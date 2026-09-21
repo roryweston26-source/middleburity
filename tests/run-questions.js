@@ -24,7 +24,10 @@ for (const q of picked) {
     continue;
   }
   console.log(`  answer: ${data.answer}`);
-  console.log(`  cards:  ${(data.cards ?? []).map((c) => c.type).join(", ") || "none"}`);
+  const cardList = (data.cards ?? []).map((c) =>
+    c.type === "menu" ? `menu ${c.date} ${[...new Set(c.menus.map((m) => m.meal))].join("/")}` : c.type,
+  );
+  console.log(`  cards:  ${cardList.join(", ") || "none"}`);
   console.log(`  good answer: ${q.good_answer}`);
   input += data.usage?.input_tokens ?? 0;
   output += data.usage?.output_tokens ?? 0;

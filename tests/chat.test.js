@@ -65,6 +65,60 @@ test("runs the menu lookup the model asks for, then returns its answer and a car
   assert.match(toolTurn.content[0].content, /Main Street/);
 });
 
+test("an answer written alongside an office lookup is kept, with no second model call", async () => {
+  const client = fakeClient([
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [
+        { type: "text", text: "I can't check meal plans yet. Dining Services handles them." },
+        { type: "tool_use", id: "o1", name: "get_office", input: { id: "dining" } },
+      ],
+    },
+  ]);
+  const result = await answerQuestion([{ role: "user", content: "How does my meal plan work?" }], { client, now });
+  assert.equal(client.requests.length, 1);
+  assert.equal(result.answer, "I can't check meal plans yet. Dining Services handles them.");
+  assert.deepEqual(result.cards.map((c) => c.type), ["office"]);
+});
+
+test("an office lookup with no answer written yet goes back to the model", async () => {
+  const client = fakeClient([
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [{ type: "tool_use", id: "o1", name: "get_office", input: { id: "dining" } }],
+    },
+    { stop_reason: "end_turn", model: "claude-opus-5", usage, content: [{ type: "text", text: "Ask Dining Services." }] },
+  ]);
+  const result = await answerQuestion([{ role: "user", content: "meal plan?" }], { client, now });
+  assert.equal(client.requests.length, 2);
+  assert.equal(result.answer, "Ask Dining Services.");
+});
+
+test("a round that also needs menu data still goes back to the model", async (t) => {
+  stubMenuFeed(t);
+  const client = fakeClient([
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [
+        { type: "text", text: "Checking." },
+        { type: "tool_use", id: "m1", name: "get_dining_menu", input: { meal: "dinner" } },
+        { type: "tool_use", id: "o1", name: "get_office", input: { id: "dining" } },
+      ],
+    },
+    { stop_reason: "end_turn", model: "claude-opus-5", usage, content: [{ type: "text", text: "Proctor has lamb." }] },
+  ]);
+  const result = await answerQuestion([{ role: "user", content: "dinner and hours?" }], { client, now });
+  assert.equal(client.requests.length, 2);
+  assert.equal(result.answer, "Proctor has lamb.");
+  assert.deepEqual(result.cards.map((c) => c.type).sort(), ["menu", "office"]);
+});
+
 test("a refusal gets a plain apology instead of an empty answer", async () => {
   const client = fakeClient([{ stop_reason: "refusal", model: "claude-opus-5", usage, content: [] }]);
   const result = await answerQuestion([{ role: "user", content: "hi" }], { client, now });

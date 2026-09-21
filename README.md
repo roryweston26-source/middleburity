@@ -2,7 +2,7 @@
 
 An unofficial, student-built assistant for Middlebury College. Ask a question, get a short answer drawn from Middlebury's own public sources, with the source's data shown underneath so you can check it.
 
-**Status:** early build. Right now it knows the three dining halls' menus. Sports, events, and general campus questions come next (see the roadmap). It is not affiliated with Middlebury College.
+**Status:** early build. Right now it knows the three dining halls' menus. For anything else, it says it can't check that yet and links the office that handles it. Sports, events, and general campus questions come next. It is not affiliated with Middlebury College.
 
 ## How it answers
 
@@ -48,6 +48,9 @@ Open http://localhost:8787. The home screen menus work without a key; the chat n
 | Source | Used for | Last checked |
 |---|---|---|
 | Dining Services' public menu feed (Nutrislice) | Dining hall menus and dietary tags | 2026-09-21 |
+| 18 campus office pages on middlebury.edu (and the Snow Bowl's site) | Pointing people to the right office, with a real link, when no other source answers | 2026-09-21 |
+
+`npm run check:feeds` re-checks every office link and flags any that redirect. A redirect usually means the office was renamed: the Student Activities Office's link, for one, now leads to Student Engagement and Belonging.
 
 Planned: the athletics calendar feed, the student events feed, middlebury.edu pages, and admissions pages.
 

@@ -94,8 +94,31 @@ function menuCard(card, label) {
   );
 }
 
+function officeCard(card) {
+  const url = new URL(card.url);
+  const shown = (url.host.replace(/^www\./, "") + url.pathname).replace(/\/$/, "");
+  const checked = new Date(`${card.source.checkedOn}T12:00:00`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return el(
+    "article",
+    { class: "card" },
+    el(
+      "a",
+      { class: "office", href: card.url, target: "_blank", rel: "noopener" },
+      el("span", { class: "office-name", text: card.name }),
+      el("span", { class: "chevron", "aria-hidden": "true", text: "›" }),
+      el("span", { class: "office-url", text: shown }),
+    ),
+    el("div", { class: "source", text: `Office link checked against middlebury.edu on ${checked}.` }),
+  );
+}
+
 function renderCard(card) {
   if (card.type === "menu") return menuCard(card);
+  if (card.type === "office") return officeCard(card);
   return null;
 }
 
@@ -169,6 +192,15 @@ $("#ask").addEventListener("submit", (event) => {
   const question = input.value;
   input.value = "";
   ask(question);
+});
+
+// Enter sends. Handled explicitly rather than left to the browser's implicit form submit,
+// and skipped mid-composition so IME users can confirm characters with Enter.
+$("#q").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.isComposing) {
+    event.preventDefault();
+    $("#ask").requestSubmit();
+  }
 });
 
 $("#suggestions").addEventListener("click", (event) => {

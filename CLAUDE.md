@@ -19,13 +19,15 @@ Middleburity is an unofficial, student-built Q&A assistant for Middlebury Colleg
 - Plain JavaScript ES modules, no build step, Node 20+. The only dependency is `@anthropic-ai/sdk`.
 - `src/worker.js` has the Cloudflare Worker shape, so the same code runs locally (`dev-server.js`) and in production (Cloudflare Workers free plan, not deployed yet).
 - **Adding a source:** add a tool file in `src/tools/`, register it in `src/tools/index.js`, add its questions to `tests/questions.json`, and add a live check to `tests/check-feeds.js`.
+- **Office names come from `src/tools/offices.js`, never from the model.** In testing, the model's remembered office names were stale: it offered the "Center for Campus Activities and Leadership", an office Middlebury has since renamed. `get_office` is `displayOnly`: when the model writes its answer and only asks for office links, chat.js returns that answer without a second model call.
+- **Test loop:** `npm run questions` runs `tests/questions.json` against the dev server (real API calls, about $0.10 per full round on Opus 5). Grade each answer against its `good_answer`, fix, and rerun. Round 1 on 2026-09-21 found details added from memory, stale office names, guessed hours, and answer text being dropped. All were fixed by round 5, which passed 15/15.
 - Model: `claude-opus-5` by default (`MODEL` in `.dev.vars` overrides it). Earlier cost estimates assumed `claude-haiku-4-5`, about a fifth of the per-token price. Which one to use is Rory's call, not a silent default.
 
 ## Roadmap (a guess, not a promise)
 
 | When | Step |
 |---|---|
-| Oct 2026 | Skeleton + dining menus (done first) |
+| Oct 2026 | Skeleton, dining menus, verified office directory (done 2026-09-21) |
 | Early Nov | Athletics ICS feed (`athletics.middlebury.edu/calendar.ashx/calendar.ics`), student events (`api.presence.io/middlebury/v1/events`), and a building list with map links |
 | Nov–Dec | Search over middlebury.edu pages (the sitemaps list about 8,000); answers must use page dates, since stale pages are a real trap |
 | Dec | Rate limits, trust-rule polish |

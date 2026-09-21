@@ -1,9 +1,11 @@
 // Checks the live sources still look the way the code expects. Free to run (no AI calls).
 // Run it when something looks off, and before any demo: npm run check:feeds
 import { getMenus } from "../src/tools/dining.js";
+import { OFFICES } from "../src/tools/offices.js";
+
+let problems = 0;
 
 const result = await getMenus();
-let problems = 0;
 console.log(`Dining menus for ${result.date}:`);
 for (const m of result.menus) {
   if (m.stations) {
@@ -15,7 +17,34 @@ for (const m of result.menus) {
   }
 }
 if (!result.menus.some((m) => m.stations)) {
-  console.log("No hall has a parsed menu today. Either everything is closed or the feed changed shape.");
+  console.log("  No hall has a parsed menu today. Either everything is closed or the feed changed shape.");
   problems++;
 }
+
+// A redirect usually means the office was renamed or moved, so update offices.js.
+console.log("\nOffice links:");
+const UA = "Mozilla/5.0 (compatible; Middleburity link check)";
+for (const [id, office] of Object.entries(OFFICES)) {
+  try {
+    const res = await fetch(office.url, { headers: { "user-agent": UA }, signal: AbortSignal.timeout(10000) });
+    const moved = res.url.replace(/\/$/, "") !== office.url.replace(/\/$/, "");
+    if ([401, 403, 429].includes(res.status)) {
+      // Some sites refuse scripted requests. That isn't a dead link, so check it by hand.
+      console.log(`  --    ${id}: the site refuses scripted checks (${res.status}); open ${office.url} by hand`);
+    } else if (!res.ok) {
+      problems++;
+      console.log(`  FAIL  ${id}: ${res.status} ${office.url}`);
+    } else if (moved) {
+      problems++;
+      console.log(`  MOVED ${id}: now redirects to ${res.url}`);
+    } else {
+      console.log(`  ok    ${id}`);
+    }
+  } catch (err) {
+    problems++;
+    console.log(`  FAIL  ${id}: ${err.message}`);
+  }
+}
+
+console.log(problems ? `\n${problems} problem(s) found.` : "\nAll sources look fine.");
 process.exitCode = problems ? 1 : 0;

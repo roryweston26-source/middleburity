@@ -3,7 +3,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { campusNowLabel } from "./campus-time.js";
 import { SYSTEM_PROMPT, timeContext } from "./prompt.js";
-import { TOOL_DEFINITIONS, runTool } from "./tools/index.js";
+import { TOOL_DEFINITIONS, isDisplayOnly, runTool } from "./tools/index.js";
 
 export const DEFAULT_MODEL = "claude-opus-5";
 const MAX_ROUNDS = 5; // lookups per question; a cost ceiling as much as a sanity check
@@ -45,6 +45,14 @@ export function contentToEcho(content) {
   if (lastSwitch === -1) return content;
   const internal = new Set(["thinking", "redacted_thinking", "tool_use", "server_tool_use"]);
   return content.filter((b, i) => i > lastSwitch || !internal.has(b.type));
+}
+
+function textOf(content) {
+  return content
+    .filter((b) => b.type === "text")
+    .map((b) => b.text)
+    .join("")
+    .trim();
 }
 
 function addUsage(total, usage = {}) {
@@ -92,6 +100,14 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
         }),
       );
       for (const { out } of results) if (out.card) cards.push(out.card);
+
+      // The model wrote its answer and only asked for office links: that text is the answer.
+      // Asking it to go again just produces a second, usually thinner, draft.
+      const draft = textOf(echoed);
+      if (draft && calls.every((call) => isDisplayOnly(call.name))) {
+        return { answer: draft, cards, usage, model: response.model };
+      }
+
       messages.push({
         role: "user",
         content: results.map(({ call, out }) => ({
@@ -104,11 +120,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       continue;
     }
 
-    const answer = response.content
-      .filter((b) => b.type === "text")
-      .map((b) => b.text)
-      .join("")
-      .trim();
+    const answer = textOf(response.content);
     return {
       answer: answer || "Sorry, I came up empty on that one.",
       cards,

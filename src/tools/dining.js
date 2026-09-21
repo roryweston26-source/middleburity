@@ -2,6 +2,7 @@
 // The feed is public but undocumented: if Nutrislice changes its shape, parseDay() is
 // where it breaks, and tests/check-feeds.js is how you find out.
 import { addDays, campusDate, campusHour } from "../campus-time.js";
+import { ToolInputError } from "./errors.js";
 
 const API = "https://middlebury.api.nutrislice.com/menu/api/weeks/school";
 const WEB = "https://middlebury.nutrislice.com/menu";
@@ -138,8 +139,6 @@ export function menuCard(result) {
   };
 }
 
-export class ToolInputError extends Error {}
-
 function validate(input) {
   const out = {};
   if (input.date !== undefined) {
@@ -166,7 +165,9 @@ export const diningTool = {
       "Look up the posted menu for Middlebury's three dining halls (Proctor, Ross, Atwater) from Dining Services' official menu feed. " +
       "Use it for any question about what food is being served, which hall to go to, or dietary options. " +
       "Returns each hall's stations and items with Dining's dietary tags (e.g. Vegan, Vegetarian, Dairy, Wheat, Local Ingredient). " +
-      "Menus are posted about a week ahead. The feed has no hours and no retail spots (the Grille, Crossroads Café, Midd Express).",
+      "Menus are posted about a week ahead. The feed has no hours and no retail spots (the Grille, Crossroads Café, Midd Express). " +
+      "If the question doesn't name a meal, go by the time: roughly breakfast before 10am, lunch before 2pm, dinner before 8pm. " +
+      "Those cutoffs are only for picking a meal: never tell someone whether a hall is open or when a meal ends, because the feed has no hours.",
     input_schema: {
       type: "object",
       properties: {
