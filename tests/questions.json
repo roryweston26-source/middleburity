@@ -39,9 +39,9 @@
     {
       "id": "field-hockey",
       "question": "Where and when is the next field hockey game? How do I get there from my dorm?",
-      "needs": "athletics + campus map",
-      "when": "later",
-      "good_answer": "Until the athletics feed exists: says it can't check schedules yet and links Middlebury Athletics. Never guesses a date, time, or place."
+      "needs": "athletics + directions",
+      "when": "now",
+      "good_answer": "Gives the next game from the athletics feed (date, time, opponent, home or away) and the next home game with its venue. Asks which dorm for walking directions, or offers a map link to the field. Never describes a route or a walking time."
     },
     {
       "id": "chem-premed",
@@ -67,9 +67,9 @@
     {
       "id": "social-house",
       "question": "Which social house is hosting tonight?",
-      "needs": "not public",
+      "needs": "events (parties not posted)",
       "when": "later",
-      "good_answer": "Says it can't check that and links Student Engagement and Belonging. Doesn't promise the office will share party details. Never uses an old office name."
+      "good_answer": "Says it can't see party plans (they aren't posted on the events feed) and links Student Engagement and Belonging. May mention a posted social-house event if one exists, without implying it's a party. Never uses an old office name."
     },
     {
       "id": "lifeguards",
@@ -105,6 +105,48 @@
       "needs": "dining",
       "when": "now",
       "good_answer": "Says it can't tell what hours halls are open (the feed has no hours) and links Dining Services. Can still say what lunch was."
+    },
+    {
+      "id": "free-food",
+      "question": "Any free food on campus today?",
+      "needs": "events",
+      "when": "now",
+      "good_answer": "Lists events tagged Free Food today from the events feed, or says none are posted today. Never invents an event."
+    },
+    {
+      "id": "this-weekend",
+      "question": "What is happening on campus this weekend?",
+      "needs": "events + athletics",
+      "when": "now",
+      "good_answer": "Uses the coming Saturday and Sunday. Picks a few real events and/or home games. Never invents one."
+    },
+    {
+      "id": "soccer-result",
+      "question": "How did the women's soccer team do in their last game?",
+      "needs": "athletics",
+      "when": "now",
+      "good_answer": "Gives the most recent women's soccer result from the feed (score and opponent). Doesn't mix up the men's team."
+    },
+    {
+      "id": "walk-to-kohn",
+      "question": "How do I walk from Hepburn to Kohn Field?",
+      "needs": "directions",
+      "when": "now",
+      "good_answer": "Shows a directions card from Hepburn Hall to Peter Kohn Field. Doesn't describe turns or give a walking time; the straight-line distance is fine."
+    },
+    {
+      "id": "natatorium",
+      "question": "Where is the Natatorium?",
+      "needs": "directions",
+      "when": "now",
+      "good_answer": "Says it has no confirmed location for the Natatorium and points to the athletics complex (219 S. Main St.) and the venue page. Doesn't make up a location."
+    },
+    {
+      "id": "hockey-home",
+      "question": "When is the first men's hockey home game?",
+      "needs": "athletics",
+      "when": "now",
+      "good_answer": "Gives the first upcoming men's ice hockey home game from the feed, with its date and venue. Doesn't confuse it with field hockey or the women's team."
     }
   ]
 }

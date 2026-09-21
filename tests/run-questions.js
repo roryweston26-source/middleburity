@@ -24,9 +24,14 @@ for (const q of picked) {
     continue;
   }
   console.log(`  answer: ${data.answer}`);
-  const cardList = (data.cards ?? []).map((c) =>
-    c.type === "menu" ? `menu ${c.date} ${[...new Set(c.menus.map((m) => m.meal))].join("/")}` : c.type,
-  );
+  const cardList = (data.cards ?? []).map((c) => {
+    if (c.type === "menu") return `menu ${c.date} ${[...new Set(c.menus.map((m) => m.meal))].join("/")}`;
+    if (c.type === "games") return `games(${c.games.length}${c.games[0] ? `: first ${c.games[0].sport} ${c.games[0].start}` : ""})`;
+    if (c.type === "events") return `events(${c.events.length} of ${c.total})`;
+    if (c.type === "directions") return `directions(${c.from ?? "here"} -> ${c.to}${c.note ? ", no exact spot" : ""})`;
+    if (c.type === "office") return `office(${c.name})`;
+    return c.type;
+  });
   console.log(`  cards:  ${cardList.join(", ") || "none"}`);
   console.log(`  good answer: ${q.good_answer}`);
   input += data.usage?.input_tokens ?? 0;

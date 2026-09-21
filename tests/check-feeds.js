@@ -1,9 +1,41 @@
 // Checks the live sources still look the way the code expects. Free to run (no AI calls).
 // Run it when something looks off, and before any demo: npm run check:feeds
+import { getGames } from "../src/tools/athletics.js";
 import { getMenus } from "../src/tools/dining.js";
+import { getEvents } from "../src/tools/events.js";
 import { OFFICES } from "../src/tools/offices.js";
 
 let problems = 0;
+
+// Sports: the feed should parse into games, and some should be upcoming.
+try {
+  const upcoming = await getGames({ limit: 10 });
+  const recent = await getGames({ direction: "recent", limit: 10 });
+  const next = upcoming.games[0];
+  console.log(`Athletics: ${upcoming.games.length} upcoming shown, ${recent.games.filter((g) => g.result).length} recent results.`);
+  if (next) console.log(`  next: ${next.sport} ${next.home ? "vs" : "at"} ${next.opponent}, ${next.start}`);
+  if (!upcoming.games.length && !recent.games.length) {
+    problems++;
+    console.log("  FAIL  no games parsed. The feed may have changed shape.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  athletics feed: ${err.message}`);
+}
+
+// Events: the feed should parse, and posted events should have names, times and links.
+try {
+  const week = await getEvents({ to: new Date(Date.now() + 6 * 864e5).toISOString().slice(0, 10), limit: 50 });
+  console.log(`Events: ${week.total} in the next 7 days.`);
+  if (week.events.some((e) => /zoom\.us|pwd=/i.test(JSON.stringify(e)))) {
+    problems++;
+    console.log("  FAIL  a meeting link got through. Check normalizeEvent.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  events feed: ${err.message}`);
+}
+console.log("");
 
 const result = await getMenus();
 console.log(`Dining menus for ${result.date}:`);

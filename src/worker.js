@@ -3,7 +3,9 @@
 // Privacy: nothing here logs or stores what people ask.
 import Anthropic from "@anthropic-ai/sdk";
 import { ChatInputError, answerQuestion } from "./chat.js";
+import { nextHomeGames } from "./tools/athletics.js";
 import { todaysMenus } from "./tools/dining.js";
+import { todaysEvents } from "./tools/events.js";
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -43,11 +45,10 @@ export default {
 
     if (pathname === "/api/today") {
       if (request.method !== "GET") return json({ error: "Use GET." }, 405);
-      try {
-        return json({ dining: await todaysMenus() });
-      } catch {
-        return json({ error: "Couldn't load today's menus." }, 502);
-      }
+      // Each card loads on its own: one feed being down shouldn't blank the others.
+      const [dining, games, events] = await Promise.allSettled([todaysMenus(), nextHomeGames(), todaysEvents()]);
+      const value = (r) => (r.status === "fulfilled" ? r.value : null);
+      return json({ dining: value(dining), games: value(games), events: value(events) });
     }
 
     if (pathname === "/api/chat") {

@@ -116,9 +116,113 @@ function officeCard(card) {
   );
 }
 
+// ---------- Games, events, directions ----------
+
+const TZ = "America/New_York";
+const dayTime = { timeZone: TZ, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+const timeOnly = { timeZone: TZ, hour: "numeric", minute: "2-digit" };
+
+function sourceLine(source, extra = "") {
+  return el(
+    "div",
+    { class: "source" },
+    "Source: ",
+    el("a", { href: source.url, target: "_blank", rel: "noopener", text: source.label }),
+    ` · checked ${checkedTime(source.checkedAt)}.${extra}`,
+  );
+}
+
+function cardHead(title, aside) {
+  return el("div", { class: "card-head" }, el("h3", { class: "card-title", text: title }), aside ? el("span", { class: "card-date", text: aside }) : null);
+}
+
+function gameWhen(game) {
+  if (game.allDay) {
+    const day = new Date(`${game.start}T12:00:00Z`).toLocaleDateString("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" });
+    return `${day} · no time posted`;
+  }
+  return new Date(game.start).toLocaleString("en-US", dayTime);
+}
+
+function gamesCard(card) {
+  const rows = card.games.map((g) => {
+    const label = `${g.sport} ${g.home ? "vs" : "at"} ${g.opponent}`;
+    const where = g.home ? g.venue ?? "Middlebury" : g.place ?? "location not posted";
+    const outcome = g.result ? { W: "win", L: "loss", T: "tie" }[g.result[0]] ?? "" : "";
+    return el(
+      "li",
+      { class: "row" },
+      el(
+        "div",
+        { class: "row-main" },
+        el("a", { href: g.url, target: "_blank", rel: "noopener", text: label }),
+        g.result ? el("span", { class: `result ${outcome}`, text: g.result }) : null,
+      ),
+      el("div", { class: "row-meta", text: `${gameWhen(g)} · ${g.home ? "Home" : "Away"}, ${where}` }),
+    );
+  });
+  return el(
+    "article",
+    { class: "card" },
+    cardHead(card.title),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No games found." }),
+    sourceLine(card.source),
+  );
+}
+
+function eventWhen(e) {
+  return `${new Date(e.start).toLocaleString("en-US", dayTime)} – ${new Date(e.end).toLocaleTimeString("en-US", timeOnly)}`;
+}
+
+function eventsCard(card) {
+  const rows = card.events.map((e) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main" }, el("a", { href: e.url, target: "_blank", rel: "noopener", text: e.name })),
+      el("div", { class: "row-meta", text: [eventWhen(e), e.location, e.org].filter(Boolean).join(" · ") }),
+    ),
+  );
+  const more = card.total > card.events.length ? `${card.total} posted` : null;
+  return el(
+    "article",
+    { class: "card" },
+    cardHead(card.title, more),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "Nothing else posted for today." }),
+    sourceLine(card.source, " Posted by the groups hosting them."),
+  );
+}
+
+function directionsCard(card) {
+  const route = card.from ? `${card.from} → ${card.to}` : `To ${card.to}, from where you are`;
+  return el(
+    "article",
+    { class: "card" },
+    cardHead("Walking directions"),
+    el(
+      "div",
+      { class: "card-body" },
+      el("p", { class: "route", text: route }),
+      card.straightLineMiles !== null ? el("p", { class: "muted small", text: `${card.straightLineMiles} mi in a straight line. The walk is a bit longer.` }) : null,
+      card.note ? el("p", { class: "note", text: card.note }) : null,
+      el("a", { class: "button", href: card.url, target: "_blank", rel: "noopener", text: "Open in Google Maps" }),
+      card.venuePage ? el("a", { class: "link-after", href: card.venuePage, target: "_blank", rel: "noopener", text: "Venue page" }) : null,
+    ),
+    el(
+      "div",
+      { class: "source" },
+      el("a", { href: card.source.url, target: "_blank", rel: "noopener", text: card.source.label }),
+      `, map data as of ${card.source.checkedOn}. The button opens Google Maps; nothing is sent until you tap it.`,
+    ),
+  );
+}
+
 function renderCard(card) {
   if (card.type === "menu") return menuCard(card);
   if (card.type === "office") return officeCard(card);
+  if (card.type === "games") return gamesCard(card);
+  if (card.type === "events") return eventsCard(card);
+  if (card.type === "directions") return directionsCard(card);
   return null;
 }
 
@@ -224,9 +328,14 @@ async function loadToday() {
     const res = await fetch("/api/today");
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
-    target.replaceChildren(menuCard(data.dining, data.dining.label));
+    const down = (what) => el("p", { class: "muted small", text: `Couldn't load ${what} right now.` });
+    target.replaceChildren(
+      data.dining ? menuCard(data.dining, data.dining.label) : down("today's menus"),
+      data.events ? eventsCard(data.events) : down("today's events"),
+      data.games ? gamesCard(data.games) : down("the game schedule"),
+    );
   } catch {
-    target.replaceChildren(el("p", { class: "muted", text: "Couldn't load today's menus. The dining feed may be down." }));
+    target.replaceChildren(el("p", { class: "muted", text: "Couldn't load today's info. Check your connection." }));
   }
 }
 

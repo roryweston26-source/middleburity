@@ -1,11 +1,14 @@
 // Every data source the model can check. Adding a source = adding one entry here.
 // A tool returns { content } for the model and, optionally, { card } for the app to
 // show as-is, so what's on screen is the source's own data, not the model's retelling.
+import { athleticsTool } from "./athletics.js";
 import { diningTool } from "./dining.js";
+import { directionsTool } from "./directions.js";
 import { ToolInputError } from "./errors.js";
+import { eventsTool } from "./events.js";
 import { officesTool } from "./offices.js";
 
-const TOOLS = [diningTool, officesTool];
+const TOOLS = [diningTool, athleticsTool, eventsTool, directionsTool, officesTool];
 
 export const TOOL_DEFINITIONS = TOOLS.map((t) => t.definition);
 

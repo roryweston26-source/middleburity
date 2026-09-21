@@ -1,0 +1,73 @@
+[
+ {
+  "eventName": "Geography Trivia Night",
+  "organizationName": "ResLife: Hepburn, Gifford, Voter, Munford, Meeker, & Social Houses",
+  "location": "Hepburn Lounge",
+  "isVirtualEventLink": false,
+  "startDateTimeUtc": "2026-09-21T00:00:00Z",
+  "endDateTimeUtc": "2026-09-21T01:30:00Z",
+  "uri": "geography-trivia-night",
+  "tags": [
+   "Academic/Professional",
+   "Cultural",
+   "Recreation"
+  ],
+  "description": "<p dir=\"ltr\">This is a drop-in geography trivia night held in the Hepburn first floor lounge. The format is simple. Residents arrive, get sorted into teams of three or four, and play through several rounds of questions covering flags, capitals, borders, rivers, and general world geography. Each round is short, roughly ten questions, and teams write their answers on scrap paper and swap sheets to score. Between rounds there is a natural pause where people talk, regroup, and get to know whoever ended up on their team.</p><p dir=\"ltr\">Teams would be assigned on the spot rather than chosen by residents because if people pick their own teams, they sit with the person they walked in with and the event does nothing for them socially. I think that assigning teams puts residents next to someone they have not met and gives them a reason to talk for the next twenty minutes.</p><p dir=\"ltr\">The event is drop-in, so residents can arrive late or leave early without disrupting anything. Anyone who shows up midway just joins a team that has room. This lowers the barrier for residents who are hesitant to commit to a full hour or who are unsure whether they want to attend at all.</p>"
+ },
+ {
+  "eventName": "Yom Kippur Services",
+  "organizationName": "Scott Center for Spiritual & Religious Life",
+  "location": "Middlebury Chapel",
+  "isVirtualEventLink": false,
+  "startDateTimeUtc": "2026-09-21T13:30:00Z",
+  "endDateTimeUtc": "2026-09-21T23:30:00Z",
+  "uri": "yom-kippur-services-2",
+  "tags": [
+   "Spiritual & Religious Life"
+  ],
+  "description": "<p>9:30 am <strong>-- </strong>Shacharit – Morning Service.<b> </b> Continue this day of reflection in community. Rabbi Danielle Stillman will be offering the sermon. </p><p>12:00 Noon Yizkor  Memorial Service -- All are welcome, whether you are remembering <br/>someone specific this year, or would just like to take a moment to <br/>acknowledge the enormous loss of life that has occurred in recent years <br/>due to pandemic illness, war and conflict.  We encourage all to stay for<br/> this short section of the larger service.</p><p>2:30 pm -- Reflective student-led nature walk through the woods starting from the chapel steps, with pauses to contemplate the themes of the season.</p><p>3:30-4:30 -- Gentle Yoga led by a student instructor who has completed her teacher training and is <br/>about to receive her certification! Please bring your own yoga mat or be<br/>prepared to practice on the Crest Room floor, which is carpeted.</p><p>5:30 pm -- <strong></strong>Minchah Afternoon Service, and Ne’ilah Concluding Services <strong></strong><br/>For the afternoon service we read from the Torah and hear the story of Jonah. This is followed by <em>Ne’ilah</em>, “the closing of the gates.”  This is our last opportunity on Yom Kippur to turn toward a new approach for the new year. </p><p>7:10 pm -- <strong></strong>Shofar Blowing and Havdalah.<strong></strong> We’ll hear the sound of <br/>the shofar for the last time of the season, and re-enter regular time <br/>through the havdalah ceremony.  Bring a shofar to blow if you have one!<br/><br/>      <br/>     <br/>      <br/>      </p>"
+ },
+ {
+  "eventName": "Cider & Doughnuts at the Career Center!",
+  "organizationName": "Center for Careers & Internships",
+  "location": "Kitchel House Lawn",
+  "isVirtualEventLink": false,
+  "startDateTimeUtc": "2026-09-30T19:00:00Z",
+  "endDateTimeUtc": "2026-09-30T20:30:00Z",
+  "uri": "cider-doughnuts-at-the-cci",
+  "tags": [
+   "Career",
+   "Community",
+   "Free Food",
+   "Orientation - Optional"
+  ],
+  "description": "<p>You're invited to the Career Center's annual kick off to Fall! We welcome all students to stop by to enjoy this quintessential Vermont fall treat and check out our resources. Featuring fresh local apple cider, cider doughnuts, apples and popcorn too. Meet our staff, our Peer Career Advisors, and the dogs, and even take a tour! Join us on the Kitchel House lawn any time between 3:00 and 4:30 pm.<br/></p>"
+ },
+ {
+  "eventName": "Student Org Leader Virtual Training",
+  "organizationName": "Student Engagement",
+  "location": "Vector Solutions",
+  "isVirtualEventLink": false,
+  "startDateTimeUtc": "2026-09-09T04:00:00Z",
+  "endDateTimeUtc": "2026-09-26T03:59:00Z",
+  "uri": "student-org-leader-virtual-training-2",
+  "tags": [
+   "Meeting"
+  ],
+  "description": "<p>All Presidents and Treasurers must complete virtual training in Vector Solutions (go/VectorSolutions/)</p><p>New leaders MUST complete the training titled &#34;Student Org Leader Training 2026-2027 - New Leaders&#34;</p><p>Returning leaders can EITHER complete the training titled &#34;Student Org Leader Training 2026-2027 - Returning Leaders 'Test Out' Option&#34; OR &#34;Student Org Leader Training 2026-2027 - New Leaders&#34;</p>"
+ },
+ {
+  "eventName": "Study Abroad Info Session: English-Speaking Options",
+  "organizationName": "International Programs",
+  "location": "https://middlebury.zoom.us/j/00000000000?pwd=FAKE-FOR-TESTS",
+  "isVirtualEventLink": true,
+  "startDateTimeUtc": "2026-10-12T20:30:00Z",
+  "endDateTimeUtc": "2026-10-12T21:30:00Z",
+  "uri": "study-abroad-info-session-english-speaking-options-2",
+  "tags": [
+   "Academic/Professional",
+   "Cultural"
+  ],
+  "description": "<p>Join us online: https://middlebury.zoom.us/j/00000000000?pwd=FAKE-FOR-TESTS</p>"
+ }
+]

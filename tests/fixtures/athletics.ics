@@ -1,0 +1,83 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//SIDEARM Sports//NONSGML SIDEARM//EN
+X-WR-CALNAME:Middlebury College Athletics
+X-PUBLISHED-TTL:PT120M
+BEGIN:VEVENT
+UID:vcal_16257-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART:20260905T160000Z
+DTEND:20260905T190000Z
+LOCATION:Middlebury\, VT, Peter Kohn Field
+SUMMARY:[W] Middlebury College Field Hockey vs Union College
+DESCRIPTION:[W] Middlebury College Field Hockey vs Union College\nW 8-0\nStreaming Video: https://www.nsnsports.net/colleges/middlebury/\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16257&amp;sport_id=3
+PRIORITY:3
+END:VEVENT
+BEGIN:VEVENT
+UID:vcal_16302-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART:20260905T150000Z
+DTEND:20260905T170000Z
+LOCATION:Middletown\, CT
+SUMMARY:[L] Middlebury College Women's Soccer at Wesleyan University
+DESCRIPTION:[L] Middlebury College Women's Soccer at Wesleyan University\nL 1-4\nStreaming Video: https://www.nsnsports.net/colleges/wesleyan/\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16302&amp;sport_id=23
+PRIORITY:3
+END:VEVENT
+BEGIN:VEVENT
+UID:vcal_16236-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART:20260922T200000Z
+DTEND:20260922T220000Z
+LOCATION:Middlebury\, VT, South Street Field
+SUMMARY:Middlebury College Men's Soccer vs Hamilton College
+DESCRIPTION:Middlebury College Men's Soccer vs Hamilton College\nStreaming Video: https://www.nsnsports.net/colleges/middlebury/\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16236&amp;sport_id=11
+PRIORITY:3
+END:VEVENT
+BEGIN:VEVENT
+UID:vcal_16285-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART:20260926T150000Z
+DTEND:20260926T180000Z
+LOCATION:Brunswick\, ME
+SUMMARY:Middlebury College Field Hockey at Bowdoin College
+DESCRIPTION:Middlebury College Field Hockey at Bowdoin College\nStreaming Video: https://www.nsnsports.net/colleges/bowdoin-college/\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16285&amp;sport_id=3
+PRIORITY:3
+END:VEVENT
+BEGIN:VEVENT
+UID:vcal_16288-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART:20261003T150000Z
+DTEND:20261003T180000Z
+LOCATION:Middlebury\, VT, Peter Kohn Field
+SUMMARY:Middlebury College Field Hockey vs Colby College
+DESCRIPTION:Middlebury College Field Hockey vs Colby College\nStreaming Video: https://www.nsnsports.net/colleges/middlebury/\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16288&amp;sport_id=3
+PRIORITY:3
+END:VEVENT
+BEGIN:VEVENT
+UID:vcal_16287-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART:20260927T160000Z
+DTEND:20260927T190000Z
+LOCATION:Cambridge\, MA
+SUMMARY:Middlebury College Field Hockey vs Christopher Newport University - Game Played at Harvard
+DESCRIPTION:Middlebury College Field Hockey vs Christopher Newport University - Game Played at Harvard\nStreaming Video: https://www.nsnsports.net/colleges/middlebury/\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16287&amp;sport_id=3
+PRIORITY:3
+END:VEVENT
+BEGIN:VEVENT
+UID:vcal_16277-athletics.middlebury.edu
+DTSTAMP:20260921T183817Z
+DTSTART;VALUE=DATE:20261002
+DTEND;VALUE=DATE:20261003
+LOCATION:Bethlehem\, PA
+SUMMARY:Middlebury College Women's Cross Country at Paul Short Invitational
+DESCRIPTION:Middlebury College Women's Cross Country at Paul Short Invitational\n
+URL:https://athletics.middlebury.edu/calendar.aspx?game_id=16277&amp;sport_id=19
+PRIORITY:3
+END:VEVENT
+END:VCALENDAR
