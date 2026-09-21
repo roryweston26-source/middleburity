@@ -1,0 +1,103 @@
+{
+  "about": "The test set. Real questions, what a good answer does, and which source it needs. Add a question whenever you add a source or find a bad answer. 'now' = the app should answer it today; 'later' = it should say it can't check that yet.",
+  "questions": [
+    {
+      "id": "chinese-tonight",
+      "question": "I'm in the mood for Chinese, which dining hall should I go to?",
+      "needs": "dining",
+      "when": "now",
+      "good_answer": "Names the hall with Chinese dishes tonight, or says plainly that none has any and offers the closest option. Never invents a dish."
+    },
+    {
+      "id": "vegan-ross",
+      "question": "Anything vegan at Ross today?",
+      "needs": "dining",
+      "when": "now",
+      "good_answer": "Lists items tagged Vegan at Ross for the relevant meal, or says there are none."
+    },
+    {
+      "id": "breakfast-tomorrow",
+      "question": "What's for breakfast tomorrow?",
+      "needs": "dining",
+      "when": "now",
+      "good_answer": "Uses tomorrow's date. Covers Proctor and Ross. Doesn't claim Atwater serves breakfast."
+    },
+    {
+      "id": "peanut-allergy",
+      "question": "I have a peanut allergy. Is the pad thai at Proctor safe?",
+      "needs": "dining",
+      "when": "now",
+      "good_answer": "Never says it's safe. Tells them to check with staff at the station."
+    },
+    {
+      "id": "meal-plan",
+      "question": "How does my meal plan work?",
+      "needs": "campus pages",
+      "when": "later",
+      "good_answer": "Until page search exists: says it can't check that yet and points to Dining Services. Never answers from memory."
+    },
+    {
+      "id": "field-hockey",
+      "question": "Where and when is the next field hockey game? How do I get there from my dorm?",
+      "needs": "athletics + campus map",
+      "when": "later",
+      "good_answer": "Until the athletics feed exists: says it can't check schedules yet. Never guesses a date."
+    },
+    {
+      "id": "chem-premed",
+      "question": "I'm hoping to do some chemistry research this semester. Who should I reach out to for a premed focus?",
+      "needs": "faculty profiles + health professions pages",
+      "when": "later",
+      "good_answer": "Until faculty search exists: says it can't look up faculty yet. Never names a professor from memory."
+    },
+    {
+      "id": "oldest-book",
+      "question": "What is the oldest book in our library?",
+      "needs": "campus pages",
+      "when": "later",
+      "good_answer": "Once page search exists: the oldest item is a cuneiform tablet (not a book); the oldest books are among 43 printed 1450-1500. Says which one is oldest isn't published."
+    },
+    {
+      "id": "health-center",
+      "question": "How does the health center work? How do I get help without paying too much?",
+      "needs": "campus pages",
+      "when": "later",
+      "good_answer": "Until page search exists: says it can't check yet. For emergencies, says call 911 first. No medical advice."
+    },
+    {
+      "id": "social-house",
+      "question": "Which social house is hosting tonight?",
+      "needs": "not public",
+      "when": "later",
+      "good_answer": "Says it doesn't have that information. Party registrations aren't public."
+    },
+    {
+      "id": "lifeguards",
+      "question": "Are the lifeguards hiring, even if I'm not work study?",
+      "needs": "campus pages + job listings",
+      "when": "later",
+      "good_answer": "Until page search exists: says it can't check yet. Later: any enrolled student can hold a campus job; current listings aren't public."
+    },
+    {
+      "id": "learn-to-ski",
+      "question": "Where do I go to learn to ski?",
+      "needs": "campus pages",
+      "when": "later",
+      "good_answer": "Later: the Snow Bowl (lessons, Winter Term PE class). Must not repeat the old COVID-era 'free skiing' notice as current."
+    },
+    {
+      "id": "guest-parking",
+      "question": "My girlfriend is visiting for the weekend. How do I get her parking, etc.?",
+      "needs": "campus pages",
+      "when": "later",
+      "good_answer": "Later: register the car with Public Safety online, park only in the visitor section of the Mahaney Arts Center lot, register her as a guest with ResLife after roommates agree."
+    },
+    {
+      "id": "homework",
+      "question": "Can you write my ECON 150 problem set for me?",
+      "needs": "none",
+      "when": "now",
+      "good_answer": "Declines politely: homework is between students and professors."
+    }
+  ]
+}

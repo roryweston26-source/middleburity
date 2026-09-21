@@ -1,0 +1,608 @@
+{
+ "start_date": "2026-09-21",
+ "days": [
+  {
+   "date": "2026-09-21",
+   "menu_items": [
+    {
+     "text": "Main Street",
+     "is_section_title": true,
+     "is_station_header": true,
+     "station_id": 68627,
+     "food": null
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Maghmour (Roasted Eggplant Stew)",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Street Cart-Style Chicken",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Halal"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Spiced Middle Eastern Couscous",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Grilled Herbed Lamb",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Halal"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Fettucine Pasta",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Turmeric Rice w/ Tomatoes",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Marinara Sauce",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegetarian"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Spinach",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Mediterranean Roasted Vegetables",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "Main Street Ext",
+     "is_section_title": true,
+     "is_station_header": true,
+     "station_id": 68628,
+     "food": null
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Pita Bread",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Soy"
+        },
+        {
+         "name": "Sesame"
+        },
+        {
+         "name": "Vegetarian"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Cucumber",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Red Onion",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Creamy Feta",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Vegetarian"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Tomato",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Parmesan Cheese",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Vegetarian"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "The Bakery",
+     "is_section_title": true,
+     "is_station_header": true,
+     "station_id": 60684,
+     "food": null
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 60684,
+     "food": {
+      "name": "Mellow Yellow Bread",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Egg"
+        },
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Vegetarian"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 60684,
+     "food": {
+      "name": "Flourless Chocolate Cake",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Egg"
+        },
+        {
+         "name": "Soy"
+        },
+        {
+         "name": "Vegetarian"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "date": "2026-09-22",
+   "menu_items": [
+    {
+     "text": "Main Street",
+     "is_section_title": true,
+     "is_station_header": true,
+     "station_id": 68627,
+     "food": null
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Smoked Chicken",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Halal"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Chickpea & Lentil Mexican Stew",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Gnocchi w/ Exotic Mushrooms",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Egg"
+        },
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Vegetarian"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Roasted Mojo Pork",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Pork"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Roasted Herbed Potatoes",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Red Beans & Rice",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Sauteed Snow Peas w/ Mushrooms",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68627,
+     "food": {
+      "name": "Mexican Roasted Acorn Squash",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Vegan"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "Main Street Ext",
+     "is_section_title": true,
+     "is_station_header": true,
+     "station_id": 68628,
+     "food": null
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 68628,
+     "food": {
+      "name": "Parmesan Cheese",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Vegetarian"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "The Bakery",
+     "is_section_title": true,
+     "is_station_header": true,
+     "station_id": 60684,
+     "food": null
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 60684,
+     "food": {
+      "name": "Portuguese Sweet Bread",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Egg"
+        },
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Vegetarian"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "text": "",
+     "is_section_title": false,
+     "is_station_header": false,
+     "station_id": 60684,
+     "food": {
+      "name": "Chai Pound Cake",
+      "icons": {
+       "food_icons": [
+        {
+         "name": "Dairy"
+        },
+        {
+         "name": "Egg"
+        },
+        {
+         "name": "Wheat"
+        },
+        {
+         "name": "Soy"
+        },
+        {
+         "name": "Vegetarian"
+        },
+        {
+         "name": "Local Ingredient"
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "date": "2026-09-23",
+   "menu_items": []
+  }
+ ]
+}

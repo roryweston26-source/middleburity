@@ -1,0 +1,9 @@
+# Copy this file to .dev.vars and fill it in. .dev.vars is git-ignored, so the key never lands in the repo.
+# Get a key from the Anthropic Console (https://console.anthropic.com). Set a monthly spend limit there too.
+ANTHROPIC_API_KEY=
+
+# Optional. Default is claude-opus-5. claude-haiku-4-5 costs about a fifth as much per token.
+# MODEL=claude-opus-5
+
+# Optional. low | medium | high. Default is low. Ignored on Haiku.
+# EFFORT=low

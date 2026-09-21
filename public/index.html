@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Middleburity</title>
+    <meta name="description" content="An unofficial, student-built assistant that answers Middlebury questions from Middlebury's own public sources." />
+    <meta name="theme-color" content="#16325c" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#101a2c" media="(prefers-color-scheme: dark)" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="top-inner">
+        <span class="wordmark">Middleburity</span>
+        <span class="badge">Unofficial</span>
+      </div>
+    </header>
+
+    <main class="page">
+      <form id="ask" class="ask" autocomplete="off">
+        <label for="q" class="visually-hidden">Ask a question about Middlebury</label>
+        <input id="q" name="q" type="text" placeholder="Ask about Midd…" maxlength="2000" enterkeyhint="send" />
+        <button type="submit" class="send" aria-label="Ask">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+        </button>
+      </form>
+
+      <div id="suggestions" class="chips">
+        <button type="button" class="chip">Where should I eat tonight?</button>
+        <button type="button" class="chip">Anything vegan at Ross today?</button>
+        <button type="button" class="chip">What's for breakfast tomorrow?</button>
+      </div>
+
+      <div id="thread-tools" class="thread-tools" hidden>
+        <button type="button" id="clear" class="link-button">Start over</button>
+      </div>
+      <section id="thread" class="thread" aria-live="polite"></section>
+
+      <section class="today" aria-labelledby="today-title">
+        <h2 id="today-title" class="section-title">Today</h2>
+        <div id="today-body"><p class="muted">Loading today's menus…</p></div>
+        <p class="muted small">Sports and events are coming next.</p>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <p>
+        A student project, not affiliated with Middlebury College. Answers come from Middlebury's public sources and can
+        still be wrong, so check anything important.
+      </p>
+      <p>
+        Middleburity doesn't store what you ask. To write an answer, your question is sent to Anthropic's Claude AI.
+      </p>
+    </footer>
+  </body>
+</html>
