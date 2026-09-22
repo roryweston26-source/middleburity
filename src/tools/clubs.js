@@ -1,6 +1,7 @@
 // Student organizations from Presence, the same public platform the events come from.
 // Like event text, club descriptions are written by students, so they're handled as data.
 import { ToolInputError } from "./errors.js";
+import { USER_AGENT } from "../user-agent.js";
 import { toPlainText } from "./events.js";
 
 const FEED = "https://api.presence.io/middlebury/v1/organizations";
@@ -37,7 +38,7 @@ export function normalizeClub(raw) {
 
 async function loadClubs() {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(10000) });
+  const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
   if (!res.ok) throw new Error(`club feed returned ${res.status}`);
   cache = { at: Date.now(), clubs: (await res.json()).map(normalizeClub).filter((c) => c.name) };
   return cache;

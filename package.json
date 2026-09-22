@@ -12,13 +12,21 @@
     "check:feeds": "node tests/check-feeds.js",
     "questions": "node tests/run-questions.js",
     "build:places": "node scripts/build-places.js",
-    "build:pages": "node scripts/build-pages.js",
-    "eval:search": "node tests/eval-search.js"
+    "build:pages": "node scripts/build-pages.js && node scripts/build-db.js",
+    "eval:search": "node tests/eval-search.js",
+    "build:db": "node scripts/build-db.js",
+    "dev:cf": "wrangler dev --port 8788",
+    "db:local": "wrangler d1 execute middleburity --local --file=.cache/pages-d1.sql",
+    "db:remote": "wrangler d1 execute middleburity --remote --file=.cache/pages-d1.sql",
+    "deploy": "wrangler deploy"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.127.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.136.2"
   }
 }

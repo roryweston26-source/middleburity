@@ -104,7 +104,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       // Every result goes back in one message, in the order the calls were made.
       const results = await Promise.all(
         calls.map(async (call) => {
-          const out = await runTool(call.name, call.input);
+          const out = await runTool(call.name, call.input, env);
           return { call, out };
         }),
       );

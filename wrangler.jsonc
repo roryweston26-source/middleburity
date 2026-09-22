@@ -1,0 +1,31 @@
+// Cloudflare config. Nothing here is secret; secrets are set with `npx wrangler secret put NAME`
+// (ANTHROPIC_API_KEY, ACCESS_CODE, VISITOR_SALT) and never live in this file or in git.
+// Locally, `npm run dev:cf` runs this same config on Cloudflare's own runtime, reading .dev.vars.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "middleburity",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-22",
+  // Don't send wrangler's usage telemetry to Cloudflare (this project doesn't do telemetry).
+  "send_metrics": false,
+  "assets": {
+    "directory": "./public/",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "middleburity",
+      // Filled in by `npx wrangler d1 create middleburity` when the account exists.
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "vars": {
+    "MODEL": "claude-opus-5",
+    // Spending protection (see src/limits.js). Change these, then redeploy.
+    "DAILY_BUDGET_USD": "2",
+    "RATE_PER_HOUR": "20",
+    "RATE_PER_DAY": "60"
+  }
+}

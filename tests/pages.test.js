@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { chunk, extract, scrub } from "../scripts/page-text.js";
 import { mergeCards } from "../src/chat.js";
-import { createPageSearch, tokenize } from "../src/tools/pages.js";
+import { openLocalD1 } from "../src/db/node-d1.js";
+import { loadStatements, matchExpression, pagesTool, searchPages } from "../src/tools/pages.js";
 
 // A tiny made-up index in the same shape scripts/build-pages.js writes.
 const data = {
@@ -21,35 +22,51 @@ const data = {
     { p: 3, h: "Skiing", t: "Students can take ski lessons at the Snow Bowl." },
   ],
 };
-const index = createPageSearch(data);
+// The same SQLite search the app uses, on an in-memory database.
+const db = openLocalD1();
+await db.batch(loadStatements(db, data));
 const now = new Date("2026-09-21T12:00:00Z");
 
-test("tokenize drops stopwords and folds simple plurals and -ing", () => {
-  assert.deepEqual(tokenize("How do the meal plans work?"), ["meal", "plan", "work"]);
-  assert.deepEqual(tokenize("skiing lessons"), ["ski", "lesson"]);
+test("questions become quoted OR searches, without stopwords, plus synonyms", () => {
+  assert.equal(matchExpression("How does the meal plan work?"), '"meal" OR "plan" OR "work"');
+  assert.equal(matchExpression("see a doctor"), '"see" OR "doctor" OR "health" OR "medical"');
+  // Search syntax a person types is quoted away, never run.
+  assert.equal(matchExpression('parking" OR NEAR(x'), '"parking" OR "near"');
+  assert.equal(matchExpression("the a of"), "");
 });
 
-test("the best-matching page comes first, with its passages and date", () => {
-  const [top] = index.search("how does the meal plan work", { now });
+test("the best-matching page comes first, with its passages and date", async () => {
+  const [top] = await searchPages(db, "how does the meal plan work", { now });
   assert.equal(top.title, "General Information");
   assert.equal(top.updated, "2026-09-17");
   assert.match(top.passages[0].text, /unlimited meal plan/);
 });
 
-test("pages over a year old are flagged", () => {
-  const [top] = index.search("ski lessons", { now });
+test("stemming matches word forms: 'skiing lessons' finds 'ski lessons'", async () => {
+  const [top] = await searchPages(db, "skiing lessons", { now });
   assert.equal(top.title, "Winter Guide");
+});
+
+test("pages over a year old are flagged", async () => {
+  const [top] = await searchPages(db, "ski lessons", { now });
   assert.equal(top.olderThanAYear, true);
-  assert.equal(index.search("meal plan", { now })[0].olderThanAYear, undefined);
+  assert.equal((await searchPages(db, "meal plan", { now }))[0].olderThanAYear, undefined);
 });
 
-test("scope limits results to faculty profiles, or excludes them", () => {
-  assert.deepEqual(index.search("chemistry research", { scope: "faculty", now }).map((r) => r.title), ["Ada Chemist"]);
-  assert.ok(!index.search("chemistry research", { scope: "not-faculty", now }).some((r) => r.title === "Ada Chemist"));
+test("scope limits results to faculty profiles, or excludes them", async () => {
+  assert.deepEqual((await searchPages(db, "chemistry research", { scope: "faculty", now })).map((r) => r.title), ["Ada Chemist"]);
+  assert.ok(!(await searchPages(db, "chemistry research", { scope: "not-faculty", now })).some((r) => r.title === "Ada Chemist"));
 });
 
-test("a search with no matching words returns nothing rather than guessing", () => {
-  assert.deepEqual(index.search("quidditch tryouts", { now }), []);
+test("a search with no matching words returns nothing rather than guessing", async () => {
+  assert.deepEqual(await searchPages(db, "quidditch tryouts", { now }), []);
+});
+
+test("the tool reports the index date and says so when there's no database", async () => {
+  const out = await pagesTool.run({ query: "visitor parking" }, { DB: db });
+  assert.equal(JSON.parse(out.content).source, "middlebury.edu pages, indexed 2026-09-21");
+  assert.equal(out.card.pages[0].title, "Visitor Parking Information");
+  await assert.rejects(pagesTool.run({ query: "parking" }, {}), /isn't set up/);
 });
 
 test("extract keeps <main> text, splits on headings, and drops menus and scripts", () => {

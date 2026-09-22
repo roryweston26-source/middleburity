@@ -76,6 +76,8 @@ Not planned without Middlebury's permission: the course catalog (its robots.txt 
 - To write an answer, your question is sent to Anthropic's API, and Anthropic's data policies apply to it.
 - The conversation lives in the page's memory only. Reloading clears it.
 - Walking directions are a link to Google Maps. Nothing goes to Google unless you tap it.
+- For the usage limits, the server keeps a count of questions per visitor. A visitor is an anonymous code: a hash of the date, a secret, and their IP address. The IP address isn't stored, codes change every day so one day can't be linked to the next, and counts are deleted after two days.
+- If an access code is in use, your browser remembers it on your device.
 
 ## Layout
 
@@ -91,9 +93,46 @@ dev-server.js        local stand-in for Cloudflare
 tests/               unit tests, the test set, feed check, question runner
 ```
 
+## Running on Cloudflare's runtime locally
+
+`wrangler.jsonc` configures Cloudflare Workers: static files from `public/`, the API from `src/worker.js`, and page search in a D1 database. You can run it all locally with no account:
+
+```bash
+npm run db:local
+```
+
+```bash
+npm run dev:cf
+```
+
+The first command loads the search index into a local D1 (about 6 minutes). The second serves the app at http://localhost:8788 on Cloudflare's own runtime, reading `.dev.vars`. Wrangler's telemetry is off for this project (`send_metrics: false`).
+
 ## Deploying
 
-Planned for Cloudflare Workers on the free plan. It needs a Cloudflare account and a wrangler config, and neither is set up yet.
+These steps need your Cloudflare account, so they're yours to run:
+
+1. Create a free Cloudflare account.
+2. Run `npx wrangler login` and approve it in the browser.
+3. Run `npx wrangler d1 create middleburity`, then paste the `database_id` it prints into `wrangler.jsonc`.
+4. Load the search index into the database with `npm run db:remote`.
+5. Set the three secrets. Each command asks for the value, so it never lands in a file:
+   - `npx wrangler secret put ANTHROPIC_API_KEY`
+   - `npx wrangler secret put ACCESS_CODE`, the code you'll give friends
+   - `npx wrangler secret put VISITOR_SALT`, any long random string
+6. Run `npm run deploy`. It prints the app's `workers.dev` address.
+7. In the Anthropic Console, set a monthly spend limit. The app's own daily cap is the first line of defense; the Console limit is the hard backstop.
+
+To refresh the index later, run `npm run build:pages`, then `npm run db:remote`.
+
+## Spending protection
+
+`src/limits.js` protects the bill before anything reaches the model:
+
+- **Per-visitor limits:** 20 questions an hour and 60 a day.
+- **A daily cap for the whole app:** $2, estimated from each answer's token counts at Anthropic's list prices.
+- **An access code** (`ACCESS_CODE`) keeps the chat to invited testers. The home screen stays open, since it costs nothing.
+
+All three numbers are settings in `wrangler.jsonc`.
 
 ## License
 

@@ -6,6 +6,12 @@
       "runtimeExecutable": "node",
       "runtimeArgs": ["dev-server.js"],
       "port": 8787
+    },
+    {
+      "name": "cloudflare-local",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/wrangler/bin/wrangler.js", "dev", "--port", "8788"],
+      "port": 8788
     }
   ]
 }

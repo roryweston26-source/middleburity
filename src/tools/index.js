@@ -19,11 +19,12 @@ export function isDisplayOnly(name) {
   return TOOLS.some((t) => t.definition.name === name && t.displayOnly);
 }
 
-export async function runTool(name, input) {
+// env carries bindings such as DB (the page-search database); most tools ignore it.
+export async function runTool(name, input, env = {}) {
   const tool = TOOLS.find((t) => t.definition.name === name);
   if (!tool) return { content: `There is no tool called ${name}.`, isError: true };
   try {
-    return await tool.run(input ?? {});
+    return await tool.run(input ?? {}, env);
   } catch (err) {
     const why = err instanceof ToolInputError ? err.message : "the source couldn't be reached";
     return { content: `That lookup failed: ${why}.`, isError: true };

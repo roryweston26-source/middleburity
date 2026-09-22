@@ -5,6 +5,7 @@
 // (some include passwords); the event's own page is linked instead.
 import { addDays, campusDate } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
+import { USER_AGENT } from "../user-agent.js";
 
 const FEED = "https://api.presence.io/middlebury/v1/events";
 const EVENT_PAGE = "https://middlebury.presence.io/event/";
@@ -47,7 +48,7 @@ export function normalizeEvent(raw) {
 
 async function loadEvents() {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(10000) });
+  const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
   if (!res.ok) throw new Error(`events feed returned ${res.status}`);
   const raw = await res.json();
   cache = { at: Date.now(), events: raw.map(normalizeEvent).filter((e) => e.name && e.start && e.end) };

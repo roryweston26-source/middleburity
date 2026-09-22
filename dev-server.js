@@ -1,10 +1,12 @@
 // Local stand-in for Cloudflare: serves public/ and hands /api/* to src/worker.js.
 // Secrets come from .dev.vars (the same file Cloudflare's wrangler reads), never from git.
 // Logs method, path, status and time only; never request bodies.
+import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import { openLocalD1 } from "./src/db/node-d1.js";
 import worker from "./src/worker.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
@@ -61,7 +63,8 @@ async function handle(req, res, env) {
   for await (const chunk of req) chunks.push(chunk);
   const request = new Request(url, {
     method: req.method,
-    headers: req.headers,
+    // Cloudflare tells the Worker who is asking with this header; locally it's the socket address.
+    headers: { ...req.headers, "cf-connecting-ip": req.socket.remoteAddress ?? "local" },
     body: ["GET", "HEAD"].includes(req.method) ? undefined : Buffer.concat(chunks),
   });
   const response = await worker.fetch(request, env);
@@ -71,6 +74,9 @@ async function handle(req, res, env) {
 }
 
 const env = await loadEnv();
+// The local stand-in for Cloudflare D1: page search plus the usage counters.
+const dbPath = join(root, ".cache", "pages.db");
+if (existsSync(dbPath)) env.DB = openLocalD1(dbPath);
 createServer(async (req, res) => {
   const started = Date.now();
   let status = 500;
@@ -84,4 +90,6 @@ createServer(async (req, res) => {
 }).listen(port, () => {
   console.log(`Middleburity running at http://localhost:${port}`);
   console.log(env.ANTHROPIC_API_KEY ? "Chat: connected (key found in .dev.vars)" : "Chat: no API key yet (add one to .dev.vars)");
+  console.log(env.DB ? "Page search: ready (.cache/pages.db)" : "Page search: not built yet (npm run build:pages)");
+  console.log(env.ACCESS_CODE ? "Access code: required for the chat" : "Access code: none set (chat is open locally)");
 });

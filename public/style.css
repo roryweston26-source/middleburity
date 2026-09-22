@@ -240,6 +240,31 @@ input {
   color: var(--warn);
 }
 
+.code-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.code-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+}
+
+.code-button {
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 14px;
+  background: var(--accent);
+  color: var(--surface);
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .thinking::after {
   content: "…";
   display: inline-block;

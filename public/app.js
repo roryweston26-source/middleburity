@@ -298,6 +298,42 @@ function setBusy(busy) {
   $("#ask .send").disabled = busy;
 }
 
+// The friends-only access code, remembered on this device only. Storage can be blocked
+// (private windows, strict settings), so every read and write is allowed to fail.
+const CODE_KEY = "middleburity-access-code";
+function savedCode() {
+  try {
+    return localStorage.getItem(CODE_KEY) ?? "";
+  } catch {
+    return sessionCode;
+  }
+}
+let sessionCode = "";
+function saveCode(code) {
+  sessionCode = code;
+  try {
+    localStorage.setItem(CODE_KEY, code);
+  } catch {
+    // Kept for this visit only.
+  }
+}
+
+// Shown in place of an answer when the server wants the access code; asks the question again once it's saved.
+function codePrompt(answer, question, message) {
+  const input = el("input", { type: "password", class: "code-input", placeholder: "Access code", "aria-label": "Access code", autocomplete: "off" });
+  const form = el("form", { class: "code-form" }, input, el("button", { type: "submit", class: "code-button", text: "Continue" }));
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!input.value.trim()) return;
+    saveCode(input.value.trim());
+    answer.closest(".qa").remove();
+    ask(question);
+  });
+  answer.className = "a";
+  answer.replaceChildren(el("p", { text: message }), form);
+  input.focus();
+}
+
 async function ask(question) {
   question = question.trim();
   if (!question) return;
@@ -311,12 +347,14 @@ async function ask(question) {
 
   const messages = [...history, { role: "user", content: question }];
   try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ messages }),
-    });
+    const headers = { "content-type": "application/json" };
+    if (savedCode()) headers["x-access-code"] = savedCode();
+    const res = await fetch("/api/chat", { method: "POST", headers, body: JSON.stringify({ messages }) });
     const data = await res.json().catch(() => ({}));
+    if (res.status === 401 && data.needsCode) {
+      codePrompt(answer, question, savedCode() ? "That code didn't work. Check it and try again." : data.error);
+      return;
+    }
     if (!res.ok) throw new Error(data.error || "Something went wrong. Try again.");
 
     answer.replaceChildren(...answerNodes(data.answer));
@@ -331,7 +369,7 @@ async function ask(question) {
     answer.replaceChildren(el("p", { text: err.message }));
   } finally {
     setBusy(false);
-    $("#q").focus();
+    if (!document.querySelector(".code-input")) $("#q").focus();
   }
 }
 

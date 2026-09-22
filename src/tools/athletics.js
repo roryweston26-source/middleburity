@@ -2,6 +2,7 @@
 // The feed asks to be re-read every 2 hours (X-PUBLISHED-TTL) and the site asks crawlers to
 // wait 30 seconds between requests, so it's fetched at most once per 2 hours, never per question.
 import { campusDate } from "../campus-time.js";
+import { USER_AGENT } from "../user-agent.js";
 import { ToolInputError } from "./errors.js";
 
 const FEED = "https://athletics.middlebury.edu/calendar.ashx/calendar.ics";
@@ -69,7 +70,7 @@ export function parseIcs(text) {
 
 async function loadGames() {
   if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "text/calendar" }, signal: AbortSignal.timeout(10000) });
+  const res = await fetch(FEED, { headers: { accept: "text/calendar", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
   if (!res.ok) throw new Error(`athletics feed returned ${res.status}`);
   cache = { at: Date.now(), games: parseIcs(await res.text()) };
   return cache;

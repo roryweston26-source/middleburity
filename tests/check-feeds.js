@@ -103,8 +103,11 @@ try {
     problems++;
     console.log("  STALE the index is over a month old. Run npm run build:pages.");
   }
-  const { createPageSearch } = await import("../src/tools/pages.js");
-  const [top] = createPageSearch(data).search("dining hall hours meal plan");
+  const { openLocalD1 } = await import("../src/db/node-d1.js");
+  const { searchPages } = await import("../src/tools/pages.js");
+  const db = openLocalD1(new URL("../.cache/pages.db", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1"));
+  const [top] = await searchPages(db, "dining hall hours meal plan");
+  db.close();
   if (!top || !top.url.includes("dining-services")) {
     problems++;
     console.log(`  FAIL  "dining hall hours meal plan" should find a Dining Services page, got ${top?.url ?? "nothing"}`);

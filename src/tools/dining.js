@@ -3,6 +3,7 @@
 // where it breaks, and tests/check-feeds.js is how you find out.
 import { addDays, campusDate, campusHour } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
+import { USER_AGENT } from "../user-agent.js";
 
 const API = "https://middlebury.api.nutrislice.com/menu/api/weeks/school";
 const WEB = "https://middlebury.nutrislice.com/menu";
@@ -42,7 +43,7 @@ async function fetchWeek(slug, meal, date) {
 
   const [y, m, d] = start.split("-");
   const res = await fetch(`${API}/${slug}/menu-type/${meal}/${y}/${m}/${d}/?format=json`, {
-    headers: { accept: "application/json" },
+    headers: { accept: "application/json", "user-agent": USER_AGENT },
     signal: AbortSignal.timeout(8000),
   });
   // 404 means this hall has no menu of this type at all.

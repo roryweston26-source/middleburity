@@ -6,10 +6,13 @@ export const athleticsIcs = readFileSync(new URL("./fixtures/athletics.ics", imp
 export const eventsFixture = JSON.parse(readFileSync(new URL("./fixtures/events.json", import.meta.url), "utf8"));
 
 // Answers fetch() by URL: the first route whose key appears in the URL wins.
+// Returns the list of URLs asked for; `requested.inits` holds each request's options.
 export function stubFetch(t, routes) {
   const requested = [];
-  t.mock.method(globalThis, "fetch", async (url) => {
+  requested.inits = [];
+  t.mock.method(globalThis, "fetch", async (url, init = {}) => {
     requested.push(String(url));
+    requested.inits.push(init);
     const key = Object.keys(routes).find((k) => String(url).includes(k));
     if (!key) return new Response("not stubbed", { status: 599 });
     const { status = 200, body } = routes[key];

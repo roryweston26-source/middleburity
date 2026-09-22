@@ -63,6 +63,14 @@ test("an unknown sport tells the model which sports exist", async (t) => {
   await assert.rejects(getGames({ sport: "quidditch" }, now), /Sports: Field Hockey/);
 });
 
+// Middlebury's athletics server answers an empty 200 when a request has no User-Agent,
+// which silently emptied the schedule in production once. Every source request says who it is.
+test("requests to Middlebury sources identify themselves", async (t) => {
+  const requested = feed(t);
+  await getGames({}, now);
+  assert.match(requested.inits[0].headers["user-agent"], /^Middleburity\/[\d.]+ \(\+https:\/\/github\.com\//);
+});
+
 test("the feed is fetched once, then cached", async (t) => {
   const requested = feed(t);
   await getGames({}, now);
