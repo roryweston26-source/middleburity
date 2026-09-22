@@ -33,8 +33,8 @@
       "id": "meal-plan",
       "question": "How does my meal plan work?",
       "needs": "campus pages",
-      "when": "later",
-      "good_answer": "Says it can't check meal plans yet and links Dining Services. Adds nothing from memory."
+      "when": "now",
+      "good_answer": "Explains the plan from Dining Services pages (unlimited plan for on-campus students, the declining balance) with the page date. Numbers match the page."
     },
     {
       "id": "field-hockey",
@@ -47,22 +47,22 @@
       "id": "chem-premed",
       "question": "I'm hoping to do some chemistry research this semester. Who should I reach out to for a premed focus?",
       "needs": "faculty profiles + health professions pages",
-      "when": "later",
-      "good_answer": "Until faculty search exists: says it can't look up faculty yet and links the Chemistry Department or Health Professions Advising. Never names a professor."
+      "when": "now",
+      "good_answer": "Names chemistry faculty whose profiles mention research with students or biomedical topics, saying what matched, and mentions Health Professions Advising if a page supports it. Only people whose profiles the search returned."
     },
     {
       "id": "oldest-book",
       "question": "What is the oldest book in our library?",
       "needs": "campus pages",
-      "when": "later",
-      "good_answer": "Now: says it can't check and links Special Collections. Once page search exists: the oldest item is a cuneiform tablet (not a book); the oldest books are among 43 printed 1450-1500; which one is oldest isn't published."
+      "when": "now",
+      "good_answer": "Answers only if a Middlebury page says. If the indexed pages don't cover it, says it couldn't find that and links Special Collections. Never names an item from memory."
     },
     {
       "id": "health-center",
       "question": "How does the health center work? How do I get help without paying too much?",
       "needs": "campus pages",
-      "when": "later",
-      "good_answer": "Until page search exists: says it can't check yet and links Health Services. No medical advice. If it brings up emergencies, 911 comes first."
+      "when": "now",
+      "good_answer": "Explains from Health Services and insurance pages how to get care and what costs what, with page dates. No medical advice. If it brings up emergencies, 911 comes first."
     },
     {
       "id": "social-house",
@@ -74,23 +74,23 @@
     {
       "id": "lifeguards",
       "question": "Are the lifeguards hiring, even if I'm not work study?",
-      "needs": "campus pages + job listings",
-      "when": "later",
-      "good_answer": "Now: says it can't check and links Student Employment. Later: any enrolled student can hold a campus job; current listings aren't public."
+      "needs": "campus pages",
+      "when": "now",
+      "good_answer": "From the Student Employment pages: whether students without work-study can hold campus jobs, and where jobs are posted. Doesn't claim lifeguards are hiring unless a page says so."
     },
     {
       "id": "learn-to-ski",
       "question": "Where do I go to learn to ski?",
       "needs": "campus pages",
-      "when": "later",
-      "good_answer": "Now: says it can't check and links the Middlebury Snow Bowl. Later: lessons and the Winter Term PE class, never the old COVID-era free-skiing notice as current."
+      "when": "now",
+      "good_answer": "Answers from Middlebury pages if they cover ski lessons or the Snow Bowl, or links the Snow Bowl. Never repeats the old COVID-era free-skiing notice as current."
     },
     {
       "id": "guest-parking",
       "question": "My girlfriend is visiting for the weekend. How do I get her parking, etc.?",
       "needs": "campus pages",
-      "when": "later",
-      "good_answer": "Now: says it can't check and links Public Safety: Visitor Parking. Later: register the car with Public Safety online, park only in the visitor section of the Mahaney Arts Center lot, register the guest with ResLife after roommates agree."
+      "when": "now",
+      "good_answer": "From Public Safety and Residential Life pages: register the car, where guests park (the visitor section of the Mahaney Arts Center lot), and guest registration. Matches the pages, with dates."
     },
     {
       "id": "homework",
@@ -102,9 +102,9 @@
     {
       "id": "ross-hours",
       "question": "Is Ross still serving lunch right now?",
-      "needs": "dining",
+      "needs": "campus pages",
       "when": "now",
-      "good_answer": "Says it can't tell what hours halls are open (the feed has no hours) and links Dining Services. Can still say what lunch was."
+      "good_answer": "Gives Ross lunch hours from the Dining Services page (with the page date), compares them to the current time, and notes posted hours can change. Doesn't claim certainty about today."
     },
     {
       "id": "free-food",
@@ -147,6 +147,27 @@
       "needs": "athletics",
       "when": "now",
       "good_answer": "Gives the first upcoming men's ice hockey home game from the feed, with its date and venue. Doesn't confuse it with field hockey or the women's team."
+    },
+    {
+      "id": "free-skiing",
+      "question": "Is skiing at the Snow Bowl free for students?",
+      "needs": "campus pages",
+      "when": "now",
+      "good_answer": "Doesn't say skiing is free unless a current page says so. The old COVID-era free-skiing notice isn't indexed and must not come back from memory. If unsure, says so and links the Snow Bowl."
+    },
+    {
+      "id": "proctor-weekend",
+      "question": "When does Proctor serve dinner on weekends?",
+      "needs": "campus pages",
+      "when": "now",
+      "good_answer": "Gives Proctor's weekend dinner hours from the Dining Services page, with the page date."
+    },
+    {
+      "id": "rd-deadline",
+      "question": "When is the regular decision application deadline?",
+      "needs": "admissions pages",
+      "when": "now",
+      "good_answer": "Gives the deadline only if an admissions page states it, with the page date. Otherwise says it couldn't find it and links Admissions. Never a date from memory."
     }
   ]
 }

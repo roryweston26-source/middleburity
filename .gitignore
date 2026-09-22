@@ -2,3 +2,5 @@ node_modules/
 .dev.vars
 .wrangler/
 .DS_Store
+.cache/
+src/data/pages.json

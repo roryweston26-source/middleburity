@@ -33,6 +33,12 @@ npm run dev
 
 Open http://localhost:8787. The home screen menus work without a key; the chat needs one.
 
+Page search needs its index, which isn't in git (it's about 17 MB and changes weekly). Build it once with the command below. The first run takes about 2 hours at the site's requested pace of one page a second; later runs only fetch changed pages:
+
+```bash
+npm run build:pages
+```
+
 ## Tests
 
 | Command | What it does | Costs money? |
@@ -50,6 +56,7 @@ Open http://localhost:8787. The home screen menus work without a key; the chat n
 | Dining Services' public menu feed (Nutrislice) | Dining hall menus and dietary tags | 2026-09-21 |
 | Middlebury Athletics' calendar feed (iCalendar) | Varsity schedules, venues, and results. Fetched at most every 2 hours, as the feed asks | 2026-09-21 |
 | Presence, the campus events platform | Events posted by student organizations and offices. Online-meeting links are never shown | 2026-09-21 |
+| About 3,250 student-relevant pages on middlebury.edu, including faculty profiles | Page search: how things work (hours, policies, services, costs), plus faculty research. Crawled by `npm run build:pages` at the site's requested pace of one request a second. The app searches a local index and never crawls | see `builtOn` in `src/data/pages.json` |
 | OpenStreetMap (© OpenStreetMap contributors, ODbL) | Where campus buildings are, for walking-direction links. Extracted by `npm run build:places`, not fetched at runtime | map data as of 2026-05-31 |
 | 18 campus office pages on middlebury.edu (and the Snow Bowl's site) | Pointing people to the right office, with a real link, when no other source answers | 2026-09-21 |
 

@@ -30,6 +30,7 @@ for (const q of picked) {
     if (c.type === "events") return `events(${c.events.length} of ${c.total})`;
     if (c.type === "directions") return `directions(${c.from ?? "here"} -> ${c.to}${c.note ? ", no exact spot" : ""})`;
     if (c.type === "office") return `office(${c.name})`;
+    if (c.type === "pages") return `pages(${c.pages.length}: ${c.pages.slice(0, 3).map((p) => p.title).join(" | ")})`;
     return c.type;
   });
   console.log(`  cards:  ${cardList.join(", ") || "none"}`);

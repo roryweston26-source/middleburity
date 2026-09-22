@@ -217,8 +217,31 @@ function directionsCard(card) {
   );
 }
 
+function monthYear(iso) {
+  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+}
+
+function pagesCard(card) {
+  const rows = card.pages.map((p) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main" }, el("a", { href: p.url, target: "_blank", rel: "noopener", text: p.title })),
+      el("div", { class: p.old ? "row-meta note" : "row-meta", text: p.updated ? `Updated ${monthYear(p.updated)}${p.old ? " · over a year old" : ""}` : "No date on the page" }),
+    ),
+  );
+  return el(
+    "article",
+    { class: "card" },
+    cardHead("Pages checked"),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No matching pages." }),
+    el("div", { class: "source", text: `From middlebury.edu, as indexed on ${card.source.checkedOn}. Pages can change; the links go to the live versions.` }),
+  );
+}
+
 function renderCard(card) {
   if (card.type === "menu") return menuCard(card);
+  if (card.type === "pages") return pagesCard(card);
   if (card.type === "office") return officeCard(card);
   if (card.type === "games") return gamesCard(card);
   if (card.type === "events") return eventsCard(card);

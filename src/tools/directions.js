@@ -103,7 +103,8 @@ export const directionsTool = {
     description:
       "Get a walking-directions link between two campus places (residence halls, dining halls, academic buildings, the athletics complex, Peter Kohn Field, Youngman Field). " +
       "The app shows it as a Google Maps button. You can't see the route, so never describe turns or walking times; the straight-line distance is the only number you have. " +
-      "If they ask from 'my dorm' without naming it, ask which dorm instead of guessing. Omit `from` to let their phone start from where they are.",
+      "If they ask from 'my dorm' without naming it, ask which dorm instead of guessing. Omit `from` to let their phone start from where they are. " +
+      "If the result has a note (for example, that a venue has no confirmed location), tell the person what it says.",
     input_schema: {
       type: "object",
       properties: {

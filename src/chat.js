@@ -55,6 +55,15 @@ function textOf(content) {
     .trim();
 }
 
+// Several page searches in one answer become one "pages checked" card, not a stack of them.
+export function mergeCards(cards) {
+  const pages = cards.filter((c) => c.type === "pages");
+  if (pages.length < 2) return cards;
+  const seen = new Set();
+  const merged = { ...pages[0], pages: pages.flatMap((c) => c.pages).filter((p) => !seen.has(p.url) && seen.add(p.url)) };
+  return [...cards.filter((c) => c.type !== "pages"), merged];
+}
+
 function addUsage(total, usage = {}) {
   for (const key of ["input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"]) {
     total[key] = (total[key] ?? 0) + (usage[key] ?? 0);
@@ -84,7 +93,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
     addUsage(usage, response.usage);
 
     if (response.stop_reason === "refusal") {
-      return { answer: "Sorry, that's not something I can help with.", cards, usage, model: response.model };
+      return { answer: "Sorry, that's not something I can help with.", cards: mergeCards(cards), usage, model: response.model };
     }
 
     if (response.stop_reason === "tool_use" || response.stop_reason === "pause_turn") {
@@ -105,7 +114,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       // Asking it to go again just produces a second, usually thinner, draft.
       const draft = textOf(echoed);
       if (draft && calls.every((call) => isDisplayOnly(call.name))) {
-        return { answer: draft, cards, usage, model: response.model };
+        return { answer: draft, cards: mergeCards(cards), usage, model: response.model };
       }
 
       messages.push({
@@ -123,7 +132,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
     const answer = textOf(response.content);
     return {
       answer: answer || "Sorry, I came up empty on that one.",
-      cards,
+      cards: mergeCards(cards),
       usage,
       model: response.model,
       ...(response.stop_reason === "max_tokens" && { truncated: true }),
@@ -132,7 +141,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
 
   return {
     answer: "That took more lookups than I allow for one question. Try asking something narrower.",
-    cards,
+    cards: mergeCards(cards),
     usage,
     model,
   };

@@ -7,8 +7,9 @@ import { directionsTool } from "./directions.js";
 import { ToolInputError } from "./errors.js";
 import { eventsTool } from "./events.js";
 import { officesTool } from "./offices.js";
+import { pagesTool } from "./pages.js";
 
-const TOOLS = [diningTool, athleticsTool, eventsTool, directionsTool, officesTool];
+const TOOLS = [diningTool, athleticsTool, eventsTool, pagesTool, directionsTool, officesTool];
 
 export const TOOL_DEFINITIONS = TOOLS.map((t) => t.definition);
 

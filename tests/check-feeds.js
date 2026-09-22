@@ -78,5 +78,28 @@ for (const [id, office] of Object.entries(OFFICES)) {
   }
 }
 
+// Page search: the index exists, isn't stale, and still finds a page it always should.
+console.log("\nPage index:");
+try {
+  const { default: data } = await import("../src/data/pages.json", { with: { type: "json" } });
+  const ageDays = Math.round((Date.now() - new Date(`${data.builtOn}T12:00:00Z`)) / 864e5);
+  console.log(`  built ${data.builtOn} (${ageDays} days ago): ${data.pages.length} pages, ${data.chunks.length} passages`);
+  if (ageDays > 30) {
+    problems++;
+    console.log("  STALE the index is over a month old. Run npm run build:pages.");
+  }
+  const { createPageSearch } = await import("../src/tools/pages.js");
+  const [top] = createPageSearch(data).search("dining hall hours meal plan");
+  if (!top || !top.url.includes("dining-services")) {
+    problems++;
+    console.log(`  FAIL  "dining hall hours meal plan" should find a Dining Services page, got ${top?.url ?? "nothing"}`);
+  } else {
+    console.log(`  ok    sample search finds ${top.url}`);
+  }
+} catch {
+  problems++;
+  console.log("  FAIL  no index yet. Run npm run build:pages.");
+}
+
 console.log(problems ? `\n${problems} problem(s) found.` : "\nAll sources look fine.");
 process.exitCode = problems ? 1 : 0;
