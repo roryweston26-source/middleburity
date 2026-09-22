@@ -56,6 +56,8 @@ npm run build:pages
 | Dining Services' public menu feed (Nutrislice) | Dining hall menus and dietary tags | 2026-09-21 |
 | Middlebury Athletics' calendar feed (iCalendar) | Varsity schedules, venues, and results. Fetched at most every 2 hours, as the feed asks | 2026-09-21 |
 | Presence, the campus events platform | Events posted by student organizations and offices. Online-meeting links are never shown | 2026-09-21 |
+| Presence's club directory (about 200 student organizations) | Clubs: what exists, when and where they meet, and links to join. Descriptions are the clubs' own words | live, cached 6 hours |
+| The Middlebury Handbook: the policies for everyone and the undergraduate College's student policies (77 pages; staff and faculty employment rules left out) | Official policies: guests, pets, alcohol, the Honor Code, grades. The Handbook doesn't date its pages, so none is shown | in the page index |
 | About 3,250 student-relevant pages on middlebury.edu, including faculty profiles | Page search: how things work (hours, policies, services, costs), plus faculty research. Crawled by `npm run build:pages` at the site's requested pace of one request a second. The app searches a local index and never crawls | see `builtOn` in `src/data/pages.json` |
 | OpenStreetMap (© OpenStreetMap contributors, ODbL) | Where campus buildings are, for walking-direction links. Extracted by `npm run build:places`, not fetched at runtime | map data as of 2026-05-31 |
 | 18 campus office pages on middlebury.edu (and the Snow Bowl's site) | Pointing people to the right office, with a real link, when no other source answers | 2026-09-21 |

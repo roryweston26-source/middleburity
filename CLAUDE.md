@@ -30,7 +30,12 @@ Middleburity is an unofficial, student-built Q&A assistant for Middlebury Colleg
     - The cache in `.cache/pages` stores raw `<main>` HTML, so fixes to extraction (`scripts/page-text.js`) need no re-crawl.
     - Emails and phone numbers are scrubbed from indexed text.
     - Every result carries the page's updated date, and pages over a year old are flagged.
-  - `src/data/pages.json` (17.5 MB, 3,248 pages, 22,321 passages as of 2026-09-21) is git-ignored, and rebuilt with `npm run build:pages`.
+  - `src/data/pages.json` is git-ignored and rebuilt with `npm run build:pages`. As of 2026-09-22 it holds 3,330 pages and 21,359 passages: middlebury.edu plus 77 Handbook pages.
+    - Handbook sitemap dates are rebuild dates, so Handbook pages show no date.
+    - Boilerplate is removed at build time, both exact copies and near-copies on 3+ office pages in the same section. Faculty profiles keep their course copies, because those show who teaches what.
+    - Parent headings are carried into sub-sections ("Meal Plans › Unlimited Plan").
+  - **Search quality is measured, not guessed.** `npm run eval:search` scores 45 labeled queries for free. It went from 25/40 right-first and 32/40 top-3 at the start of 2026-09-22 to 31/45 and 40/45, via address words x3, synonyms, boilerplate removal and parent headings. `--compare` scores settings side by side. Label a query's right page by URL first, never by the ranking being tested, and don't tune past what the model's own re-searching covers.
+  - `get_clubs` reads Presence's organization list live (cached 6 hours). Category "boards" are marked and rank after real clubs, and keywords match whole words ("ski" not "skills").
   - **Deploy constraint:** Cloudflare's free Workers plan allows 10 ms of CPU per request, and building the in-memory index takes about 0.9 s. So production needs either the paid plan (30 s CPU) or the index moved into D1 (SQLite FTS5), which is the likelier path. Decide at the December deploy step.
   - **Middlebury's own pages can disagree.** The regular-decision deadline is January 4 in the deadlines table but January 5 on the admission-options page (both updated 2026-09-04). The model is told to prefer the newer page and mention the conflict, and it did.
   - **Money rule (from Rory, 2026-09-21): ask before anything that costs money**, including paid APIs and test rounds against the real model. Free work (crawls, unit tests, `check:feeds`) doesn't need asking.

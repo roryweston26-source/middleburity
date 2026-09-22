@@ -1,0 +1,185 @@
+{
+  "about": "Page-search test set: a search, and a pattern matching the page(s) that count as right. Right pages were found by URL first, never by the ranking being tested. Run: npm run eval:search (free, no AI calls).",
+  "queries": [
+    {
+      "q": "meal plan",
+      "expect": "dining-services/(general-information|dining-halls)"
+    },
+    {
+      "q": "dining hall hours",
+      "expect": "dining-services/(general-information|dining-halls)"
+    },
+    {
+      "q": "lost ID card",
+      "expect": "dining-services/general-information|card"
+    },
+    {
+      "q": "visitor parking overnight guest",
+      "expect": "visitor-parking-information"
+    },
+    {
+      "q": "student parking permit",
+      "expect": "parking-information(/permits-and-registration|/first-year-u-permit-parking-areas)?$"
+    },
+    {
+      "q": "overnight guest policy dorm",
+      "expect": "housing-resources|residential-life-policies"
+    },
+    {
+      "q": "room selection housing lottery",
+      "expect": "residential-life/fall-room-selection"
+    },
+    {
+      "q": "make a health center appointment",
+      "expect": "make-appointment|center-health-wellness|health-services"
+    },
+    {
+      "q": "see a doctor sick",
+      "expect": "make-appointment|center-health-wellness|health-services|timelycare"
+    },
+    {
+      "q": "counseling appointment",
+      "expect": "counseling/making-appointment|counseling"
+    },
+    {
+      "q": "health insurance waiver",
+      "expect": "student-health-insurance"
+    },
+    {
+      "q": "after hours medical care",
+      "expect": "timelycare|community-resources"
+    },
+    {
+      "q": "campus jobs without work study",
+      "expect": "human-resources/student-employment|types-aid/student-employment"
+    },
+    {
+      "q": "tutoring",
+      "expect": "student-resources/tutoring"
+    },
+    {
+      "q": "writing center help with a paper",
+      "expect": "writing-center|writing-tutoring"
+    },
+    {
+      "q": "premed advising",
+      "expect": "health-professions"
+    },
+    {
+      "q": "undergraduate research funding",
+      "expect": "undergraduate-research"
+    },
+    {
+      "q": "internship advising",
+      "expect": "center-careers-and-internships"
+    },
+    {
+      "q": "add drop deadline",
+      "expect": "registrar"
+    },
+    {
+      "q": "order a transcript",
+      "expect": "registrar/records/transcripts"
+    },
+    {
+      "q": "connect to wifi",
+      "expect": "information-technology-services"
+    },
+    {
+      "q": "reset my password",
+      "expect": "passwords|accounts-and-passwords"
+    },
+    {
+      "q": "where can I print",
+      "expect": "services/printing"
+    },
+    {
+      "q": "study abroad application",
+      "expect": "study-abroad"
+    },
+    {
+      "q": "disability accommodations",
+      "expect": "disability-resource-center"
+    },
+    {
+      "q": "F-1 visa international student",
+      "expect": "student-visa-information"
+    },
+    {
+      "q": "report sexual misconduct title ix",
+      "expect": "civil-rights-and-title-ix-office|title-ix"
+    },
+    {
+      "q": "chaplain religious life",
+      "expect": "scott-center"
+    },
+    {
+      "q": "rent outdoor gear",
+      "expect": "middlebury-outdoor-programs/(gear-room|ski-shop)"
+    },
+    {
+      "q": "ski lessons",
+      "expect": "college/student-life/athletics|outdoor-resources"
+    },
+    {
+      "q": "rare books special collections",
+      "expect": "library/special-collections"
+    },
+    {
+      "q": "library hours",
+      "expect": "library"
+    },
+    {
+      "q": "reserve a study room library",
+      "expect": "library/spaces"
+    },
+    {
+      "q": "regular decision deadline",
+      "expect": "application-instructions-and-deadlines"
+    },
+    {
+      "q": "schedule a campus tour",
+      "expect": "admissions/(visit|campus-and-virtual-visits)"
+    },
+    {
+      "q": "tuition cost",
+      "expect": "tuition-and-fees|billing-information"
+    },
+    {
+      "q": "Feb orientation",
+      "expect": "orientation/feb-orientation|feb-celebration"
+    },
+    {
+      "q": "honor code",
+      "expect": "honor-code|acad-honesty"
+    },
+    {
+      "q": "alcohol policy",
+      "expect": "drugs-and-alcohol|alcohol-abuse-prevention|community-standards|alcohol-drugs"
+    },
+    {
+      "q": "chemistry major requirements",
+      "expect": "chemistry/requirements"
+    },
+    {
+      "q": "can I have a pet in my dorm",
+      "expect": "handbook.middlebury.edu/pages/ii-ug-college-policies/commun-policies/pets"
+    },
+    {
+      "q": "hazing policy",
+      "expect": "hazing-policy"
+    },
+    {
+      "q": "smoking on campus",
+      "expect": "no-smoking|alcohol-drugs"
+    },
+    {
+      "q": "pass fail grading option",
+      "expect": "grades-transcripts|course-reg-course-conduct|registrar"
+    },
+    {
+      "q": "service animal emotional support animal",
+      "expect": "svc-assist-animals|disability-resource-center"
+    }
+  ]
+}

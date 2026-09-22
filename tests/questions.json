@@ -69,7 +69,7 @@
       "question": "Which social house is hosting tonight?",
       "needs": "events (parties not posted)",
       "when": "later",
-      "good_answer": "Says it can't see party plans (they aren't posted on the events feed) and links Student Engagement and Belonging. May mention a posted social-house event if one exists, without implying it's a party. Never uses an old office name."
+      "good_answer": "Says it can't see party plans (they aren't posted on the events feed) and links Student Engagement and Belonging. May list the social houses from the club directory, without implying any is hosting. Never uses an old office name."
     },
     {
       "id": "lifeguards",
@@ -168,6 +168,27 @@
       "needs": "admissions pages",
       "when": "now",
       "good_answer": "Gives the deadline only if an admissions page states it, with the page date. Otherwise says it couldn't find it and links Admissions. Never a date from memory."
+    },
+    {
+      "id": "a-cappella",
+      "question": "What a cappella groups are there and when do they rehearse?",
+      "needs": "clubs",
+      "when": "now",
+      "good_answer": "Lists a cappella groups from the club directory with their posted meeting times, and says where times aren't posted. Never invents a group."
+    },
+    {
+      "id": "join-ski-club",
+      "question": "How do I join the ski club?",
+      "needs": "clubs",
+      "when": "now",
+      "good_answer": "Finds the Ski & Ride Club (and maybe Ski Patrol or Nordic) in the club directory, links its page, and says meeting details aren't posted if they're TBD."
+    },
+    {
+      "id": "pet-policy",
+      "question": "Can I have a pet in my dorm?",
+      "needs": "handbook",
+      "when": "now",
+      "good_answer": "From the Handbook pet policy: no pets in Middlebury buildings including residence halls; mentions service/assistance animals are handled separately. Notes Handbook pages carry no date."
     }
   ]
 }

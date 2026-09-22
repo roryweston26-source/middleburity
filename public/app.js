@@ -239,9 +239,31 @@ function pagesCard(card) {
   );
 }
 
+function clubsCard(card) {
+  const rows = card.clubs.map((c) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main" }, el("a", { href: c.url, target: "_blank", rel: "noopener", text: c.name })),
+      el("div", {
+        class: "row-meta",
+        text: [c.board ? "Board for this category" : c.categories[0], c.meets && `Meets ${c.meets}`, c.where].filter(Boolean).join(" · "),
+      }),
+    ),
+  );
+  return el(
+    "article",
+    { class: "card" },
+    cardHead("Clubs", card.total > card.clubs.length ? `${card.total} match` : null),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No matching clubs." }),
+    sourceLine(card.source, " Descriptions and meeting times are posted by the clubs."),
+  );
+}
+
 function renderCard(card) {
   if (card.type === "menu") return menuCard(card);
   if (card.type === "pages") return pagesCard(card);
+  if (card.type === "clubs") return clubsCard(card);
   if (card.type === "office") return officeCard(card);
   if (card.type === "games") return gamesCard(card);
   if (card.type === "events") return eventsCard(card);

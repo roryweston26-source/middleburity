@@ -12,7 +12,8 @@
     "check:feeds": "node tests/check-feeds.js",
     "questions": "node tests/run-questions.js",
     "build:places": "node scripts/build-places.js",
-    "build:pages": "node scripts/build-pages.js"
+    "build:pages": "node scripts/build-pages.js",
+    "eval:search": "node tests/eval-search.js"
   },
   "engines": {
     "node": ">=20"

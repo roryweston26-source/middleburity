@@ -53,6 +53,21 @@ if (!result.menus.some((m) => m.stations)) {
   problems++;
 }
 
+// Clubs: the directory should parse, with plenty of clubs in it.
+try {
+  const { getClubs } = await import("../src/tools/clubs.js");
+  const all = await getClubs();
+  const chess = await getClubs({ keyword: "chess" });
+  console.log(`\nClubs: ${all.total} registered in ${all.categories.length} categories; "chess" finds ${chess.total}.`);
+  if (all.total < 50) {
+    problems++;
+    console.log("  FAIL  far fewer clubs than expected. The feed may have changed shape.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  club feed: ${err.message}`);
+}
+
 // A redirect usually means the office was renamed or moved, so update offices.js.
 console.log("\nOffice links:");
 const UA = "Mozilla/5.0 (compatible; Middleburity link check)";
