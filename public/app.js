@@ -249,6 +249,19 @@ function clubsCard(card) {
         class: "row-meta",
         text: [c.board ? "Board for this category" : c.categories[0], c.meets && `Meets ${c.meets}`, c.where].filter(Boolean).join(" · "),
       }),
+      c.next &&
+        el(
+          "div",
+          { class: "row-meta" },
+          "Next: ",
+          el("a", { href: c.next.url, target: "_blank", rel: "noopener", text: c.next.name }),
+          ` · ${[eventWhen(c.next), c.next.location].filter(Boolean).join(" · ")}`,
+        ),
+      c.join &&
+        el("div", {
+          class: "row-meta",
+          text: [c.join.onPresence ? (c.join.approval ? "Request to join on its page · officers approve" : "Join on its page") : "Not joinable on MiddPresence", c.contact && `Contact: ${c.contact}`].filter(Boolean).join(" · "),
+        }),
     ),
   );
   return el(
@@ -260,7 +273,54 @@ function clubsCard(card) {
   );
 }
 
+// ---------- Hours and buses ----------
+
+function hoursCard(card) {
+  const rows = card.days.map((d) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main", text: shortDate(d.date) }),
+      el("div", { class: "row-meta", text: d.hours.length ? d.hours.join(" · ") : "Nothing posted" }),
+    ),
+  );
+  return el("article", { class: "card" }, cardHead(card.place), el("ul", { class: "rows" }, rows), sourceLine(card.source, " Hours as the calendar lists them."));
+}
+
+// Timetable times are "HH:MM", and can run past 24:00 for trips after midnight.
+function busTime(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h % 24 < 12 ? "AM" : "PM"}${h >= 24 ? " (next day)" : ""}`;
+}
+
+function busCard(card) {
+  const rows = card.departures.map((d) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main" }, el("a", { href: d.url, target: "_blank", rel: "noopener", text: `${busTime(d.time)} · ${d.route}` })),
+      el("div", { class: "row-meta", text: `From ${d.stop} → ${d.arrive.stop}, ${busTime(d.arrive.time)}` }),
+    ),
+  );
+  const validTo = new Date(`${card.source.validTo}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return el(
+    "article",
+    { class: "card" },
+    cardHead("Buses", shortDate(card.date)),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: card.covered ? "No matching departures." : "Not in the saved timetable." }),
+    el(
+      "div",
+      { class: "source" },
+      "Source: ",
+      el("a", { href: card.source.url, target: "_blank", rel: "noopener", text: card.source.label }),
+      `, valid through ${validTo}. Scheduled times, not live tracking.`,
+    ),
+  );
+}
+
 function renderCard(card) {
+  if (card.type === "hours") return hoursCard(card);
+  if (card.type === "bus") return busCard(card);
   if (card.type === "menu") return menuCard(card);
   if (card.type === "pages") return pagesCard(card);
   if (card.type === "clubs") return clubsCard(card);

@@ -16,6 +16,8 @@ const SYNONYMS = {
   job: ["employment"], jobs: ["employment"], paper: ["writing"], essay: ["writing"],
   internship: ["career"], internships: ["career"], dorm: ["residential", "housing"], dorms: ["residential", "housing"],
   gym: ["fitness"], wifi: ["wireless", "network"], id: ["card"], tour: ["visit"], lottery: ["selection"],
+  broken: ["repair", "maintenance"], fix: ["repair", "maintenance"],
+  club: ["organization"], clubs: ["organizations"], org: ["organization"], orgs: ["organizations"],
   prof: ["professor", "faculty"], premed: ["med", "health", "profession"],
 };
 

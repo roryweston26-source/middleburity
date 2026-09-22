@@ -4,6 +4,8 @@ import { getGames } from "../src/tools/athletics.js";
 import { getMenus } from "../src/tools/dining.js";
 import { getEvents } from "../src/tools/events.js";
 import { OFFICES } from "../src/tools/offices.js";
+import { campusDate } from "../src/campus-time.js";
+import { USER_AGENT } from "../src/user-agent.js";
 
 let problems = 0;
 
@@ -63,9 +65,53 @@ try {
     problems++;
     console.log("  FAIL  far fewer clubs than expected. The feed may have changed shape.");
   }
+  // A single club's own record carries the joining flags.
+  const [club] = chess.clubs;
+  console.log(`  "${club?.name}": joining ${club?.join ? `"${club.join.text}"` : "unknown"}; ${club?.upcoming?.length ?? "?"} upcoming events.`);
+  if (!club?.join) {
+    problems++;
+    console.log("  FAIL  couldn't read how joining works. The club detail record may have changed shape.");
+  }
+  if (club && club.upcoming === null) {
+    problems++;
+    console.log("  FAIL  couldn't match club events. The events feed may have changed shape.");
+  }
 } catch (err) {
   problems++;
   console.log(`  FAIL  club feed: ${err.message}`);
+}
+
+// Hours: each calendar should answer for today, and still be looked after. A calendar nobody
+// edits keeps repeating old rules (the climbing wall's said "CLOSED" in 2026 from a 2019 rule).
+try {
+  const { PLACES, hoursTool } = await import("../src/tools/hours.js");
+  console.log("\nHours:");
+  for (const place of Object.keys(PLACES)) {
+    const days = JSON.parse((await hoursTool.run({ place })).content).days;
+    const today = days[0].hours;
+    console.log(`  ${Array.isArray(today) ? "ok  " : "--  "}  ${place}: ${JSON.stringify(today)}`);
+  }
+  for (const [place, { gcal }] of Object.entries(PLACES)) {
+    if (!gcal) continue;
+    const text = await (await fetch(`https://calendar.google.com/calendar/ical/${gcal}%40group.calendar.google.com/public/basic.ics`, { headers: { "user-agent": USER_AGENT } })).text();
+    const last = [...text.matchAll(/^LAST-MODIFIED:(\d{8})/gm)].map((m) => m[1]).sort().pop() ?? "never";
+    const stale = last === "never" || last < campusDate(new Date(Date.now() - 150 * 86400000)).replace(/-/g, "");
+    if (stale) problems++;
+    console.log(`  ${stale ? "FAIL" : "ok  "}  ${place} calendar last edited ${last}${stale ? ": nobody seems to maintain it any more; drop it from hours.js" : ""}`);
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  hours: ${err.message}`);
+}
+
+// Buses: the saved timetable runs out every couple of months (feed_end_date).
+{
+  const { TRANSIT } = await import("../src/data/transit.js");
+  const left = Math.round((new Date(`${TRANSIT.validTo}T12:00:00Z`) - Date.now()) / 86400000);
+  const soon = left < 21;
+  if (soon) problems++;
+  console.log(`\nBus timetable: built ${TRANSIT.builtOn}, valid to ${TRANSIT.validTo} (${left} days left).`);
+  if (soon) console.log("  FAIL  the timetable runs out soon. Run npm run build:transit (Tri-Valley usually has the next one out by now).");
 }
 
 // A redirect usually means the office was renamed or moved, so update offices.js.

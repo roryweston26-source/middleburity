@@ -35,8 +35,13 @@ const SECTIONS = [
   "college/academics", "college/people",
   "library/services", "library/special-collections", "library/spaces", "library/collections", "library/about", "library/search-find",
 ];
-// Single pages whose sections are otherwise out of scope (the library's own news and staff pages aren't wanted).
-const SINGLE_PAGES = ["library", "library/collection-locations"];
+// Single pages whose sections are otherwise out of scope (the library's own news and staff pages aren't wanted;
+// the rest of Facilities, Business Services and the arts site is for staff and visitors).
+const SINGLE_PAGES = [
+  "library", "library/collection-locations",
+  "facilities-services/student-mail-center", "facilities-services/who-do-i-call", "business-services/laundry",
+  "college/arts/about/transportation-options", "college/box-office/directions-parking-and-transportation",
+];
 // Old or archived material, even inside allowed sections.
 const EXCLUDE = /covid|archive|-old\b|\bold-|spring-?2021|midd2021|test-page|example|\/news\//i;
 

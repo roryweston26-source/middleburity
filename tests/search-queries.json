@@ -180,6 +180,70 @@
     {
       "q": "service animal emotional support animal",
       "expect": "svc-assist-animals|disability-resource-center"
+    },
+    {
+      "q": "how do I join a club",
+      "expect": "student-engagement-belonging/student-engagment$"
+    },
+    {
+      "q": "how to start a new club",
+      "expect": "student-engagement-belonging/student-engagment$"
+    },
+    {
+      "q": "club sports teams",
+      "expect": "student-engagment/club-sports"
+    },
+    {
+      "q": "club leader treasurer training",
+      "expect": "student-organization-resources$"
+    },
+    {
+      "q": "club funding annual allocation",
+      "expect": "student-organization-resources"
+    },
+    {
+      "q": "dining hall hours",
+      "expect": "dining-services/dining-halls$"
+    },
+    {
+      "q": "when does proctor close for dinner",
+      "expect": "dining-services/dining-halls$"
+    },
+    {
+      "q": "grille hours",
+      "expect": "dining-services/retail-operations"
+    },
+    {
+      "q": "mail room hours package pickup",
+      "expect": "facilities-services/student-mail-center"
+    },
+    {
+      "q": "where do I pick up my packages",
+      "expect": "facilities-services/student-mail-center"
+    },
+    {
+      "q": "what is my mailing address on campus",
+      "expect": "facilities-services/student-mail-center"
+    },
+    {
+      "q": "where is the closest laundry room",
+      "expect": "housing-overview/housing-resources|business-services/laundry"
+    },
+    {
+      "q": "my heater is broken who do I call",
+      "expect": "facilities-services/who-do-i-call"
+    },
+    {
+      "q": "where can I print",
+      "expect": "library/spaces/print-and-copy|services/printing"
+    },
+    {
+      "q": "student parking permit",
+      "expect": "public-safety/parking-information"
+    },
+    {
+      "q": "bus home for thanksgiving break",
+      "expect": "sga-break-buses"
     }
   ]
 }

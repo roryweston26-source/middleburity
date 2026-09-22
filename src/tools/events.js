@@ -37,6 +37,7 @@ export function normalizeEvent(raw) {
   return {
     name: (raw.eventName ?? "").trim(),
     org: (raw.organizationName ?? "").trim(),
+    orgUri: raw.organizationUri ?? null,
     location: online ? "Online" : (raw.location ?? "").trim() || null,
     start: raw.startDateTimeUtc,
     end: raw.endDateTimeUtc,
@@ -83,7 +84,21 @@ export async function getEvents({ from, to, keyword, includeLong = false, limit 
   return { checkedAt: new Date(at).toISOString(), from: start, to: end, total: events.length, events: events.slice(0, limit) };
 }
 
-function when(event) {
+// The next few events each organization has posted, keyed by its Presence address. The
+// clubs tool uses this for clubs whose meeting time isn't posted but whose meetings are.
+export async function upcomingEventsFor(orgUris, { perOrg = 3, now = new Date() } = {}) {
+  const { events } = await loadEvents();
+  const nowIso = now.toISOString();
+  const wanted = new Set(orgUris);
+  const byOrg = new Map([...wanted].map((u) => [u, []]));
+  const ahead = events
+    .filter((e) => wanted.has(e.orgUri) && e.end >= nowIso && new Date(e.end) - new Date(e.start) <= LONG_EVENT_MS)
+    .sort((a, b) => (a.start < b.start ? -1 : 1));
+  for (const e of ahead) if (byOrg.get(e.orgUri).length < perOrg) byOrg.get(e.orgUri).push(e);
+  return byOrg;
+}
+
+export function when(event) {
   const opts = { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
   const endTime = new Date(event.end).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
   return `${new Date(event.start).toLocaleString("en-US", opts)} to ${endTime}`;

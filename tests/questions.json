@@ -181,7 +181,42 @@
       "question": "How do I join the ski club?",
       "needs": "clubs",
       "when": "now",
-      "good_answer": "Finds the Ski & Ride Club (and maybe Ski Patrol or Nordic) in the club directory, links its page, and says meeting details aren't posted if they're TBD."
+      "good_answer": "Finds the Ski & Ride Club (and maybe Ski Patrol or Nordic) in the club directory and says to request to join on its MiddPresence page, where officers approve requests. Says meeting details aren't posted if they're TBD and nothing is on its events. Never invents a meeting time."
+    },
+    {
+      "id": "club-when-meet",
+      "question": "When does quadball practice?",
+      "needs": "clubs",
+      "when": "now",
+      "good_answer": "Gives Club Quadball's posted practice times and place (Battell Beach at last check) and its next posted practice or scrimmage from its events. Times match the directory exactly."
+    },
+    {
+      "id": "club-what-do",
+      "question": "What does Ski Patrol do?",
+      "needs": "clubs",
+      "when": "now",
+      "good_answer": "Summarizes Ski Patrol's own description (OEC training, first responders at the Snow Bowl and Rikert) without adding details from memory, and links its page."
+    },
+    {
+      "id": "join-clubs-general",
+      "question": "How do I join clubs at Midd?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "Says clubs are listed on MiddPresence, where you can see when and where they meet and contact leaders, and that membership is open to all students, citing the Student Engagement page. Offers to look up a specific club. No invented activities-fair dates."
+    },
+    {
+      "id": "start-a-club",
+      "question": "How do I start a new club?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "From the Student Engagement page: new-org registration opens October 1 and runs through the fall, with the process on the Forms tab in MiddPresence; may mention the Exploration Fund as an option without registering. Cites the page."
+    },
+    {
+      "id": "no-such-club",
+      "question": "Is there a fencing club?",
+      "needs": "clubs",
+      "when": "now",
+      "good_answer": "Says no fencing club is in the club directory (as of the check) and may point to starting one or to Student Engagement. Never claims one exists."
     },
     {
       "id": "pet-policy",
@@ -189,6 +224,76 @@
       "needs": "handbook",
       "when": "now",
       "good_answer": "From the Handbook pet policy: no pets in Middlebury buildings including residence halls; mentions service/assistance animals are handled separately. Notes Handbook pages carry no date."
+    },
+    {
+      "id": "library-hours",
+      "question": "Is the library open late tonight?",
+      "needs": "hours",
+      "when": "now",
+      "good_answer": "Gives Davis Family Library's hours for today from LibCal (7:30am-12am on a fall weekday as of 2026-09-22). Never hours from memory."
+    },
+    {
+      "id": "gym-hours-weekend",
+      "question": "What are the gym hours this weekend?",
+      "needs": "hours",
+      "when": "now",
+      "good_answer": "Gives the Fitness Center's posted hours for Saturday and Sunday from the athletics calendar (and maybe the general facility hours). Says 'nothing posted' for a day with no entry rather than calling it closed."
+    },
+    {
+      "id": "pool-hours",
+      "question": "When can I swim at the pool tomorrow?",
+      "needs": "hours",
+      "when": "now",
+      "good_answer": "Gives the Natatorium's posted entry for tomorrow as written in the calendar. Doesn't invent lap-swim times."
+    },
+    {
+      "id": "climbing-wall-hours",
+      "question": "When is the climbing wall open?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "Doesn't read a stale calendar. Uses the climbing wall page from Outdoor Programs or athletics if search finds times, otherwise says it couldn't find current hours and links the page."
+    },
+    {
+      "id": "dining-hall-hours",
+      "question": "When does Proctor serve dinner?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "From the Dining Halls page: Proctor dinner 4:30pm to 8pm seven days a week. Does not use the summer-operations page's summer schedule."
+    },
+    {
+      "id": "mail-center",
+      "question": "Where do I pick up packages and when is it open?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "From the Student Mail Center page: lower level of McCullough, Monday-Friday 9am-4pm, closed weekends; wait for the pickup email; packages are held 14 days."
+    },
+    {
+      "id": "bus-burlington",
+      "question": "How do I get to Burlington by bus tomorrow?",
+      "needs": "bus",
+      "when": "now",
+      "good_answer": "Lists Burlington Link and/or 116 Commuter departures for tomorrow from the timetable (from Academy Street or the campus stop), with arrival at the Downtown Transit Center. Says they're scheduled times. No invented times."
+    },
+    {
+      "id": "shuttle-hannaford",
+      "question": "Is there a bus to Hannaford from campus?",
+      "needs": "bus",
+      "when": "now",
+      "good_answer": "Names the Middlebury Shuttle (Hannaford loop) with next departures from the Adirondack Circle campus stop and arrival at Hannaford/Centre Plaza, from the timetable."
+    },
+    {
+      "id": "snow-bowl-bus",
+      "question": "Is there a shuttle to the Snow Bowl?",
+      "needs": "bus",
+      "when": "now",
+      "good_answer": "Says the Snow Bowl Shuttle is a Tri-Valley route but has no trips in the current timetable (valid through its end date), and doesn't guess when it starts."
+    },
+    {
+      "id": "broken-heater",
+      "question": "The heater in my room is broken, who do I contact?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "Points to Facilities Services from the \"Who Do I Call\" page, with what that page says about maintenance requests. No invented phone numbers or forms."
     }
   ]
 }
