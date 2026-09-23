@@ -95,7 +95,45 @@ const SITES = [
     container: "article",
     section: () => "outside/trivalleytransit",
   },
+  // The College's two ski areas. Both are WordPress sites whose theme scatters <main> tags
+  // through the page, so their pages are read from the WordPress API instead (wordpress: true).
+  {
+    host: "https://middleburysnowbowl.com/",
+    sitemaps: ["https://middleburysnowbowl.com/wp-sitemap-posts-page-1.xml"],
+    include: slugIn([
+      "middlebury-college-411", "lift-tickets", "season-passes", "hours-of-operation", "winter-term", "faq",
+      "mountain-info", "lesson-programs", "dining", "uphill-policy",
+    ]),
+    dated: true,
+    wordpress: true,
+    section: () => "outside/snowbowl",
+  },
+  {
+    host: "https://rikertoutdoor.com/",
+    sitemaps: ["https://rikertoutdoor.com/wp-sitemap-posts-page-1.xml"],
+    include: slugIn(["day-tickets", "season-passes-1", "winter-term-pe", "lessons", "packages", "safety"]),
+    dated: true,
+    wordpress: true,
+    section: () => "outside/rikert",
+  },
 ];
+
+// For sites listed page by page: the URL's last path segment is one of these.
+function slugIn(slugs) {
+  return (url) => slugs.includes(trim(url).split("/").pop());
+}
+
+// A WordPress page's content from the site's own API, as <main> for extract().
+async function wordpressMain(url) {
+  const u = new URL(url);
+  const slug = trim(u.pathname).split("/").pop();
+  const res = await get(`${u.origin}/wp-json/wp/v2/pages?slug=${encodeURIComponent(slug)}&_fields=title,content`);
+  if (res.status !== 200) return { status: res.status, main: null };
+  const [page] = JSON.parse(res.text);
+  if (!page) return { status: 404, main: null };
+  const body = page.content.rendered.replace(/<\/?main\b[^>]*>/gi, "");
+  return { status: 200, main: `<main><h1>${page.title.rendered}</h1>${body}</main>` };
+}
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const cacheDir = new URL("../.cache/pages/", import.meta.url);
@@ -163,6 +201,14 @@ async function main() {
       if (entry.lastmod !== lastmod || !("main" in entry)) entry = null;
     } catch {
       entry = null;
+    }
+    if (!entry && site.wordpress) {
+      const { status, main } = await wordpressMain(url);
+      fetched++;
+      await sleep(site.delayMs ?? DELAY_MS);
+      if (status === 0) continue; // network trouble: not cached, so the next run tries again
+      entry = { url, lastmod, status, main };
+      await writeFile(cacheFile, JSON.stringify(entry));
     }
     if (!entry) {
       const res = await get(url);

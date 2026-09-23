@@ -119,7 +119,7 @@
     },
     {
       "q": "ski lessons",
-      "expect": "college/student-life/athletics|outdoor-resources"
+      "expect": "college/student-life/athletics|outdoor-resources|rikertoutdoor.com/lessons|middleburysnowbowl.com/lesson-programs"
     },
     {
       "q": "rare books special collections",
@@ -256,6 +256,18 @@
     {
       "q": "how do I get to the burlington airport by bus",
       "expect": "trivalleytransit.org/regional-connections"
+    },
+    {
+      "q": "snow bowl student season pass price",
+      "expect": "middleburysnowbowl.com/(middlebury-college-411|season-passes)"
+    },
+    {
+      "q": "winter term pe skiing class",
+      "expect": "rikertoutdoor.com/winter-term-pe|middleburysnowbowl.com/winter-term"
+    },
+    {
+      "q": "rikert day ticket",
+      "expect": "rikertoutdoor.com/day-tickets"
     }
   ]
 }

@@ -13,8 +13,9 @@ import { hoursTool } from "./hours.js";
 import { intercityTool } from "./intercity.js";
 import { officesTool } from "./offices.js";
 import { pagesTool } from "./pages.js";
+import { weatherTool } from "./weather.js";
 
-const TOOLS = [diningTool, athleticsTool, eventsTool, clubsTool, hoursTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool];
+const TOOLS = [diningTool, athleticsTool, eventsTool, clubsTool, hoursTool, weatherTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool];
 
 export const TOOL_DEFINITIONS = TOOLS.map((t) => t.definition);
 

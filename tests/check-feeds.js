@@ -135,6 +135,36 @@ try {
   }
 }
 
+// Weather: the forecast should parse for both places. The Snow Bowl's hours calendar should
+// parse too, and in ski season it should show open days.
+try {
+  const { weatherTool } = await import("../src/tools/weather.js");
+  for (const place of ["campus", "snow-bowl"]) {
+    const w = JSON.parse((await weatherTool.run({ place })).content);
+    const [first] = w.forecast;
+    const alerts = Array.isArray(w.alerts) ? w.alerts.map((a) => a.event).join(", ") : "no alerts";
+    console.log(`${place === "campus" ? "\nWeather" : "       "}: ${w.place}: ${first ? `${first.name} ${first.temperature}, ${first.summary}` : "NO FORECAST"}; ${alerts}.`);
+    if (!first) problems++;
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  weather.gov: ${err.message}`);
+}
+try {
+  const { hoursTool } = await import("../src/tools/hours.js");
+  const month = new Date().getMonth() + 1;
+  const sb = JSON.parse((await hoursTool.run({ place: "snow-bowl" })).content);
+  const inSeason = [12, 1, 2, 3].includes(month);
+  console.log(`Snow Bowl hours today: ${JSON.stringify(sb.days[0].hours)}${sb.also ? " (no open days posted this month)" : ""}`);
+  if (inSeason && sb.also) {
+    problems++;
+    console.log("  FAIL  it's ski season but the calendar shows no open days. Check the Snow Bowl's hours page.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  Snow Bowl hours calendar: ${err.message}`);
+}
+
 // Flights: Burlington airport's board should list flights for about the next day.
 try {
   const { flightsTool } = await import("../src/tools/flights.js");

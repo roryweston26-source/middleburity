@@ -21,7 +21,26 @@ export const PLACES = {
   "athletic-complex": { name: "Athletic facilities (general open hours)", gcal: "nrusevg9me9pg139f9n0hoo934" },
   "fitness-center": { name: "Fitness Center", gcal: "t0e014c4u6vpndfjcgqqe25ct8" },
   pool: { name: "Natatorium (pool)", gcal: "0b3h20dfo8ep5ojt765one44qo" },
+  "snow-bowl": { name: "Middlebury Snow Bowl", snowbowl: true },
 };
+
+// The Snow Bowl's own hours calendar: the month table its hours page loads (robots.txt allows
+// admin-ajax.php). Days are "Open from 9 a.m. to 9 p.m." or "Closed", and next season's months
+// read "Closed" every day until hours are set, so a month with no open day at all is reported
+// as nothing posted rather than closed.
+const SNOWBOWL = (year, month) => `https://middleburysnowbowl.com/wp-admin/admin-ajax.php?action=load_hours_calendar&month=${month}&year=${year}`;
+const SNOWBOWL_PAGE = "https://middleburysnowbowl.com/hours-of-operation/";
+
+export function parseSnowbowlMonth(html, year, month) {
+  const days = new Map();
+  for (const m of html.matchAll(/<td class=['"](open|closed)['"]>\s*<strong>(\d+)<\/strong>\s*<br>([^<]*)<\/td>/g)) {
+    const date = `${year}-${String(month).padStart(2, "0")}-${m[2].padStart(2, "0")}`;
+    const text = m[3].replace(/\s+/g, " ").trim();
+    days.set(date, m[1] === "open" ? text.replace(/^Open from /i, "") : "Closed");
+  }
+  const anyOpen = [...days.values()].some((v) => v !== "Closed");
+  return { days, anyOpen };
+}
 
 const cache = new Map(); // source url -> { at, data }
 export function clearHoursCache() {
@@ -232,6 +251,27 @@ export async function getHours(placeId, from, to, now = new Date()) {
     for (let d = from; d <= to; d = addDays(d, 1)) out.push({ date: d, hours: days.has(d) ? (days.get(d) ? [days.get(d)] : []) : null });
     return { checkedAt: new Date(at).toISOString(), url: LIBCAL_PAGE, label: "Middlebury Libraries hours (LibCal)", days: out };
   }
+  if (place.snowbowl) {
+    const months = [...new Set([from, to].map((d) => d.slice(0, 7)))];
+    const parsed = [];
+    for (const ym of months) {
+      const [y, m] = ym.split("-").map(Number);
+      parsed.push({ ym, ...(await cached(SNOWBOWL(y, m), (html) => parseSnowbowlMonth(html, y, m), now)) });
+    }
+    const out = [];
+    const notes = [];
+    for (let d = from; d <= to; d = addDays(d, 1)) {
+      const month = parsed.find((p) => p.ym === d.slice(0, 7)).data;
+      out.push({ date: d, hours: month.anyOpen && month.days.has(d) ? [month.days.get(d)] : null });
+    }
+    for (const p of parsed) {
+      if (!p.data.anyOpen) {
+        const label = new Date(`${p.ym}-15T12:00:00Z`).toLocaleDateString("en-US", { timeZone: "UTC", month: "long", year: "numeric" });
+        notes.push(`The Snow Bowl's calendar lists no open days in ${label}. That can mean it's closed for the season or that the hours aren't set yet; don't call it closed.`);
+      }
+    }
+    return { checkedAt: new Date(Math.min(...parsed.map((p) => p.at))).toISOString(), url: SNOWBOWL_PAGE, label: "Middlebury Snow Bowl hours calendar", days: out, notes };
+  }
   // Entries that ended over a week ago are skipped at parse time (see stillMatters).
   const since = addDays(campusDate(now), -7).replace(/-/g, "");
   const { at, data } = await cached(GCAL(place.gcal), (text) => parseCalendar(text, since), now);
@@ -251,7 +291,8 @@ export const hoursTool = {
     name: "get_hours",
     description:
       "Posted opening hours, day by day, from the calendars Middlebury keeps them in: the library, Crossroads Café and library research help (LibCal, about two weeks ahead), " +
-      "and the athletic facilities, fitness center and pool (the athletics department's calendars). " +
+      "the athletic facilities, fitness center and pool (the athletics department's calendars), " +
+      "and the Middlebury Snow Bowl's lift hours (its own calendar, any month ahead; ski conditions and trail status aren't online, only in its app). " +
       "A day with no entry means nothing is posted for it, not that the place is closed. " +
       "Other hours (dining halls, the Grille and other retail spots, the Mail Center, offices) are written on Middlebury's pages: use search_pages for those. " +
       "Kenyon Arena, Pepin Gym, Nelson Rec Center and climbing wall hours aren't in a calendar this can read (the climbing wall's has had no new entries since 2023): search Middlebury's pages, or say you couldn't find them.",
@@ -279,6 +320,7 @@ export const hoursTool = {
         source: result.label,
         place: name,
         note: "Hours as posted. A day marked 'nothing posted' has no entry in the calendar; don't guess it.",
+        ...(result.notes?.length && { also: result.notes }),
         days: result.days.map((d) => ({
           date: `${dayLabel(d.date)} (${d.date})`,
           hours: d.hours === null ? "nothing posted (beyond what the calendar covers)" : d.hours.length ? d.hours : "nothing posted",

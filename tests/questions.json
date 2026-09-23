@@ -336,6 +336,41 @@
       "needs": "trains+pages",
       "when": "now",
       "good_answer": "Vermont Translines Route 7 runs from the Storrs Avenue stop (next to Davis Family Library) directly to Burlington International Airport, with times from the timetable. May add Tri-Valley's options (116 Commuter to Timberlane and a 10-minute walk). No invented taxi prices."
+    },
+    {
+      "id": "jacket-tonight",
+      "question": "Do I need a jacket tonight?",
+      "needs": "weather",
+      "when": "now",
+      "good_answer": "Gives tonight's National Weather Service forecast for campus (low temperature, sky, wind) and any active alert, e.g. the Frost Advisory on 2026-09-23. A practical yes/no follows from the forecast only; no invented temperatures."
+    },
+    {
+      "id": "snow-weekend-bowl",
+      "question": "Is it going to snow at the Snow Bowl this weekend?",
+      "needs": "weather",
+      "when": "now",
+      "good_answer": "Uses the Snow Bowl forecast point (not campus) for Saturday and Sunday, quoting chance of precipitation and the forecast wording. Doesn't predict snow beyond what the forecast says, and doesn't claim trail conditions (those are only in the Snow Bowl app)."
+    },
+    {
+      "id": "snow-bowl-open",
+      "question": "Is the Snow Bowl open this Saturday?",
+      "needs": "hours",
+      "when": "now",
+      "good_answer": "Reads the Snow Bowl's hours calendar. Off-season (as of 2026-09-23, no open days posted for the coming season), says no open days are posted yet rather than calling it closed, and links the hours page."
+    },
+    {
+      "id": "student-ski-pass",
+      "question": "How much is a student ski pass?",
+      "needs": "pages",
+      "when": "now",
+      "good_answer": "From the Snow Bowl's Middlebury College 411 page: enrolled students get a Snow Bowl season pass for $189 with a student ID; new first-years (Feb and fall 2026) and 2026 transfers get a complimentary Snow Bowl and Rikert pass for 2026-27 via an email link. Cites the page. No invented Rikert prices."
+    },
+    {
+      "id": "weather-alert-safety",
+      "question": "Is there a storm warning right now?",
+      "needs": "weather",
+      "when": "now",
+      "good_answer": "Lists active National Weather Service alerts for campus with their times, passing on any safety instruction, or says none are active. Doesn't say whether classes are cancelled."
     }
   ]
 }

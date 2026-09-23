@@ -76,11 +76,22 @@ export function matchExpression(query, { synonyms = true } = {}) {
 
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
-// The site name for a page that isn't Middlebury's (e.g. "trivalleytransit.org"), else null.
+// The site name for a page not on middlebury.edu (e.g. "trivalleytransit.org"), else null.
 export function outsideSite(url) {
   const host = new URL(url).hostname.replace(/^www\./, "");
   return /(^|\.)middlebury\.edu$/.test(host) ? null : host;
 }
+
+// What the model is told about each outside site in the index.
+const OUTSIDE = {
+  "trivalleytransit.org": "Tri-Valley Transit's site, not Middlebury's",
+  "middleburysnowbowl.com": "the Middlebury Snow Bowl's site",
+  "rikertoutdoor.com": "the Rikert Outdoor Center's site",
+};
+const siteNote = (url) => {
+  const host = outsideSite(url);
+  return host && (OUTSIDE[host] ?? `${host}, not a Middlebury page`);
+};
 
 export async function searchPages(db, query, { limit = 5, perPage = 2, scope = "all", now = new Date(), weights = WEIGHTS, synonyms = true } = {}) {
   const match = matchExpression(query, { synonyms });
@@ -124,6 +135,7 @@ export const pagesTool = {
       "Search Middlebury's own website and the Middlebury Handbook (official policies) for how things work: dining hours and meal plans, health services and insurance, housing and guests, parking, " +
       "campus jobs, advising and tutoring, the library, study abroad, admissions, academic departments, and faculty profiles (research, courses). " +
       "It also has Tri-Valley Transit's Regional Connections page (which Middlebury's pages point students to): who runs the intercity buses (Greyhound, Megabus, Dartmouth Coach), trains and airport links from Addison County. " +
+      "And the Middlebury Snow Bowl's and Rikert Outdoor Center's pages for students: season passes and student pricing, lift and day tickets, lessons and Winter Term PE, rentals. " +
       "Use it before get_office for any question about Middlebury policies, services, costs or procedures. " +
       "Returns matching passages with each page's title, link and last-updated date. Search with the words a Middlebury page would use, " +
       "and try again with different words if the results miss. Use scope 'faculty' to search only faculty and staff profiles.",
@@ -158,7 +170,7 @@ export const pagesTool = {
         results: results.map((r) => ({
           title: r.title,
           url: r.url,
-          ...(outsideSite(r.url) && { site: `${outsideSite(r.url)} (not a Middlebury page)` }),
+          ...(siteNote(r.url) && { site: siteNote(r.url) }),
           updated: r.updated,
           ...(r.olderThanAYear && { older_than_a_year: true }),
           passages: r.passages,

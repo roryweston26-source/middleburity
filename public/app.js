@@ -366,7 +366,30 @@ function flightsCard(card) {
   );
 }
 
+function weatherCard(card) {
+  const alerts = card.alerts.map((a) =>
+    el("div", { class: "note" }, el("strong", { text: a.event }), a.until ? ` until ${new Date(a.until).toLocaleString("en-US", dayTime)}` : ""),
+  );
+  const rows = card.periods.map((p) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main", text: `${p.name} · ${p.temperature}` }),
+      el("div", { class: "row-meta", text: [p.summary, p.chance_of_precipitation && `${p.chance_of_precipitation} chance of precipitation`, p.wind].filter(Boolean).join(" · ") }),
+    ),
+  );
+  return el(
+    "article",
+    { class: "card" },
+    cardHead(card.hourly ? `${card.place}, next 12 hours` : card.place),
+    alerts.length ? el("div", { class: "card-body" }, alerts) : null,
+    el("ul", { class: "rows" }, rows),
+    sourceLine(card.source, " A forecast, not a guarantee."),
+  );
+}
+
 function renderCard(card) {
+  if (card.type === "weather") return weatherCard(card);
   if (card.type === "trips") return tripsCard(card);
   if (card.type === "flights") return flightsCard(card);
   if (card.type === "hours") return hoursCard(card);

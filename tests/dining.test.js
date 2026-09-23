@@ -59,7 +59,7 @@ test("bad tool input comes back as an error the model can read", async () => {
   const out = await runTool("get_dining_menu", { date: "tonight" });
   assert.equal(out.isError, true);
   assert.match(out.content, /YYYY-MM-DD/);
-  const unknown = await runTool("get_weather", {});
+  const unknown = await runTool("get_horoscope", {});
   assert.equal(unknown.isError, true);
 });
 
