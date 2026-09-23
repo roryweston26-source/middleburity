@@ -8,11 +8,13 @@ import { diningTool } from "./dining.js";
 import { directionsTool } from "./directions.js";
 import { ToolInputError } from "./errors.js";
 import { eventsTool } from "./events.js";
+import { flightsTool } from "./flights.js";
 import { hoursTool } from "./hours.js";
+import { intercityTool } from "./intercity.js";
 import { officesTool } from "./offices.js";
 import { pagesTool } from "./pages.js";
 
-const TOOLS = [diningTool, athleticsTool, eventsTool, clubsTool, hoursTool, busTool, pagesTool, directionsTool, officesTool];
+const TOOLS = [diningTool, athleticsTool, eventsTool, clubsTool, hoursTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool];
 
 export const TOOL_DEFINITIONS = TOOLS.map((t) => t.definition);
 

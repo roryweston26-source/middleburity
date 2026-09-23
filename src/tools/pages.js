@@ -76,6 +76,12 @@ export function matchExpression(query, { synonyms = true } = {}) {
 
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
+// The site name for a page that isn't Middlebury's (e.g. "trivalleytransit.org"), else null.
+export function outsideSite(url) {
+  const host = new URL(url).hostname.replace(/^www\./, "");
+  return /(^|\.)middlebury\.edu$/.test(host) ? null : host;
+}
+
 export async function searchPages(db, query, { limit = 5, perPage = 2, scope = "all", now = new Date(), weights = WEIGHTS, synonyms = true } = {}) {
   const match = matchExpression(query, { synonyms });
   if (!match) return [];
@@ -117,6 +123,7 @@ export const pagesTool = {
     description:
       "Search Middlebury's own website and the Middlebury Handbook (official policies) for how things work: dining hours and meal plans, health services and insurance, housing and guests, parking, " +
       "campus jobs, advising and tutoring, the library, study abroad, admissions, academic departments, and faculty profiles (research, courses). " +
+      "It also has Tri-Valley Transit's Regional Connections page (which Middlebury's pages point students to): who runs the intercity buses (Greyhound, Megabus, Dartmouth Coach), trains and airport links from Addison County. " +
       "Use it before get_office for any question about Middlebury policies, services, costs or procedures. " +
       "Returns matching passages with each page's title, link and last-updated date. Search with the words a Middlebury page would use, " +
       "and try again with different words if the results miss. Use scope 'faculty' to search only faculty and staff profiles.",
@@ -151,6 +158,7 @@ export const pagesTool = {
         results: results.map((r) => ({
           title: r.title,
           url: r.url,
+          ...(outsideSite(r.url) && { site: `${outsideSite(r.url)} (not a Middlebury page)` }),
           updated: r.updated,
           ...(r.olderThanAYear && { older_than_a_year: true }),
           passages: r.passages,
@@ -158,7 +166,7 @@ export const pagesTool = {
       }),
       card: {
         type: "pages",
-        pages: results.map((r) => ({ title: r.title, url: r.url, updated: r.updated, ...(r.olderThanAYear && { old: true }) })),
+        pages: results.map((r) => ({ title: r.title, url: r.url, updated: r.updated, ...(r.olderThanAYear && { old: true }), ...(outsideSite(r.url) && { site: outsideSite(r.url) }) })),
         source: { label: "middlebury.edu", url: "https://www.middlebury.edu/", checkedOn: builtOn },
       },
     };

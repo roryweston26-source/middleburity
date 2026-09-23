@@ -5,70 +5,15 @@
 // The app never downloads the feed at runtime: unzipping and parsing it would blow the Workers
 // free plan's 10 ms CPU limit, so only the Addison County routes are kept, in a small file.
 import { writeFile } from "node:fs/promises";
-import { inflateRawSync } from "node:zlib";
-import { USER_AGENT } from "../src/user-agent.js";
+import { isoDate, loadGtfs } from "./gtfs.js";
 
 const FEED = "https://data.trilliumtransit.com/gtfs/trivalleytransit-vt-us/trivalleytransit-vt-us.zip";
 const OUT = new URL("../src/data/transit.js", import.meta.url);
 
-// Reads the files out of a zip archive (stored or deflated entries, which is all GTFS uses).
-function unzip(buf, wanted) {
-  let end = buf.length - 22;
-  while (end >= 0 && buf.readUInt32LE(end) !== 0x06054b50) end--;
-  if (end < 0) throw new Error("not a zip file");
-  const count = buf.readUInt16LE(end + 10);
-  let p = buf.readUInt32LE(end + 16);
-  const files = {};
-  for (let i = 0; i < count; i++) {
-    const method = buf.readUInt16LE(p + 10);
-    const size = buf.readUInt32LE(p + 20);
-    const nameLen = buf.readUInt16LE(p + 28);
-    const extraLen = buf.readUInt16LE(p + 30);
-    const commentLen = buf.readUInt16LE(p + 32);
-    const local = buf.readUInt32LE(p + 42);
-    const name = buf.toString("utf8", p + 46, p + 46 + nameLen);
-    p += 46 + nameLen + extraLen + commentLen;
-    if (!wanted.includes(name)) continue;
-    const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
-    const data = buf.subarray(start, start + size);
-    files[name] = (method === 8 ? inflateRawSync(data) : data).toString("utf8");
-  }
-  return files;
-}
-
-// CSV with quoted fields (the feed's trip messages contain commas).
-export function parseCsv(text) {
-  const rows = [];
-  let row = [], field = "", quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (quoted) {
-      if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
-      else if (c === '"') quoted = false;
-      else field += c;
-    } else if (c === '"') quoted = true;
-    else if (c === ",") { row.push(field); field = ""; }
-    else if (c === "\n" || c === "\r") {
-      if (c === "\r" && text[i + 1] === "\n") i++;
-      row.push(field); field = "";
-      if (row.length > 1 || row[0] !== "") rows.push(row);
-      row = [];
-    } else field += c;
-  }
-  if (field || row.length) { row.push(field); rows.push(row); }
-  const [head, ...body] = rows;
-  const keys = head.map((h) => h.replace(/^﻿/, "").trim());
-  return body.map((r) => Object.fromEntries(keys.map((k, i) => [k, (r[i] ?? "").trim()])));
-}
-
-const isoDate = (d) => `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6, 8)}`;
-
-const res = await fetch(FEED, { headers: { "user-agent": USER_AGENT }, signal: AbortSignal.timeout(60000) });
-if (!res.ok) throw new Error(`transit feed returned ${res.status}`);
-const files = unzip(Buffer.from(await res.arrayBuffer()), [
+const feed = await loadGtfs(FEED, [
   "feed_info.txt", "routes.txt", "trips.txt", "stop_times.txt", "stops.txt", "calendar.txt", "calendar_dates.txt",
 ]);
-const csv = (name) => (files[name] ? parseCsv(files[name]) : []);
+const csv = (name) => feed[name.replace(/\.txt$/, "")];
 
 // Addison County's routes are the ones Tri-Valley files under /addison_routes/.
 const routes = {};

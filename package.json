@@ -12,7 +12,7 @@
     "check:feeds": "node tests/check-feeds.js",
     "questions": "node tests/run-questions.js",
     "build:places": "node scripts/build-places.js",
-    "build:transit": "node scripts/build-transit.js",
+    "build:transit": "node scripts/build-transit.js && node scripts/build-intercity.js",
     "build:pages": "node scripts/build-pages.js && node scripts/build-db.js",
     "eval:search": "node tests/eval-search.js",
     "build:db": "node scripts/build-db.js",

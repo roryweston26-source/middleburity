@@ -114,6 +114,42 @@ try {
   if (soon) console.log("  FAIL  the timetable runs out soon. Run npm run build:transit (Tri-Valley usually has the next one out by now).");
 }
 
+// Trains and intercity buses: Amtrak reissues its timetable every week or so and changes it
+// with the seasons, so a saved copy over a month old gets rebuilt.
+{
+  const { INTERCITY } = await import("../src/data/intercity.js");
+  const { findTrips } = await import("../src/tools/intercity.js");
+  const age = Math.round((Date.now() - new Date(`${INTERCITY.builtOn}T12:00:00Z`)) / 86400000);
+  console.log(`\nTrains and intercity buses: saved ${INTERCITY.builtOn} (${age} days ago), ${INTERCITY.trips.length} trips.`);
+  if (age > 30) {
+    problems++;
+    console.log("  FAIL  over a month old. Run npm run build:transit.");
+  }
+  const day = campusDate(new Date(Date.now() + 86400000));
+  const nyc = findTrips(INTERCITY, { from: "Middlebury", to: "New York", date: day });
+  const direct = nyc.trips.find((t) => t.length === 1);
+  if (direct) console.log(`  ok    Middlebury to New York tomorrow: ${direct[0].route.name}, direct`);
+  else {
+    problems++;
+    console.log("  FAIL  no direct Middlebury-New York train tomorrow. The Ethan Allen Express may have changed; check the feed.");
+  }
+}
+
+// Flights: Burlington airport's board should list flights for about the next day.
+try {
+  const { flightsTool } = await import("../src/tools/flights.js");
+  const board = JSON.parse((await flightsTool.run({})).content);
+  const n = board.departure_cities_on_board.length;
+  console.log(`\nBTV flight board: ${board.board_covers}, departures to ${n} cities.`);
+  if (n < 3) {
+    problems++;
+    console.log("  FAIL  hardly any departures. The airport's flight data may have changed shape.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  BTV flight board: ${err.message}`);
+}
+
 // A redirect usually means the office was renamed or moved, so update offices.js.
 console.log("\nOffice links:");
 const UA = "Mozilla/5.0 (compatible; Middleburity link check)";

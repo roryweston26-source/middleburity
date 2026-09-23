@@ -244,6 +244,18 @@
     {
       "q": "bus home for thanksgiving break",
       "expect": "sga-break-buses"
+    },
+    {
+      "q": "megabus to boston",
+      "expect": "trivalleytransit.org/regional-connections"
+    },
+    {
+      "q": "greyhound bus from burlington",
+      "expect": "trivalleytransit.org/regional-connections"
+    },
+    {
+      "q": "how do I get to the burlington airport by bus",
+      "expect": "trivalleytransit.org/regional-connections"
     }
   ]
 }

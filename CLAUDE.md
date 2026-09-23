@@ -13,10 +13,10 @@ Everything through the December step is built, tested and pushed. **It's deploye
 - A brand-new `workers.dev` subdomain took about 3 minutes to get its TLS certificate. Until then, requests fail with a TLS handshake error, not a 404.
 - Redeploy with `npm run deploy`. Secrets and the database carry over.
 
-The app answers from: dining menus, varsity schedules and results, campus events, the club directory, library and athletic-facility hours, Addison County bus times, walking directions, about 3,330 indexed pages (middlebury.edu plus the Handbook), and a directory of 18 offices. All 27 original questions in `tests/questions.json` passed against Claude Opus 5 on 2026-09-22. The 15 added later that day (clubs, hours, buses, mail and repairs) haven't been run against the model yet.
+The app answers from: dining menus, varsity schedules and results, campus events, the club directory, library and athletic-facility hours, Addison County bus times, trains and intercity buses (Amtrak, Vermont Translines), Burlington airport flights, walking directions, about 3,340 indexed pages (middlebury.edu, the Handbook and one Tri-Valley Transit page), and a directory of 18 offices. All 27 original questions in `tests/questions.json` passed against Claude Opus 5 on 2026-09-22. The 21 added since (clubs, hours, buses, mail and repairs, sushi, travel) haven't been run against the model yet.
 
 **Next, in order:**
-1. **Run the full question set** (43 questions, about $1 on Opus; needs Rory's OK). The 16 added on 2026-09-22/23 haven't run against the model, and the Sources-line change touched every answer's prompt.
+1. **Run the full question set** (48 questions, about $1.10 on Opus; needs Rory's OK). The 21 added on 2026-09-22/23 haven't run against the model, and the Sources-line change touched every answer's prompt.
 2. **Compare models** before friends test in January. Run `tests/questions.json` on Haiku 4.5 (one line in `.dev.vars`) and GPT-5.6 Luna (needs an OpenAI adapter, roughly 100 lines, plus an OpenAI account). Pick the cheapest that passes. Rough costs per 1,000 questions: Opus 5 ~$20, Haiku ~$4, Luna ~$1.
 3. **Friends test in January** behind the access code, then the pitch to Middlebury in spring.
 
@@ -36,7 +36,7 @@ The app answers from: dining menus, varsity schedules and results, campus events
 ## How it's built
 
 - Plain JavaScript ES modules, no build step, Node 20+. The only dependency is `@anthropic-ai/sdk`.
-- `src/worker.js` has the Cloudflare Worker shape, so the same code runs locally (`dev-server.js`) and in production (Cloudflare Workers free plan, not deployed yet).
+- `src/worker.js` has the Cloudflare Worker shape, so the same code runs locally (`dev-server.js`) and in production (Cloudflare Workers free plan).
 - **Adding a source:** add a tool file in `src/tools/`, register it in `src/tools/index.js`, add its questions to `tests/questions.json`, and add a live check to `tests/check-feeds.js`.
 - **Office names come from `src/tools/offices.js`, never from the model.** In testing, the model's remembered office names were stale: it offered the "Center for Campus Activities and Leadership", an office Middlebury has since renamed. `get_office` is `displayOnly`: when the model writes its answer and only asks for office links, chat.js returns that answer without a second model call.
 - **Sources that need care:**
@@ -60,6 +60,17 @@ The app answers from: dining menus, varsity schedules and results, campus events
     - The Snow Bowl shuttle has no trips in the fall timetable. The tool says so, not a guess about when it starts.
     - Untimed stops in the feed are dropped rather than interpolated.
   - Page search also indexes a few single pages outside the crawled sections (`SINGLE_PAGES` in scripts/build-pages.js): the Student Mail Center, Facilities' "Who Do I Call", laundry, and two transportation pages.
+    - One page isn't Middlebury's: Tri-Valley Transit's Regional Connections page, which Middlebury's international-student pages point to. It says who runs Greyhound, Megabus and Dartmouth Coach service and the airport links. Its robots.txt asks for 10 seconds between requests and its content is in `<article>`, so sites in `SITES` can set `delayMs` and `container`. Results and cards label non-Middlebury pages with their site (`outsideSite`).
+  - **Trains and intercity buses (`get_trains_and_buses`, src/tools/intercity.js)** read `src/data/intercity.js`, built by `npm run build:transit` (after the local buses) from two GTFS feeds:
+    - Amtrak's national feed, cut to four routes: the Ethan Allen Express (Middlebury station MBY; now through to Burlington), Vermonter, Adirondack (to Montreal) and Lake Shore Limited (Albany to Boston). Amtrak said in a FOIA response that it has no restrictions on using the feed to drive Amtrak ridership.
+    - Vermont Translines Route 7 (Burlington and its airport, Middlebury's Storrs Ave stop next to Davis Family Library, Rutland, Bennington, Albany-Rensselaer and its airport).
+    - Amtrak's feed_info claims a one-week window, but its service calendars run a year. Amtrak reissues it every week or so, so `check:feeds` fails once the saved copy is 30 days old.
+    - Trips are direct or one change. A change is at the same stop, or a walk of up to 800 m to another operator's stop (Translines' Rensselaer stop is a minute from Amtrak's platforms), with at least 20 minutes and at most 6 hours between legs. A second leg that passes back through the start is dropped.
+    - A town name matches stop names, plus any stop within 3 km, because the feeds name some stops by street. "Middlebury" finds the Storrs Ave bus stop that way.
+    - Station names come from the feed. Amtrak's two "Boston" stations (BOS, BBY) aren't renamed from memory; amtrak.com refuses scripted requests, so they couldn't be checked.
+    - Search is about 2 ms warm, after indexing boardings by stop; a first version that scanned every trip for each change took 20+ ms.
+    - **Greyhound isn't used (Rory's call, 2026-09-23).** Flix publishes a US feed with Greyhound's Burlington–Boston and Burlington–Montreal buses, but it has no published US license. Asking Flix for permission is the way to add it. Megabus and Dartmouth Coach publish no feeds.
+  - **Flights (`get_flights`, src/tools/flights.js)** read Burlington airport's own board data (`btv.aero/wp-json/btv/v1/flights`, cached 10 minutes). It's a rolling window of about the next 20 hours, nonstop flights only, so answers about destinations say what's on the board, not every route BTV serves.
   - Page search (`search_pages`) is local BM25 over `src/data/pages.json`, built by `npm run build:pages`:
     - What gets crawled: the sitemap sections in `SECTIONS`, minus archive, old and COVID paths and pages not updated since 2022. It runs at robots.txt's one request a second under an honest User-Agent, and stops if the site starts refusing. A full crawl takes about 2 hours; re-runs only fetch pages whose sitemap date changed.
     - The cache in `.cache/pages` stores raw `<main>` HTML, so fixes to extraction (`scripts/page-text.js`) need no re-crawl.

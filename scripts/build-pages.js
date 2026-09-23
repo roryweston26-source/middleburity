@@ -83,6 +83,18 @@ const SITES = [
     dated: false,
     section: (url) => (url.includes("/ii-ug-college-policies/") ? "handbook/college-policies" : "handbook/policies-for-all"),
   },
+  {
+    // Tri-Valley Transit's Regional Connections page: which trains, intercity buses and airport
+    // links serve Addison County. Middlebury's international-student pages send students there.
+    // Its robots.txt asks for 10 seconds between requests, and its content sits in <article>.
+    host: "https://www.trivalleytransit.org/",
+    sitemaps: ["https://www.trivalleytransit.org/page-sitemap.xml"],
+    include: (url) => trim(url) === "https://www.trivalleytransit.org/regional-connections",
+    dated: true,
+    delayMs: 10000,
+    container: "article",
+    section: () => "outside/trivalleytransit",
+  },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -113,11 +125,11 @@ async function get(url) {
 }
 
 // Reads a sitemap, following sitemap indexes (<sitemap><loc>) and Drupal's ?page=N splits.
-async function readSitemap(url, out) {
+async function readSitemap(url, out, delay = DELAY_MS) {
   const xml = (await get(url)).text;
-  await sleep(DELAY_MS);
+  await sleep(delay);
   const children = [...xml.matchAll(/<sitemap>\s*<loc>([^<]+)<\/loc>/g)].map((m) => m[1].trim());
-  for (const child of children) await readSitemap(child, out);
+  for (const child of children) await readSitemap(child, out, delay);
   for (const m of xml.matchAll(/<url>([\s\S]*?)<\/url>/g)) {
     const loc = m[1].match(/<loc>([^<]+)<\/loc>/)?.[1];
     const lastmod = (m[1].match(/<lastmod>([^<]+)<\/lastmod>/)?.[1] ?? "").slice(0, 10);
@@ -130,7 +142,7 @@ async function main() {
   const wanted = [];
   for (const site of SITES) {
     const found = [];
-    for (const sitemap of site.sitemaps) await readSitemap(sitemap, found);
+    for (const sitemap of site.sitemaps) await readSitemap(sitemap, found, site.delayMs ?? DELAY_MS);
     const seen = new Set();
     const keep = found.filter(
       (u) => !seen.has(u.url) && seen.add(u.url) && site.include(u.url) && !EXCLUDE.test(u.url) && (!site.dated || u.lastmod >= OLDEST),
@@ -155,7 +167,7 @@ async function main() {
     if (!entry) {
       const res = await get(url);
       fetched++;
-      await sleep(DELAY_MS);
+      await sleep(site.delayMs ?? DELAY_MS);
       if (res.status === 0) {
         networkFailures++;
         if (networkFailures >= 10) {
@@ -174,9 +186,12 @@ async function main() {
         }
         continue;
       }
-      const start = res.text.indexOf("<main");
-      const end = res.text.indexOf("</main>");
-      const main = res.status === 200 && start >= 0 && end > start ? res.text.slice(start, end + 7) : null;
+      // The cache keeps the page's content as <main>...</main>, whatever element the site uses.
+      const tag = site.container ?? "main";
+      const start = res.text.indexOf(`<${tag}`);
+      const end = res.text.indexOf(`</${tag}>`);
+      const inner = res.status === 200 && start >= 0 && end > start ? res.text.slice(res.text.indexOf(">", start) + 1, end) : null;
+      const main = inner === null ? null : `<main>${inner}</main>`;
       entry = { url, lastmod, status: res.status, main };
       await writeFile(cacheFile, JSON.stringify(entry));
     }

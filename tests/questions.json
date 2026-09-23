@@ -301,6 +301,41 @@
       "needs": "dining+pages",
       "when": "now",
       "good_answer": "Checks tonight's hall menus (no sushi there as of 2026-09-23) and Dining's retail page: S.E.A. Dinette in McCullough is a sushi and Southeast Asian spot, and Midd Express carries fresh sushi (posted Mon-Fri 8am-midnight, weekends noon-midnight). S.E.A. Dinette's only posted hours are for summer 2026 (6/19-8/13), so it must not give those as tonight's hours; it says its current hours aren't posted. Doesn't cover off-campus restaurants. The Sources card lists the retail page, not unrelated pages."
+    },
+    {
+      "id": "nyc-weekend",
+      "question": "My friends want to go to NYC for the weekend, how do we get there?",
+      "needs": "trains",
+      "when": "now",
+      "good_answer": "Amtrak's Ethan Allen Express leaves Middlebury daily and runs direct to New York Penn (10:11am to 4:27pm as of 2026-09-23), with the return times for Sunday from the timetable. Says to book and check times on amtrak.com. No invented fares. May mention the evening bus-and-train option only if the tool returned it."
+    },
+    {
+      "id": "boston-home",
+      "question": "I'm going home to Boston, what's the best way?",
+      "needs": "trains+pages",
+      "when": "now",
+      "good_answer": "No direct train: the tool's one-change trip (Ethan Allen to Albany-Rensselaer, then the Lake Shore Limited to Boston, arriving about 8:24pm). From Tri-Valley's Regional Connections page: Megabus runs Burlington to Boston from GMT's Downtown Transit Center (reachable on the 116 Commuter or Burlington LINK), and Dartmouth Coach runs Hanover to Boston. No Megabus or Dartmouth Coach times, since those aren't in any source. Doesn't pick a \"best\" beyond what the sources support."
+    },
+    {
+      "id": "fly-california",
+      "question": "Can I fly from Burlington to California?",
+      "needs": "flights",
+      "when": "now",
+      "good_answer": "From BTV's flight board: no flight on it goes to California; its departures go to East Coast and Midwest cities (lists some, e.g. Chicago, Atlanta, Newark, Charlotte), so it would mean a connection. Says the board only covers about the next day and that the airlines' sites show connections and fares. Doesn't name specific connecting flights."
+    },
+    {
+      "id": "bus-montreal",
+      "question": "Is there a bus to Montreal?",
+      "needs": "trains+pages",
+      "when": "now",
+      "good_answer": "No Vermont Translines bus goes to Montreal. Tri-Valley's page says Greyhound runs inter-state service from Burlington, but no source gives Greyhound's destinations or times, so it points to greyhound.com without claiming Montreal service. By train, Amtrak's Adirondack reaches Montreal, with a change from the Ethan Allen on days the tool shows a connection."
+    },
+    {
+      "id": "bus-to-airport",
+      "question": "How do I get to the Burlington airport from campus?",
+      "needs": "trains+pages",
+      "when": "now",
+      "good_answer": "Vermont Translines Route 7 runs from the Storrs Avenue stop (next to Davis Family Library) directly to Burlington International Airport, with times from the timetable. May add Tri-Valley's options (116 Commuter to Timberlane and a 10-minute walk). No invented taxi prices."
     }
   ]
 }

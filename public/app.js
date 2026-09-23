@@ -227,15 +227,19 @@ function pagesCard(card) {
       "li",
       { class: "row" },
       el("div", { class: "row-main" }, el("a", { href: p.url, target: "_blank", rel: "noopener", text: p.title })),
-      el("div", { class: p.old ? "row-meta note" : "row-meta", text: p.updated ? `Updated ${monthYear(p.updated)}${p.old ? " · over a year old" : ""}` : "No date on the page" }),
+      el("div", {
+        class: p.old ? "row-meta note" : "row-meta",
+        text: [p.site, p.updated ? `Updated ${monthYear(p.updated)}${p.old ? " · over a year old" : ""}` : "No date on the page"].filter(Boolean).join(" · "),
+      }),
     ),
   );
+  const from = card.pages.some((p) => p.site) ? "From the sites above" : "From middlebury.edu";
   return el(
     "article",
     { class: "card" },
     cardHead("Sources"),
     rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No matching pages." }),
-    el("div", { class: "source", text: `From middlebury.edu, as indexed on ${card.source.checkedOn}. Pages can change; the links go to the live versions.` }),
+    el("div", { class: "source", text: `${from}, as indexed on ${card.source.checkedOn}. Pages can change; the links go to the live versions.` }),
   );
 }
 
@@ -318,7 +322,53 @@ function busCard(card) {
   );
 }
 
+function tripsCard(card) {
+  const rows = card.trips.map((legs) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main", text: `${legs[0].leaves} → ${legs.at(-1).arrives}${legs.length > 1 ? " · 1 change" : " · direct"}` }),
+      legs.map((l) =>
+        el(
+          "div",
+          { class: "row-meta" },
+          el("a", { href: l.url, target: "_blank", rel: "noopener", text: `${l.operator} ${l.route}` }),
+          `: ${l.from} ${l.leaves} → ${l.to} ${l.arrives}`,
+        ),
+      ),
+    ),
+  );
+  const published = new Date(`${card.source.published}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return el(
+    "article",
+    { class: "card" },
+    cardHead(`${card.from} → ${card.to}`, shortDate(card.date)),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No trips in these timetables." }),
+    el("div", { class: "source", text: `Source: ${card.source.label}, as published ${published}. Scheduled times; book and check on the operator's site.` }),
+  );
+}
+
+function flightsCard(card) {
+  const rows = card.flights.map((f) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main", text: `${f.scheduled ?? ""} · ${card.direction === "arrival" ? "from" : "to"} ${f.city}` }),
+      el("div", { class: f.status && !/on time|early|landed/i.test(f.status) ? "row-meta note" : "row-meta", text: [`${f.airline} ${f.flight}`, f.status, f.actual && `now ${f.actual}`, f.gate && `gate ${f.gate}`].filter(Boolean).join(" · ") }),
+    ),
+  );
+  return el(
+    "article",
+    { class: "card" },
+    cardHead(card.direction === "arrival" ? "Arrivals at BTV" : "Departures from BTV"),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No matching flights on the board." }),
+    sourceLine(card.source, " The board covers about the next day."),
+  );
+}
+
 function renderCard(card) {
+  if (card.type === "trips") return tripsCard(card);
+  if (card.type === "flights") return flightsCard(card);
   if (card.type === "hours") return hoursCard(card);
   if (card.type === "bus") return busCard(card);
   if (card.type === "menu") return menuCard(card);
