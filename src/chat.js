@@ -64,6 +64,30 @@ export function mergeCards(cards) {
   return [...cards.filter((c) => c.type !== "pages"), merged];
 }
 
+// The model ends an answer that used Middlebury's pages with "Sources: <url>, <url>" (or
+// "Sources: none"). That line comes off the answer, and the pages card keeps just those
+// pages, at most three, in the order cited. Only pages a search actually returned can be
+// shown, so the card is still the search's own data. Without the line, the top three stay.
+const MAX_SOURCES = 3;
+const sameUrl = (u) => u.trim().replace(/[)>\].,;]+$/, "").replace(/\/+$/, "").toLowerCase();
+
+export function applySources(answer, cards) {
+  const lines = answer.trimEnd().split("\n");
+  const cited = lines.at(-1)?.match(/^\s*\**sources?\**:\**\s*(.*)$/i);
+  const text = cited ? lines.slice(0, -1).join("\n").trimEnd() : answer;
+  const merged = mergeCards(cards);
+  const pagesCard = merged.find((c) => c.type === "pages");
+  if (!pagesCard) return { answer: text, cards: merged };
+  let keep = pagesCard.pages.slice(0, MAX_SOURCES);
+  if (cited) {
+    const byUrl = new Map(pagesCard.pages.map((p) => [sameUrl(p.url), p]));
+    const urls = [...new Set((cited[1].match(/https?:\/\/[^\s,<>]+/g) ?? []).map(sameUrl))];
+    keep = urls.map((u) => byUrl.get(u)).filter(Boolean).slice(0, MAX_SOURCES);
+  }
+  const rest = merged.filter((c) => c.type !== "pages");
+  return { answer: text, cards: keep.length ? [...rest, { ...pagesCard, pages: keep }] : rest };
+}
+
 function addUsage(total, usage = {}) {
   for (const key of ["input_tokens", "output_tokens", "cache_read_input_tokens", "cache_creation_input_tokens"]) {
     total[key] = (total[key] ?? 0) + (usage[key] ?? 0);
@@ -93,7 +117,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
     addUsage(usage, response.usage);
 
     if (response.stop_reason === "refusal") {
-      return { answer: "Sorry, that's not something I can help with.", cards: mergeCards(cards), usage, model: response.model };
+      return { answer: "Sorry, that's not something I can help with.", cards: applySources("", cards).cards, usage, model: response.model };
     }
 
     if (response.stop_reason === "tool_use" || response.stop_reason === "pause_turn") {
@@ -114,7 +138,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       // Asking it to go again just produces a second, usually thinner, draft.
       const draft = textOf(echoed);
       if (draft && calls.every((call) => isDisplayOnly(call.name))) {
-        return { answer: draft, cards: mergeCards(cards), usage, model: response.model };
+        return { ...applySources(draft, cards), usage, model: response.model };
       }
 
       messages.push({
@@ -130,9 +154,10 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
     }
 
     const answer = textOf(response.content);
+    const final = applySources(answer, cards);
     return {
-      answer: answer || "Sorry, I came up empty on that one.",
-      cards: mergeCards(cards),
+      answer: final.answer || "Sorry, I came up empty on that one.",
+      cards: final.cards,
       usage,
       model: response.model,
       ...(response.stop_reason === "max_tokens" && { truncated: true }),
@@ -141,7 +166,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
 
   return {
     answer: "That took more lookups than I allow for one question. Try asking something narrower.",
-    cards: mergeCards(cards),
+    cards: applySources("", cards).cards,
     usage,
     model,
   };

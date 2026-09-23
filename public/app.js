@@ -233,7 +233,7 @@ function pagesCard(card) {
   return el(
     "article",
     { class: "card" },
-    cardHead("Pages checked"),
+    cardHead("Sources"),
     rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No matching pages." }),
     el("div", { class: "source", text: `From middlebury.edu, as indexed on ${card.source.checkedOn}. Pages can change; the links go to the live versions.` }),
   );

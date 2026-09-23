@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { beforeEach, test } from "node:test";
-import { ChatInputError, answerQuestion, cleanHistory, contentToEcho, modelOptions } from "../src/chat.js";
+import { ChatInputError, answerQuestion, applySources, cleanHistory, contentToEcho, modelOptions } from "../src/chat.js";
 import { clearDiningCache } from "../src/tools/dining.js";
 import { stubMenuFeed } from "./helpers.js";
 
@@ -168,4 +168,29 @@ test("model options only use features the model has", () => {
   assert.deepEqual(modelOptions("claude-haiku-4-5"), {});
   assert.deepEqual(modelOptions("claude-sonnet-5"), { output_config: { effort: "low" } });
   assert.equal(modelOptions("claude-opus-5", "medium").output_config.effort, "medium");
+});
+
+const pagesCard = (...urls) => ({ type: "pages", pages: urls.map((url) => ({ title: url, url })), source: { label: "middlebury.edu" } });
+const A = "https://www.middlebury.edu/a";
+const B = "https://www.middlebury.edu/b";
+const C = "https://www.middlebury.edu/c";
+const D = "https://www.middlebury.edu/d";
+
+test("the Sources line comes off the answer, and the card keeps just those pages, in order", () => {
+  const out = applySources(`The Mail Center is in McCullough.\n\nSources: ${C}, ${A}/`, [pagesCard(A, B), pagesCard(C, D)]);
+  assert.equal(out.answer, "The Mail Center is in McCullough.");
+  assert.deepEqual(out.cards[0].pages.map((p) => p.url), [C, A]);
+});
+
+test("only pages a search returned can be shown, and never more than three", () => {
+  const out = applySources(`Answer.\n**Sources:** ${A}, https://example.com/made-up, ${B}, ${C}, ${D}`, [pagesCard(A, B, C, D)]);
+  assert.deepEqual(out.cards[0].pages.map((p) => p.url), [A, B, C]);
+});
+
+test("'Sources: none' drops the pages card; a missing line keeps the top three", () => {
+  const menu = { type: "menu" };
+  assert.deepEqual(applySources("Nothing on the site.\nSources: none", [menu, pagesCard(A, B)]).cards, [menu]);
+  const missing = applySources("An answer with no Sources line.", [pagesCard(A, B, C, D)]);
+  assert.equal(missing.answer, "An answer with no Sources line.");
+  assert.equal(missing.cards[0].pages.length, 3);
 });
