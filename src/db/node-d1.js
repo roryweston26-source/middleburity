@@ -5,7 +5,9 @@
 import { DatabaseSync } from "node:sqlite";
 
 export function openLocalD1(path = ":memory:") {
-  const db = new DatabaseSync(path);
+  // Several dev servers can share one file (comparing models side by side); a write waits for
+  // another's lock instead of failing with "database is locked".
+  const db = new DatabaseSync(path, { timeout: 5000 });
   const run = (sql, args) => db.prepare(sql).run(...args);
   const statement = (sql, args = []) => ({
     bind: (...values) => statement(sql, values),
