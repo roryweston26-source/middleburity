@@ -103,3 +103,17 @@ test("a dated model id is priced as its alias", () => {
   assert.equal(estimateUsd("claude-haiku-4-5-20251001", usage), estimateUsd("claude-haiku-4-5", usage));
   assert.equal(estimateUsd("claude-haiku-4-5", usage), 1);
 });
+
+test("the last round sends no tools and asks for an answer from what the model has", async () => {
+  const lookup = () => ({ choices: [{ message: { role: "assistant", content: null, tool_calls: [{ id: `c${Math.random()}`, type: "function", function: { name: "get_office", arguments: '{"id":"public-safety"}' } }] }, finish_reason: "tool_calls" }], usage: {} });
+  const answer = { choices: [{ message: { role: "assistant", content: "Sunny." }, finish_reason: "stop" }], usage: {} };
+  const provider = fakeProvider([lookup(), lookup(), lookup(), lookup(), answer]);
+  const result = await answerWithOpenAICompatible([{ role: "user", content: "weather?" }], { env, model: "x/y", now, fetchImpl: provider.fetchImpl });
+  assert.equal(provider.requests.length, 5);
+  assert.ok(provider.requests[3].body.tools);
+  const last = provider.requests[4].body;
+  assert.equal(last.tools, undefined);
+  assert.equal(last.tool_choice, undefined);
+  assert.match(last.messages.at(-1).content, /no more lookups/);
+  assert.equal(result.answer, "Sunny.");
+});

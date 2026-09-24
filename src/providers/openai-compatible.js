@@ -19,6 +19,8 @@ export class ProviderError extends Error {
   }
 }
 
+const LAST_ROUND = "(From the app, not the student: no more lookups are available for this question. Answer now from the results above, and say what you couldn't find.)";
+
 export const toFunctionTools = (defs) =>
   defs.map((d) => ({ type: "function", function: { name: d.name, description: d.description, parameters: d.input_schema } }));
 
@@ -70,7 +72,13 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
   const tools = [];
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const data = await complete(env, { model, messages, tools: functions, tool_choice: round === MAX_ROUNDS - 1 ? "none" : "auto", max_tokens: 16000, ...extra }, fetchImpl);
+    // The last round sends no tools and says so, so the model answers from what it has. Neither
+    // tool_choice "none" nor leaving the tools out was enough on its own: in testing Gemini 3.8
+    // Flash asked for another lookup anyway.
+    const last = round === MAX_ROUNDS - 1;
+    if (last) messages.push({ role: "user", content: LAST_ROUND });
+    const lookups = last ? {} : { tools: functions, tool_choice: "auto" };
+    const data = await complete(env, { model, messages, ...lookups, max_tokens: 16000, ...extra }, fetchImpl);
     addUsage(usage, mapUsage(data.usage));
     const choice = data.choices?.[0];
     const message = choice?.message ?? {};
