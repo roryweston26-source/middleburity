@@ -97,3 +97,9 @@ test("OpenRouter requests skip hosts that keep prompts, and can pin one host", a
   await answerWithOpenAICompatible([{ role: "user", content: "hi" }], { env: pinEnv, model: "x/y", now, fetchImpl: pinned.fetchImpl });
   assert.deepEqual(pinned.requests[0].body.provider, { data_collection: "deny", require_parameters: true, order: ["DeepInfra", "Together"], allow_fallbacks: false });
 });
+
+test("a dated model id is priced as its alias", () => {
+  const usage = { input_tokens: 1_000_000, output_tokens: 0 };
+  assert.equal(estimateUsd("claude-haiku-4-5-20251001", usage), estimateUsd("claude-haiku-4-5", usage));
+  assert.equal(estimateUsd("claude-haiku-4-5", usage), 1);
+});

@@ -3,7 +3,7 @@
 //   npm run dev          (in one terminal)
 //   npm run questions    (in another)
 // Options:
-//   npm run questions -- vegan-ross              just one question, by id
+//   npm run questions -- vegan-ross              just one question, by id (or several: a,b,c)
 //   npm run questions -- --capability=injection  just the questions testing one capability
 //   npm run questions -- --price=0.30,1.20       $ per million input,output tokens, for a
 //                                                non-Claude model whose provider reports no cost
@@ -11,16 +11,16 @@
 // models can be compared side by side.
 import { mkdir, writeFile } from "node:fs/promises";
 import { readFile } from "node:fs/promises";
-import { estimateUsd, PRICES } from "../src/pricing.js";
+import { estimateUsd, priceFor } from "../src/pricing.js";
 import { PROBE_BAIT, PROBE_EVENT, PROBE_WORDS } from "./probes.js";
 
 const base = process.env.BASE_URL || "http://localhost:8787";
 const args = process.argv.slice(2);
-const only = args.find((a) => !a.startsWith("--"));
+const only = args.find((a) => !a.startsWith("--"))?.split(",");
 const capability = args.find((a) => a.startsWith("--capability="))?.split("=")[1];
 const priceArg = args.find((a) => a.startsWith("--price="))?.split("=")[1]?.split(",").map(Number);
 const { questions } = JSON.parse(await readFile(new URL("./questions.json", import.meta.url), "utf8"));
-let picked = questions.filter((q) => (!only || q.id === only) && (!capability || q.capabilities?.includes(capability)));
+let picked = questions.filter((q) => (!only || only.includes(q.id)) && (!capability || q.capabilities?.includes(capability)));
 
 // The injection questions need the planted test data (TEST_PROBES=1 in .dev.vars).
 if (picked.some((q) => q.probe)) {
@@ -34,7 +34,7 @@ if (picked.some((q) => q.probe)) {
 }
 
 function cost(model, usage) {
-  if (typeof usage.cost_usd === "number" || PRICES[model]) return estimateUsd(model, usage);
+  if (typeof usage.cost_usd === "number" || priceFor(model)) return estimateUsd(model, usage);
   if (!priceArg) return null; // unknown price: say so rather than guess
   const [inp, out] = priceArg;
   return ((usage.input_tokens ?? 0) * inp + (usage.cache_read_input_tokens ?? 0) * inp * 0.1 + (usage.output_tokens ?? 0) * out) / 1e6;

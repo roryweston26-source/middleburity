@@ -10,10 +10,15 @@ export const PRICES = {
   "claude-haiku-4-5": { input: 1, output: 5 },
 };
 
+export function priceFor(model = "") {
+  return PRICES[model] ?? PRICES[model.replace(/-\d{8}$/, "")];
+}
+
 export function estimateUsd(model, usage = {}) {
   // Some providers (OpenRouter) report what a request actually cost; that beats any estimate.
   if (typeof usage.cost_usd === "number") return usage.cost_usd;
-  const price = PRICES[model] ?? PRICES["claude-opus-5"];
+  // The API can answer with a dated id ("claude-haiku-4-5-20251001") for an alias it was asked for.
+  const price = priceFor(model) ?? PRICES["claude-opus-5"];
   const perToken = (rate) => rate / 1_000_000;
   return (
     (usage.input_tokens ?? 0) * perToken(price.input) +
