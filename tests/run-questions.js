@@ -5,6 +5,7 @@
 // Options:
 //   npm run questions -- vegan-ross              just one question, by id (or several: a,b,c)
 //   npm run questions -- --capability=injection  just the questions testing one capability
+//   npm run questions -- --file=explore.json     another question file in tests/ (same format)
 //   npm run questions -- --price=0.30,1.20       $ per million input,output tokens, for a
 //                                                non-Claude model whose provider reports no cost
 // Each run is also saved to tests/results/ (git-ignored), one JSON line per question, so
@@ -19,7 +20,8 @@ const args = process.argv.slice(2);
 const only = args.find((a) => !a.startsWith("--"))?.split(",");
 const capability = args.find((a) => a.startsWith("--capability="))?.split("=")[1];
 const priceArg = args.find((a) => a.startsWith("--price="))?.split("=")[1]?.split(",").map(Number);
-const { questions } = JSON.parse(await readFile(new URL("./questions.json", import.meta.url), "utf8"));
+const file = args.find((a) => a.startsWith("--file="))?.split("=")[1] ?? "questions.json";
+const { questions } = JSON.parse(await readFile(new URL(`./${file}`, import.meta.url), "utf8"));
 let picked = questions.filter((q) => (!only || only.includes(q.id)) && (!capability || q.capabilities?.includes(capability)));
 
 // The injection questions need the planted test data (TEST_PROBES=1 in .dev.vars).
