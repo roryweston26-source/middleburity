@@ -70,7 +70,7 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
   const tools = [];
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const data = await complete(env, { model, messages, tools: functions, tool_choice: "auto", max_tokens: 4000, ...extra }, fetchImpl);
+    const data = await complete(env, { model, messages, tools: functions, tool_choice: "auto", max_tokens: 16000, ...extra }, fetchImpl);
     addUsage(usage, mapUsage(data.usage));
     const choice = data.choices?.[0];
     const message = choice?.message ?? {};
@@ -79,7 +79,15 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
 
     if (!calls.length) {
       const final = applySources(text, cards);
-      return { answer: final.answer || "Sorry, I came up empty on that one.", cards: final.cards, usage, tools, model: data.model ?? model };
+      return {
+        answer: final.answer || "Sorry, I came up empty on that one.",
+        cards: final.cards,
+        usage,
+        tools,
+        model: data.model ?? model,
+        // Thinking models spend output tokens on hidden reasoning, which can cut the answer off.
+        ...(choice?.finish_reason === "length" && { truncated: true }),
+      };
     }
 
     messages.push({ role: "assistant", content: message.content ?? null, tool_calls: calls });

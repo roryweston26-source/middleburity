@@ -103,3 +103,12 @@ test("a club search still answers when a club's own record can't be read", async
   assert.equal(result.clubs[0].upcoming, null);
   assert.equal(result.clubs[0].meets, "Tuesdays 6pm");
 });
+
+test("when no club has every word, clubs matching some come back, marked partial", () => {
+  const found = findClubs(clubs, "acapella a cappella club");
+  assert.equal(found.partial, true);
+  assert.equal(found.clubs[0].name, "The Middlebury Bobolinks");
+  assert.equal(findClubs(clubs, "ski").partial, undefined);
+  // Filler words alone don't count as a match.
+  assert.equal(findClubs(clubs, "club fencing").total, 0);
+});
