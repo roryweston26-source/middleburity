@@ -7,9 +7,9 @@
 // OPENAI_COMPAT_BASE_URL (e.g. "https://openrouter.ai/api/v1") and OPENAI_COMPAT_API_KEY.
 // Optional on OpenRouter: OPENROUTER_PROVIDER, the host (or comma-separated hosts) to use.
 import { campusNowLabel } from "../campus-time.js";
-import { MAX_ROUNDS, applySources } from "../chat.js";
+import { MAX_ROUNDS, applySources, runLookup } from "../chat.js";
 import { SYSTEM_PROMPT, timeContext } from "../prompt.js";
-import { TOOL_DEFINITIONS, isDisplayOnly, runTool } from "../tools/index.js";
+import { TOOL_DEFINITIONS, isDisplayOnly } from "../tools/index.js";
 
 // A provider error, with the HTTP status so the worker can say what went wrong.
 export class ProviderError extends Error {
@@ -70,7 +70,7 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
   const tools = [];
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
-    const data = await complete(env, { model, messages, tools: functions, tool_choice: "auto", max_tokens: 16000, ...extra }, fetchImpl);
+    const data = await complete(env, { model, messages, tools: functions, tool_choice: round === MAX_ROUNDS - 1 ? "none" : "auto", max_tokens: 16000, ...extra }, fetchImpl);
     addUsage(usage, mapUsage(data.usage));
     const choice = data.choices?.[0];
     const message = choice?.message ?? {};
@@ -100,13 +100,13 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
         } catch {
           return { call, out: { content: "That lookup failed: the tool input wasn't valid JSON.", isError: true } };
         }
-        return { call, out: await runTool(call.function?.name, input, env) };
+        return { call, out: await runLookup(call.function?.name, input, env, tools) };
       }),
     );
     for (const { out } of results) if (out.card) cards.push(out.card);
 
     // Same shortcut as chat.js: an answer written alongside office links only is the answer.
-    if (text && calls.every((c) => isDisplayOnly(c.function?.name))) {
+    if (text && calls.every((c) => isDisplayOnly(c.function?.name)) && !results.some(({ out }) => out.searchFirst)) {
       return { ...applySources(text, cards), usage, tools, model: data.model ?? model };
     }
     for (const { call, out } of results) messages.push({ role: "tool", tool_call_id: call.id, content: out.content });

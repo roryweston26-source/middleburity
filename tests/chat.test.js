@@ -72,14 +72,14 @@ test("an answer written alongside an office lookup is kept, with no second model
       model: "claude-opus-5",
       usage,
       content: [
-        { type: "text", text: "I can't check meal plans yet. Dining Services handles them." },
-        { type: "tool_use", id: "o1", name: "get_office", input: { id: "dining" } },
+        { type: "text", text: "Call 911 first. Public Safety can help on campus too." },
+        { type: "tool_use", id: "o1", name: "get_office", input: { id: "public-safety" } },
       ],
     },
   ]);
-  const result = await answerQuestion([{ role: "user", content: "How does my meal plan work?" }], { client, now });
+  const result = await answerQuestion([{ role: "user", content: "My friend won't wake up" }], { client, now });
   assert.equal(client.requests.length, 1);
-  assert.equal(result.answer, "I can't check meal plans yet. Dining Services handles them.");
+  assert.equal(result.answer, "Call 911 first. Public Safety can help on campus too.");
   assert.deepEqual(result.cards.map((c) => c.type), ["office"]);
 });
 
@@ -108,7 +108,7 @@ test("a round that also needs menu data still goes back to the model", async (t)
       content: [
         { type: "text", text: "Checking." },
         { type: "tool_use", id: "m1", name: "get_dining_menu", input: { meal: "dinner" } },
-        { type: "tool_use", id: "o1", name: "get_office", input: { id: "dining" } },
+        { type: "tool_use", id: "o1", name: "get_office", input: { id: "public-safety" } },
       ],
     },
     { stop_reason: "end_turn", model: "claude-opus-5", usage, content: [{ type: "text", text: "Proctor has lamb." }] },
@@ -117,6 +117,28 @@ test("a round that also needs menu data still goes back to the model", async (t)
   assert.equal(client.requests.length, 2);
   assert.equal(result.answer, "Proctor has lamb.");
   assert.deepEqual(result.cards.map((c) => c.type).sort(), ["menu", "office"]);
+});
+
+test("an office referral before any page search is sent back to search first", async () => {
+  const client = fakeClient([
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [
+        { type: "text", text: "I couldn't find that. ResLife handles it." },
+        { type: "tool_use", id: "o1", name: "get_office", input: { id: "residential-life" } },
+      ],
+    },
+    { stop_reason: "end_turn", model: "claude-opus-5", usage, content: [{ type: "text", text: "Facilities takes repair requests." }] },
+  ]);
+  const result = await answerQuestion([{ role: "user", content: "My heater is broken" }], { client, now });
+  assert.equal(client.requests.length, 2);
+  const [sent] = client.requests[1].messages.at(-1).content;
+  assert.equal(sent.is_error, true);
+  assert.match(sent.content, /search_pages/);
+  assert.equal(result.answer, "Facilities takes repair requests.");
+  assert.deepEqual(result.cards, []);
 });
 
 test("a refusal gets a plain apology instead of an empty answer", async () => {
@@ -136,6 +158,10 @@ test("the lookup loop has a ceiling", async (t) => {
   const client = fakeClient(Array.from({ length: 10 }, looping));
   const result = await answerQuestion([{ role: "user", content: "menus?" }], { client, now });
   assert.equal(client.requests.length, 5);
+  // The last round asks for an answer with no more lookups; only a model that ignores that
+  // gets the ceiling message.
+  assert.deepEqual(client.requests[4].tool_choice, { type: "none" });
+  assert.equal(client.requests[3].tool_choice, undefined);
   assert.match(result.answer, /more lookups than I allow/);
 });
 
@@ -222,4 +248,13 @@ test("a 'Sources' word inside the answer isn't mistaken for the block", () => {
 test("the same card twice (the model asked twice) shows once", () => {
   const trip = { type: "trips", from: "Middlebury", to: "Boston", trips: [] };
   assert.equal(applySources("Answer.", [trip, { ...trip }]).cards.length, 1);
+});
+
+test("a Sources line at the end of a sentence, mid-answer, or twice still comes off", () => {
+  assert.equal(applySources("Plenty of options today. Sources: none", [pagesCard(A)]).answer, "Plenty of options today.");
+  const mid = applySources("No posted hours for today.\n\nSources: none\n\nDining Services would know.", [pagesCard(A)]);
+  assert.equal(mid.answer, "No posted hours for today.\n\nDining Services would know.");
+  const twice = applySources(`Register the car.\n\nSources: ${A}\nSources: ${B}`, [pagesCard(A, B, C)]);
+  assert.equal(twice.answer, "Register the car.");
+  assert.deepEqual(twice.cards[0].pages.map((p) => p.url), [A, B]);
 });

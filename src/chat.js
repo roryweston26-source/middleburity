@@ -78,18 +78,34 @@ export function mergeCards(cards) {
 const MAX_SOURCES = 3;
 const sameUrl = (u) => u.trim().replace(/[)>\].,;]+$/, "").replace(/\/+$/, "").toLowerCase();
 
-// The Sources block: the last "Sources:" line, plus any lines after it that hold only links
-// (the model often puts each address on its own line, sometimes as a "- " list).
+// The Sources blocks: every "Sources:" that holds only links or "none", plus any lines after it
+// that hold only links (the model often puts each address on its own line, sometimes as a "- "
+// list). Models don't always put it last: in testing it came at the end of a sentence ("...
+// today. Sources: none"), mid-answer with more text after, and twice in a row.
+const SOURCES = /(^|\s)[-*]?\s*\**sources?\**:\**\s*((?:none\.?|<?https?:\/\/\S+>?|[\s,])*)$/i;
+const LINKS_ONLY = /^\s*(?:[-*•]\s*)?(?:<?https?:\/\/\S+>?[\s,]*)+$/;
+
 function splitSources(answer) {
-  const lines = answer.trimEnd().split("\n");
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const head = lines[i].match(/^\s*[-*]?\s*\**sources?\**:\**\s*(.*)$/i);
-    if (!head) continue;
-    const rest = lines.slice(i + 1);
-    if (!rest.every((l) => /^\s*(?:[-*•]\s*)?(?:<?https?:\/\/\S+>?[\s,]*)*$/.test(l))) return { text: answer, cited: null };
-    return { text: lines.slice(0, i).join("\n").trimEnd(), cited: [head[1], ...rest].join(" ") };
+  const kept = [];
+  const cited = [];
+  let inBlock = false;
+  for (const line of answer.trimEnd().split("\n")) {
+    if (inBlock && LINKS_ONLY.test(line)) {
+      cited.push(line);
+      continue;
+    }
+    const m = line.match(SOURCES);
+    inBlock = Boolean(m);
+    if (!m) {
+      kept.push(line);
+      continue;
+    }
+    cited.push(m[2]);
+    const before = line.slice(0, m.index).trimEnd();
+    if (before) kept.push(before);
   }
-  return { text: answer, cited: null };
+  if (!cited.length) return { text: answer, cited: null };
+  return { text: kept.join("\n").replace(/\n{3,}/g, "\n\n").trim(), cited: cited.join(" ") };
 }
 
 export function applySources(answer, cards) {
@@ -105,6 +121,20 @@ export function applySources(answer, cards) {
   }
   const rest = merged.filter((c) => c.type !== "pages");
   return { answer: text, cards: keep.length ? [...rest, { ...pagesCard, pages: keep }] : rest };
+}
+
+// Office referrals come after a page search. In testing, cheaper models skipped the search and
+// sent students to an office (ResLife for a broken heater, "I couldn't find that" for the Mail
+// Center's hours) when the answer was on Middlebury's pages. Public Safety goes straight through,
+// so an emergency answer is never held up. `lookups` is every tool asked for so far, this round's too.
+const SEARCH_FIRST =
+  "Search Middlebury's pages with search_pages before pointing to an office: the answer may be on them. Point to an office only if the search doesn't answer the question.";
+
+export async function runLookup(name, input, env, lookups) {
+  if (name === "get_office" && input?.id !== "public-safety" && !lookups.includes("search_pages")) {
+    return { content: SEARCH_FIRST, isError: true, searchFirst: true };
+  }
+  return runTool(name, input, env);
 }
 
 function addUsage(total, usage = {}) {
@@ -134,6 +164,9 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
         { type: "text", text: timeContext(campusNowLabel(now)) },
       ],
       tools: TOOL_DEFINITIONS,
+      // The last round can't look anything else up, so the model answers from what it has
+      // rather than the question ending in "too many lookups".
+      ...(round === MAX_ROUNDS - 1 && { tool_choice: { type: "none" } }),
       messages,
       ...options,
     });
@@ -152,7 +185,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       // Every result goes back in one message, in the order the calls were made.
       const results = await Promise.all(
         calls.map(async (call) => {
-          const out = await runTool(call.name, call.input, env);
+          const out = await runLookup(call.name, call.input, env, tools);
           return { call, out };
         }),
       );
@@ -161,7 +194,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       // The model wrote its answer and only asked for office links: that text is the answer.
       // Asking it to go again just produces a second, usually thinner, draft.
       const draft = textOf(echoed);
-      if (draft && calls.every((call) => isDisplayOnly(call.name))) {
+      if (draft && calls.every((call) => isDisplayOnly(call.name)) && !results.some(({ out }) => out.searchFirst)) {
         return { ...applySources(draft, cards), usage, tools, model: response.model };
       }
 
