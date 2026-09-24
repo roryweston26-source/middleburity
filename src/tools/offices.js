@@ -112,8 +112,7 @@ export const officesTool = {
   definition: {
     name: "get_office",
     description:
-      "Get a Middlebury office's official name and web page, to point someone to the right place when no other tool answers their question. " +
-      "The app shows the link as a card, so you don't need to repeat it. Never name an office this tool didn't return. " +
+      "Point someone to the right office when no other tool answers; the app shows its link as a card. Never name an office not listed here. " +
       `Offices by id: ${directory}.`,
     input_schema: {
       type: "object",

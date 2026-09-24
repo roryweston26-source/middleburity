@@ -163,14 +163,11 @@ export const diningTool = {
   definition: {
     name: "get_dining_menu",
     description:
-      "Look up the posted menu for Middlebury's three dining halls (Proctor, Ross, Atwater) from Dining Services' official menu feed. " +
-      "Use it for any question about what food is being served, which hall to go to, or dietary options. " +
-      "Returns each hall's stations and items with Dining's dietary tags (e.g. Vegan, Vegetarian, Dairy, Wheat, Local Ingredient). " +
-      "Menus are posted about a week ahead. This feed has no hours and none of the campus retail spots (the Grille, Crossroads Café, Midd Express and others). " +
-      "When someone wants a kind of food, check both: this feed for the halls, and search_pages for what the retail spots serve and when they're open (Dining Services' retail page). " +
-      "For dining hall hours, use search_pages too, since Dining Services posts its regular hours there. " +
-      "If the question doesn't name a meal, go by the time: roughly breakfast before 10am, lunch before 2pm, dinner before 8pm. " +
-      "Those cutoffs are only for picking a meal. Never say whether a hall is open or when a meal ends from this feed alone; check the posted hours with search_pages.",
+      "Posted menus (about a week ahead) for the three dining halls, Proctor, Ross and Atwater: stations and items with Dining's dietary tags. " +
+      "It has no hours and no retail spots (the Grille, Crossroads Café, Midd Express and others). " +
+      "When someone wants a kind of food, also search_pages for what the retail spots serve and when. " +
+      "If no meal is named, pick by the time: breakfast before 10am, lunch before 2pm, dinner before 8pm. " +
+      "Never say whether a hall is open or when a meal ends from this alone; dining hall hours come from search_pages.",
     input_schema: {
       type: "object",
       properties: {

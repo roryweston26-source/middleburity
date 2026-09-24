@@ -290,12 +290,9 @@ export const hoursTool = {
   definition: {
     name: "get_hours",
     description:
-      "Posted opening hours, day by day, from the calendars Middlebury keeps them in: the library, Crossroads Café and library research help (LibCal, about two weeks ahead), " +
-      "the athletic facilities, fitness center and pool (the athletics department's calendars), " +
-      "and the Middlebury Snow Bowl's lift hours (its own calendar, any month ahead; ski conditions and trail status aren't online, only in its app). " +
-      "A day with no entry means nothing is posted for it, not that the place is closed. " +
-      "Other hours (dining halls, the Grille and other retail spots, the Mail Center, offices) are written on Middlebury's pages: use search_pages for those. " +
-      "Kenyon Arena, Pepin Gym, Nelson Rec Center and climbing wall hours aren't in a calendar this can read (the climbing wall's has had no new entries since 2023): search Middlebury's pages, or say you couldn't find them.",
+      "Posted opening hours, day by day: the library, Crossroads Café and research help (about two weeks ahead), the athletic complex, fitness center and pool, and the Snow Bowl's lift hours (ski conditions and trail status aren't online, only in its app). " +
+      "A day with no entry means nothing is posted, not that it's closed. " +
+      "Other hours (dining halls, retail spots, the Mail Center, offices, Kenyon Arena, Pepin Gym, Nelson Rec, the climbing wall) aren't here: search_pages, or say you couldn't find them.",
     input_schema: {
       type: "object",
       properties: {

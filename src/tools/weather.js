@@ -79,10 +79,9 @@ export const weatherTool = {
   definition: {
     name: "get_weather",
     description:
-      "The National Weather Service forecast and any active weather alerts (storm, winter weather, frost, heat) for Middlebury's campus or the Snow Bowl up the mountain. " +
-      "Gives the next few days in day and night periods, or the next 12 hours hour by hour. " +
-      "Say what the forecast says; don't add your own predictions, and don't say whether classes or events are cancelled (that's the College's call, on its own pages). " +
-      "For an alert with a safety instruction, pass it on; in an emergency, 911 comes first.",
+      "National Weather Service forecast and active alerts for campus or the Snow Bowl. " +
+      "Say what the forecast says; no predictions of your own, and don't say whether classes or events are cancelled. " +
+      "Pass on an alert's safety instructions; in an emergency, 911 comes first.",
     input_schema: {
       type: "object",
       properties: {

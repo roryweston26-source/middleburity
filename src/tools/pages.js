@@ -132,18 +132,15 @@ export const pagesTool = {
   definition: {
     name: "search_pages",
     description:
-      "Search Middlebury's own website and the Middlebury Handbook (official policies) for how things work: dining hours and meal plans, health services and insurance, housing and guests, parking, " +
-      "campus jobs, advising and tutoring, the library, study abroad, admissions, academic departments, and faculty profiles (research, courses). " +
-      "It also has Tri-Valley Transit's Regional Connections page (which Middlebury's pages point students to): who runs the intercity buses (Greyhound, Megabus, Dartmouth Coach), trains and airport links from Addison County. " +
-      "And the Middlebury Snow Bowl's and Rikert Outdoor Center's pages for students: season passes and student pricing, lift and day tickets, lessons and Winter Term PE, rentals. " +
-      "Use it before get_office for any question about Middlebury policies, services, costs or procedures. " +
-      "Returns matching passages with each page's title, link and last-updated date. Search with the words a Middlebury page would use, " +
-      "and try again with different words if the results miss. Use scope 'faculty' to search only faculty and staff profiles.",
+      "Search Middlebury's website and Handbook for how things work: policies, services, costs, procedures, hours written on pages, admissions, departments and faculty profiles. " +
+      "Also Tri-Valley Transit's Regional Connections page (who runs intercity buses and airport links) and the Snow Bowl's and Rikert's student pages (passes, tickets, lessons, Winter Term PE). " +
+      "Use it before get_office. Returns passages with each page's title, link and updated date. " +
+      "Search with the words a Middlebury page would use, and retry with different words if results miss.",
     input_schema: {
       type: "object",
       properties: {
         query: { type: "string", description: 'Keywords, e.g. "visitor parking overnight guest", "chemistry research students".' },
-        scope: { type: "string", enum: ["all", "faculty", "not-faculty"], description: "Default all." },
+        scope: { type: "string", enum: ["all", "faculty", "not-faculty"], description: "Default all. faculty searches only faculty and staff profiles." },
       },
       required: ["query"],
       additionalProperties: false,

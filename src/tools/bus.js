@@ -114,11 +114,10 @@ export const busTool = {
   definition: {
     name: "get_bus",
     description:
-      "Bus times from Tri-Valley Transit's published timetable (formerly ACTR): the Middlebury Shuttle's in-town loops, the Burlington Link, the 116 Commuter to Burlington, the TriTown routes to Bristol and Vergennes, the Rutland Connector and the Snow Bowl shuttle. " +
-      "Gives the next departures after a time, from campus stops and Academy Street (the downtown hub) unless another stop is named, with where and when each trip ends (or reaches the 'to' stop). " +
-      "For a trip back to Middlebury, name the stop they're leaving from (e.g. from \"downtown transit center\" in Burlington). " +
-      "Times are the timetable's, not live tracking. Never estimate a bus time the tool didn't return. " +
-      "For SGA break buses to airports and cities, search Middlebury's pages instead.",
+      "Tri-Valley Transit (formerly ACTR) timetable: the Middlebury Shuttle, Burlington Link, 116 Commuter, TriTown (Bristol, Vergennes), Rutland Connector and Snow Bowl shuttle. " +
+      "Next departures from campus stops and Academy Street unless another stop is named; for a trip back to Middlebury, name the stop they leave from. " +
+      "Timetable times, not live tracking. Never estimate a bus time the tool didn't return. " +
+      "SGA break buses: search_pages.",
     input_schema: {
       type: "object",
       properties: {

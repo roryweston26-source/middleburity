@@ -164,9 +164,8 @@ export const eventsTool = {
   definition: {
     name: "get_events",
     description:
-      "Look up campus events posted by Middlebury student organizations and offices on Presence, the campus events platform: talks, club meetings, dorm events, services, performances. " +
-      "Each event has its host, time, place and tags such as Free Food, Music, Outdoor/Adventure or Cultural. " +
-      "Social house parties may not be listed here, so if you don't find one, say you don't know (not that nothing is happening) and point them to Student Engagement and Belonging with get_office. get_clubs can list the social houses themselves.",
+      "Campus events posted on Presence by student organizations and offices (talks, club meetings, dorm events, services, performances), with host, time, place and tags like Free Food. " +
+      "Social house parties may not be listed, so if you don't find one, say you don't know (not that nothing is happening) and point them to Student Engagement and Belonging with get_office. get_clubs can list the social houses.",
     input_schema: {
       type: "object",
       properties: {

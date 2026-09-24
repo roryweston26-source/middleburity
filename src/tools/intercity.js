@@ -145,12 +145,10 @@ export const intercityTool = {
   definition: {
     name: "get_trains_and_buses",
     description:
-      "Train and intercity bus trips between towns, from Amtrak's and Vermont Translines' published timetables: " +
-      "Amtrak's Ethan Allen Express (stops in Middlebury; Burlington to New York via Rutland and Albany), the Vermonter, the Adirondack (New York to Montreal via Albany) " +
-      "and the Lake Shore Limited (Albany to Boston), plus Vermont Translines' bus along US-7 (Burlington, its airport, Middlebury, Rutland, Bennington, Albany and its airport). " +
-      "Gives direct trips and trips with one change, with every leg's times, for a given day. Times are Eastern. " +
-      "It doesn't cover Greyhound, Megabus or Dartmouth Coach (their schedules aren't available): search Middlebury's pages, which include Tri-Valley Transit's Regional Connections page, for who runs those. " +
-      "Never offer a trip or connection this tool didn't return, and say tickets and current schedules are on the operator's site.",
+      "Amtrak and Vermont Translines timetables: direct and one-change trips between towns on a given day, times Eastern. " +
+      "Covers the Ethan Allen Express (stops in Middlebury; Burlington–Rutland–Albany–New York), Vermonter, Adirondack (to Montreal) and Lake Shore Limited (Albany–Boston), and Translines' US-7 bus (Burlington and its airport, Middlebury, Rutland, Bennington, Albany and its airport). " +
+      "No Greyhound, Megabus or Dartmouth Coach: search_pages (Tri-Valley's Regional Connections page) for who runs those. " +
+      "Never offer a trip or connection this tool didn't return; tickets and current schedules are on the operator's site.",
     input_schema: {
       type: "object",
       properties: {

@@ -59,10 +59,9 @@ export const flightsTool = {
   definition: {
     name: "get_flights",
     description:
-      "Flights on Burlington International Airport's (BTV) live departures and arrivals board: airline, flight number, city, scheduled and actual time, status and gate. " +
-      "The board only covers about the next day and lists nonstop flights, so it shows where BTV's flights go right now, not every route, fare or connection. " +
-      "If no flight on the board goes somewhere, say that the board shows none and name the cities it does show; don't claim which connections exist. " +
-      "For getting to the airport from Middlebury, use get_trains_and_buses (Vermont Translines stops there) or search_pages (Tri-Valley's Regional Connections page).",
+      "Burlington airport's (BTV) live departures and arrivals board: about the next day, nonstop flights only, so not every route, fare or connection. " +
+      "If nothing on the board goes somewhere, say so and name the cities it does show; don't claim which connections exist. " +
+      "Getting to the airport: get_trains_and_buses (Vermont Translines) or search_pages.",
     input_schema: {
       type: "object",
       properties: {

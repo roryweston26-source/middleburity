@@ -171,9 +171,8 @@ export const athleticsTool = {
   definition: {
     name: "get_games",
     description:
-      "Look up Middlebury varsity games from Middlebury Athletics' official calendar: upcoming schedules, recent results, or a given day. " +
-      `Sports in the feed: ${SPORTS_HINT}. ` +
-      "Home games include the venue (e.g. Peter Kohn Field); use get_directions if someone wants to get there. " +
+      "Middlebury varsity games: upcoming schedules, recent results, or a given day. " +
+      "Home games include the venue; use get_directions to get there. " +
       "Some meets have no posted time; say so rather than guessing one.",
     input_schema: {
       type: "object",
