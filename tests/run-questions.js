@@ -69,7 +69,8 @@ for (const q of picked) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ messages: [{ role: "user", content: q.question }] }),
     });
-    data = await res.json();
+    // A crashed request can come back as plain text; that's one failed question, not a stopped run.
+    data = await res.json().catch(() => ({ error: `not JSON (HTTP ${res.status})` }));
     if (res.status !== 429 || /this hour|today/.test(data.error ?? "")) break;
   }
   const seconds = (Date.now() - started) / 1000;
