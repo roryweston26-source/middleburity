@@ -194,3 +194,32 @@ test("'Sources: none' drops the pages card; a missing line keeps the top three",
   assert.equal(missing.answer, "An answer with no Sources line.");
   assert.equal(missing.cards[0].pages.length, 3);
 });
+
+// Shapes the model actually used in the 2026-09-23 round.
+test("a Sources block with each address on its own line comes off the answer too", () => {
+  const P = "https://www.middlebury.edu/public-safety/parking-information/visitor-parking-information";
+  const R = "https://www.middlebury.edu/residential-life/housing-overview/housing-resources";
+  const answer = `Register her car with Public Safety.\n\nSources:\n${P}\n${R}`;
+  const out = applySources(answer, [pagesCard(A, P, R, B)]);
+  assert.equal(out.answer, "Register her car with Public Safety.");
+  assert.deepEqual(out.cards[0].pages.map((p) => p.url), [P, R]);
+});
+
+test("a Sources block that starts on the Sources line and continues below, or as a list, is read whole", () => {
+  const inline = applySources(`Everything runs through MiddPresence.\n\nSources: ${A}\n${B}`, [pagesCard(A, B, C)]);
+  assert.equal(inline.answer, "Everything runs through MiddPresence.");
+  assert.deepEqual(inline.cards[0].pages.map((p) => p.url), [A, B]);
+  const listed = applySources(`Answer.\n\n**Sources:**\n- ${C}\n- <${A}>`, [pagesCard(A, B, C)]);
+  assert.equal(listed.answer, "Answer.");
+  assert.deepEqual(listed.cards[0].pages.map((p) => p.url), [C, A]);
+});
+
+test("a 'Sources' word inside the answer isn't mistaken for the block", () => {
+  const text = "Sources: the Dining page says 4:30-8pm.\nThat's seven days a week.";
+  assert.equal(applySources(text, [pagesCard(A)]).answer, text);
+});
+
+test("the same card twice (the model asked twice) shows once", () => {
+  const trip = { type: "trips", from: "Middlebury", to: "Boston", trips: [] };
+  assert.equal(applySources("Answer.", [trip, { ...trip }]).cards.length, 1);
+});

@@ -193,7 +193,13 @@ export const intercityTool = {
       }
     }
     const sources = Object.values(data.feeds).map((f) => f.name).join(" and ");
-    const base = { source: `${sources} timetables, as published ${data.builtOn}`, date: `${dayLabel(shownDate)} (${shownDate})` };
+    const base = {
+      source: `${sources} timetables, as published ${data.builtOn}`,
+      date: `${dayLabel(shownDate)} (${shownDate})`,
+      // In testing, answers about Boston and Montreal stopped at the train and missed the buses.
+      other_operators:
+        "Greyhound, Megabus and Dartmouth Coach aren't in these timetables. Before answering, search_pages \"Regional Connections Greyhound Megabus\": Tri-Valley Transit's page says which of them run from where (no times). Don't add options no source gives.",
+    };
     let content;
     if (!result.origins) content = { ...base, result: `No Amtrak or Vermont Translines stop matches "${q.from}".` };
     else if (!result.dests) content = { ...base, result: `No Amtrak or Vermont Translines stop matches "${q.to}". Greyhound, Megabus and Dartmouth Coach aren't covered.` };

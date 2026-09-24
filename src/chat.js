@@ -55,13 +55,19 @@ function textOf(content) {
     .trim();
 }
 
-// Several page searches in one answer become one "pages checked" card, not a stack of them.
+// Several page searches in one answer become one "pages checked" card, not a stack of them,
+// and a lookup the model made twice shows its card once.
 export function mergeCards(cards) {
-  const pages = cards.filter((c) => c.type === "pages");
-  if (pages.length < 2) return cards;
+  const seenCards = new Set();
+  const unique = cards.filter((c) => {
+    const k = JSON.stringify(c);
+    return !seenCards.has(k) && seenCards.add(k);
+  });
+  const pages = unique.filter((c) => c.type === "pages");
+  if (pages.length < 2) return unique;
   const seen = new Set();
   const merged = { ...pages[0], pages: pages.flatMap((c) => c.pages).filter((p) => !seen.has(p.url) && seen.add(p.url)) };
-  return [...cards.filter((c) => c.type !== "pages"), merged];
+  return [...unique.filter((c) => c.type !== "pages"), merged];
 }
 
 // The model ends an answer that used Middlebury's pages with "Sources: <url>, <url>" (or
@@ -71,17 +77,29 @@ export function mergeCards(cards) {
 const MAX_SOURCES = 3;
 const sameUrl = (u) => u.trim().replace(/[)>\].,;]+$/, "").replace(/\/+$/, "").toLowerCase();
 
-export function applySources(answer, cards) {
+// The Sources block: the last "Sources:" line, plus any lines after it that hold only links
+// (the model often puts each address on its own line, sometimes as a "- " list).
+function splitSources(answer) {
   const lines = answer.trimEnd().split("\n");
-  const cited = lines.at(-1)?.match(/^\s*\**sources?\**:\**\s*(.*)$/i);
-  const text = cited ? lines.slice(0, -1).join("\n").trimEnd() : answer;
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const head = lines[i].match(/^\s*[-*]?\s*\**sources?\**:\**\s*(.*)$/i);
+    if (!head) continue;
+    const rest = lines.slice(i + 1);
+    if (!rest.every((l) => /^\s*(?:[-*•]\s*)?(?:<?https?:\/\/\S+>?[\s,]*)*$/.test(l))) return { text: answer, cited: null };
+    return { text: lines.slice(0, i).join("\n").trimEnd(), cited: [head[1], ...rest].join(" ") };
+  }
+  return { text: answer, cited: null };
+}
+
+export function applySources(answer, cards) {
+  const { text, cited } = splitSources(answer);
   const merged = mergeCards(cards);
   const pagesCard = merged.find((c) => c.type === "pages");
   if (!pagesCard) return { answer: text, cards: merged };
   let keep = pagesCard.pages.slice(0, MAX_SOURCES);
-  if (cited) {
+  if (cited !== null) {
     const byUrl = new Map(pagesCard.pages.map((p) => [sameUrl(p.url), p]));
-    const urls = [...new Set((cited[1].match(/https?:\/\/[^\s,<>]+/g) ?? []).map(sameUrl))];
+    const urls = [...new Set((cited.match(/https?:\/\/[^\s,<>]+/g) ?? []).map(sameUrl))];
     keep = urls.map((u) => byUrl.get(u)).filter(Boolean).slice(0, MAX_SOURCES);
   }
   const rest = merged.filter((c) => c.type !== "pages");

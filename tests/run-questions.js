@@ -31,6 +31,12 @@ for (const q of picked) {
     if (c.type === "directions") return `directions(${c.from ?? "here"} -> ${c.to}${c.note ? ", no exact spot" : ""})`;
     if (c.type === "office") return `office(${c.name})`;
     if (c.type === "pages") return `pages(${c.pages.length}: ${c.pages.slice(0, 3).map((p) => p.title).join(" | ")})`;
+    if (c.type === "clubs") return `clubs(${c.clubs.map((x) => x.name).slice(0, 4).join(" | ")})`;
+    if (c.type === "hours") return `hours(${c.place}: ${c.days.map((d) => `${d.date} ${d.hours.join("/") || "none"}`).join("; ")})`;
+    if (c.type === "weather") return `weather(${c.place}${c.alerts.length ? `, alerts: ${c.alerts.map((a) => a.event).join("/")}` : ""}: ${c.periods.slice(0, 2).map((p) => `${p.name} ${p.temperature} ${p.summary}`).join("; ")})`;
+    if (c.type === "bus") return `bus(${c.date}: ${c.departures.slice(0, 3).map((d) => `${d.time} ${d.route} ${d.stop}`).join("; ")})`;
+    if (c.type === "trips") return `trips(${c.from}->${c.to} ${c.date}: ${c.trips.map((t) => t.map((l) => `${l.route} ${l.leaves}-${l.arrives}`).join(" + ")).join("; ")})`;
+    if (c.type === "flights") return `flights(${c.flights.length}: ${c.flights.slice(0, 3).map((f) => `${f.city} ${f.scheduled}`).join("; ")})`;
     return c.type;
   });
   console.log(`  cards:  ${cardList.join(", ") || "none"}`);

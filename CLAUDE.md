@@ -13,14 +13,14 @@ Everything through the December step is built, tested and pushed. **It's deploye
 - A brand-new `workers.dev` subdomain took about 3 minutes to get its TLS certificate. Until then, requests fail with a TLS handshake error, not a 404.
 - Redeploy with `npm run deploy`. Secrets and the database carry over.
 
-The app answers from: dining menus, varsity schedules and results, campus events, the club directory, library and athletic-facility hours, Addison County bus times, trains and intercity buses (Amtrak, Vermont Translines), Burlington airport flights, weather and alerts (National Weather Service), Snow Bowl lift hours, walking directions, about 3,350 indexed pages (middlebury.edu, the Handbook, one Tri-Valley Transit page, and the Snow Bowl's and Rikert's student pages), and a directory of 18 offices. All 27 original questions in `tests/questions.json` passed against Claude Opus 5 on 2026-09-22. The 26 added since (clubs, hours, buses, mail and repairs, sushi, travel, weather and skiing) haven't been run against the model yet.
+The app answers from: dining menus, varsity schedules and results, campus events, the club directory, library and athletic-facility hours, Addison County bus times, trains and intercity buses (Amtrak, Vermont Translines), Burlington airport flights, weather and alerts (National Weather Service), Snow Bowl lift hours, walking directions, about 3,350 indexed pages (middlebury.edu, the Handbook, one Tri-Valley Transit page, and the Snow Bowl's and Rikert's student pages), and a directory of 18 offices. On 2026-09-23 all 53 questions in `tests/questions.json` ran against Claude Opus 5 (about $1.20). Every factual claim checked against its source held up. 44 answers were clean. 5 were right but leaked the Sources line (a parser bug, now fixed). 4 were partial: Boston and Montreal missed the buses on Tri-Valley's page, the ski-pass answer left out the free pass for new students, and the health-center card showed an unrelated page.
 
 **Next, in order:**
-1. **Run the full question set** (53 questions, about $1.20 on Opus; needs Rory's OK). The 26 added on 2026-09-22/23 haven't run against the model, and the Sources-line change touched every answer's prompt.
+1. **Rerun the questions the 2026-09-23 fixes touched** (Boston, Montreal, health center, and one of the Sources-leak ones; about $0.10, needs Rory's OK) to confirm the nudges work.
 2. **Compare models** before friends test in January. Run `tests/questions.json` on Haiku 4.5 (one line in `.dev.vars`) and GPT-5.6 Luna (needs an OpenAI adapter, roughly 100 lines, plus an OpenAI account). Pick the cheapest that passes. Rough costs per 1,000 questions: Opus 5 ~$20, Haiku ~$4, Luna ~$1.
 3. **Friends test in January** behind the access code, then the pitch to Middlebury in spring.
 
-**Spending:** about $2.30 of Anthropic credit used through 2026-09-22; $20 added that day. A full 27-question round on Opus costs roughly $0.60.
+**Spending:** about $3.50 of Anthropic credit used through 2026-09-23 ($20 added on 2026-09-22). A full 53-question round on Opus costs about $1.20 (115,521 tokens in, 12,945 out on 2026-09-23).
 
 ## Rules that don't change without asking
 
@@ -99,7 +99,7 @@ The app answers from: dining menus, varsity schedules and results, campus events
   - Tools get `env` (for `env.DB`) through `runTool(name, input, env)`.
   - **Middlebury's own pages can disagree.** The regular-decision deadline is January 4 in the deadlines table but January 5 on the admission-options page (both updated 2026-09-04). The model is told to prefer the newer page and mention the conflict, and it did.
   - **Money rule (from Rory, 2026-09-21): ask before anything that costs money**, including paid APIs and test rounds against the real model. Free work (crawls, unit tests, `check:feeds`, `eval:search`) doesn't need asking.
-  - A full round asks 27 questions, over the 20-per-hour visitor limit. Raise `RATE_PER_HOUR` / `RATE_PER_DAY` in `wrangler.jsonc` for the run, then put them back (20 and 60).
+  - A full round asks more questions than the 20-per-hour visitor limit allows. `npm run questions` goes through the Node dev server, which reads its settings from `.dev.vars`, not `wrangler.jsonc` (that's for `dev:cf` and production). So for a round, add `RATE_PER_HOUR=100`, `RATE_PER_DAY=200` and `DAILY_BUDGET_USD=3` to `.dev.vars`, restart the dev server, and remove the lines afterwards.
 - **Test loop:** `npm run questions` runs `tests/questions.json` against the dev server (real API calls, about $0.10 per full round on Opus 5). Grade each answer against its `good_answer`, fix, and rerun. Round 1 on 2026-09-21 found details added from memory, stale office names, guessed hours, and answer text being dropped. All were fixed by round 5, which passed 15/15.
 - Model: `claude-opus-5` by default (`MODEL` in `.dev.vars` overrides it). Earlier cost estimates assumed `claude-haiku-4-5`, about a fifth of the per-token price. Which one to use is Rory's call, not a silent default.
 
