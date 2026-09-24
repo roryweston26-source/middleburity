@@ -85,3 +85,15 @@ test("test mode plants one event and one club in the Presence feeds, and nothing
   assert.deepEqual(other, { other: true });
   assert.equal(globalThis.fetch, plain, "uninstall puts the original fetch back");
 });
+
+test("OpenRouter requests skip hosts that keep prompts, and can pin one host", async () => {
+  const reply = { choices: [{ message: { role: "assistant", content: "Hi." }, finish_reason: "stop" }], usage: {} };
+  const open = fakeProvider([structuredClone(reply)]);
+  await answerWithOpenAICompatible([{ role: "user", content: "hi" }], { env, model: "x/y", now, fetchImpl: open.fetchImpl });
+  assert.deepEqual(open.requests[0].body.provider, { data_collection: "deny", require_parameters: true });
+
+  const pinned = fakeProvider([structuredClone(reply)]);
+  const pinEnv = { ...env, OPENROUTER_PROVIDER: "DeepInfra, Together" };
+  await answerWithOpenAICompatible([{ role: "user", content: "hi" }], { env: pinEnv, model: "x/y", now, fetchImpl: pinned.fetchImpl });
+  assert.deepEqual(pinned.requests[0].body.provider, { data_collection: "deny", require_parameters: true, order: ["DeepInfra", "Together"], allow_fallbacks: false });
+});

@@ -5,6 +5,7 @@
 //
 // Settings (in .dev.vars): MODEL (the provider's model name, e.g. "qwen/qwen3.7-flash"),
 // OPENAI_COMPAT_BASE_URL (e.g. "https://openrouter.ai/api/v1") and OPENAI_COMPAT_API_KEY.
+// Optional on OpenRouter: OPENROUTER_PROVIDER, the host (or comma-separated hosts) to use.
 import { campusNowLabel } from "../campus-time.js";
 import { MAX_ROUNDS, applySources } from "../chat.js";
 import { SYSTEM_PROMPT, timeContext } from "../prompt.js";
@@ -55,7 +56,15 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
   const messages = [{ role: "system", content: `${SYSTEM_PROMPT}\n\n${timeContext(campusNowLabel(now))}` }, ...history];
   const functions = toFunctionTools(TOOL_DEFINITIONS);
   // OpenRouter reports each request's cost when asked; other providers would reject the field.
-  const extra = /openrouter\.ai/.test(env.OPENAI_COMPAT_BASE_URL ?? "") ? { usage: { include: true } } : {};
+  // It also skips hosts that train on or keep prompts, and OPENROUTER_PROVIDER (e.g. "DeepInfra")
+  // pins one host with no fallback, so a round isn't spread across differently quantized copies.
+  const pinned = (env.OPENROUTER_PROVIDER ?? "").split(",").map((p) => p.trim()).filter(Boolean);
+  const extra = /openrouter\.ai/.test(env.OPENAI_COMPAT_BASE_URL ?? "")
+    ? {
+        usage: { include: true },
+        provider: { data_collection: "deny", require_parameters: true, ...(pinned.length && { order: pinned, allow_fallbacks: false }) },
+      }
+    : {};
   const cards = [];
   const usage = {};
   const tools = [];
