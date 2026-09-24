@@ -19,6 +19,8 @@ const SYNONYMS = {
   broken: ["repair", "maintenance"], fix: ["repair", "maintenance"],
   club: ["organization"], clubs: ["organizations"], org: ["organization"], orgs: ["organizations"],
   prof: ["professor", "faculty"], premed: ["med", "health", "profession"],
+  // Students say "free"; the Snow Bowl's page says the new-student pass is "complimentary".
+  free: ["complimentary"],
 };
 
 // Column weights for bm25(): title, heading, address words, body. Chosen 2026-09-22 on the

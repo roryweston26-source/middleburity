@@ -84,6 +84,10 @@ const sameUrl = (u) => u.trim().replace(/[)>\].,;]+$/, "").replace(/\/+$/, "").t
 // today. Sources: none"), mid-answer with more text after, and twice in a row.
 const SOURCES = /(^|\s)[-*]?\s*\**sources?\**:\**\s*((?:none\.?|<?https?:\/\/\S+>?|[\s,])*)$/i;
 const LINKS_ONLY = /^\s*(?:[-*•]\s*)?(?:<?https?:\/\/\S+>?[\s,]*)+$/;
+// A "Sources:" line that starts with a link and then turns into prose is the model thinking
+// out loud about what to cite (DeepSeek did this twice in ~180 answers: "Sources: https://...
+// — hmm, I shouldn't invent links..."). The answer ends there.
+const SOURCES_THEN_PROSE = /^\s*[-*]?\s*\**sources?\**:\**\s*<?https?:\/\//i;
 
 function splitSources(answer) {
   const kept = [];
@@ -95,6 +99,10 @@ function splitSources(answer) {
       continue;
     }
     const m = line.match(SOURCES);
+    if (!m && SOURCES_THEN_PROSE.test(line)) {
+      cited.push(line);
+      break;
+    }
     inBlock = Boolean(m);
     if (!m) {
       kept.push(line);

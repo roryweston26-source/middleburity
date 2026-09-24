@@ -258,3 +258,11 @@ test("a Sources line at the end of a sentence, mid-answer, or twice still comes 
   assert.equal(twice.answer, "Register the car.");
   assert.deepEqual(twice.cards[0].pages.map((p) => p.url), [A, B]);
 });
+
+test("a Sources line that starts with a link and turns into prose ends the answer there", () => {
+  const leaked = `PALANA has Salsa Night tonight, 7:00–8:25 PM.\n\nSources: https://example.com/event (Salsa Night listing) — hmm, I shouldn't invent links. Actually the tool didn't give me addresses.\nSo write Sources: none.PALANA has Salsa Night tonight.`;
+  const out = applySources(leaked, [pagesCard(A)]);
+  assert.equal(out.answer, "PALANA has Salsa Night tonight, 7:00–8:25 PM.");
+  // A real Sources line with a cited page still works.
+  assert.deepEqual(applySources(`Answer.\n\nSources: ${A} (the dining page)`, [pagesCard(A, B)]).cards[0].pages.map((p) => p.url), [A]);
+});
