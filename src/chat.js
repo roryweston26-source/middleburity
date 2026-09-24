@@ -4,9 +4,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { campusNowLabel } from "./campus-time.js";
 import { SYSTEM_PROMPT, timeContext } from "./prompt.js";
 import { TOOL_DEFINITIONS, isDisplayOnly, runTool } from "./tools/index.js";
+import { answerWithOpenAICompatible } from "./providers/openai-compatible.js";
 
 export const DEFAULT_MODEL = "claude-opus-5";
-const MAX_ROUNDS = 5; // lookups per question; a cost ceiling as much as a sanity check
+export const MAX_ROUNDS = 5; // lookups per question; a cost ceiling as much as a sanity check
 const MAX_TURNS = 12;
 const MAX_CHARS = 2000;
 
@@ -114,11 +115,15 @@ function addUsage(total, usage = {}) {
 
 export async function answerQuestion(history, { env = {}, client, now = new Date() } = {}) {
   const model = env.MODEL || DEFAULT_MODEL;
-  client ??= new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const messages = cleanHistory(history);
+  // Claude always goes through Anthropic's SDK. Other models (for comparison testing) go
+  // through an OpenAI-style endpoint set in OPENAI_COMPAT_BASE_URL.
+  if (!model.startsWith("claude-")) return answerWithOpenAICompatible(messages, { env, model, now });
+  client ??= new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const options = modelOptions(model, env.EFFORT);
   const cards = [];
   const usage = {};
+  const tools = []; // names of the lookups made, in order, for grading test rounds
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const response = await client.beta.messages.create({
@@ -135,7 +140,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
     addUsage(usage, response.usage);
 
     if (response.stop_reason === "refusal") {
-      return { answer: "Sorry, that's not something I can help with.", cards: applySources("", cards).cards, usage, model: response.model };
+      return { answer: "Sorry, that's not something I can help with.", cards: applySources("", cards).cards, usage, tools, model: response.model };
     }
 
     if (response.stop_reason === "tool_use" || response.stop_reason === "pause_turn") {
@@ -143,6 +148,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       messages.push({ role: "assistant", content: echoed });
       const calls = echoed.filter((b) => b.type === "tool_use");
       if (!calls.length) continue;
+      tools.push(...calls.map((c) => c.name));
       // Every result goes back in one message, in the order the calls were made.
       const results = await Promise.all(
         calls.map(async (call) => {
@@ -156,7 +162,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       // Asking it to go again just produces a second, usually thinner, draft.
       const draft = textOf(echoed);
       if (draft && calls.every((call) => isDisplayOnly(call.name))) {
-        return { ...applySources(draft, cards), usage, model: response.model };
+        return { ...applySources(draft, cards), usage, tools, model: response.model };
       }
 
       messages.push({
@@ -177,6 +183,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
       answer: final.answer || "Sorry, I came up empty on that one.",
       cards: final.cards,
       usage,
+      tools,
       model: response.model,
       ...(response.stop_reason === "max_tokens" && { truncated: true }),
     };
@@ -186,6 +193,7 @@ export async function answerQuestion(history, { env = {}, client, now = new Date
     answer: "That took more lookups than I allow for one question. Try asking something narrower.",
     cards: applySources("", cards).cards,
     usage,
+    tools,
     model,
   };
 }

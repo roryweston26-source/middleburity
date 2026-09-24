@@ -5,6 +5,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { campusDate } from "./campus-time.js";
 import { ChatInputError, answerQuestion } from "./chat.js";
+import { ProviderError } from "./providers/openai-compatible.js";
 import { admit, limitsFrom, recordSpend, visitorId } from "./limits.js";
 import { estimateUsd } from "./pricing.js";
 import { nextHomeGames } from "./tools/athletics.js";
@@ -28,7 +29,8 @@ function sameText(a, b) {
 }
 
 async function handleChat(request, env) {
-  if (!env.ANTHROPIC_API_KEY) {
+  // A non-Claude model under test needs its own provider key instead (checked when it's called).
+  if (!env.ANTHROPIC_API_KEY && (env.MODEL ?? "claude-").startsWith("claude-")) {
     return json({ error: "The chat isn't connected yet: the server has no Anthropic API key." }, 503);
   }
   // A friends-only test: when ACCESS_CODE is set, the chat needs it. Menus and the home
@@ -65,6 +67,13 @@ async function handleChat(request, env) {
     if (err instanceof Anthropic.RateLimitError) return json({ error: "Too many questions at once. Try again in a minute." }, 429);
     if (err instanceof Anthropic.APIError) {
       console.error(`AI service error ${err.status}: ${err.message}`);
+      return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
+    }
+    // A non-Claude model under comparison testing (src/providers/openai-compatible.js).
+    if (err instanceof ProviderError) {
+      console.error(`model provider error ${err.status}: ${err.message}`);
+      if (err.status === 401 || err.status === 403) return json({ error: "The model provider rejected the server's key." }, 503);
+      if (err.status === 429) return json({ error: "Too many questions at once. Try again in a minute." }, 429);
       return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
     }
     console.error(`chat failed: ${err?.name}: ${err?.message}`);

@@ -11,6 +11,8 @@ export const PRICES = {
 };
 
 export function estimateUsd(model, usage = {}) {
+  // Some providers (OpenRouter) report what a request actually cost; that beats any estimate.
+  if (typeof usage.cost_usd === "number") return usage.cost_usd;
   const price = PRICES[model] ?? PRICES["claude-opus-5"];
   const perToken = (rate) => rate / 1_000_000;
   return (

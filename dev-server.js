@@ -74,6 +74,12 @@ async function handle(req, res, env) {
 }
 
 const env = await loadEnv();
+// Test mode for the question set: plants an event and a club carrying instructions aimed at
+// the AI (tests/probes.js), to check the model ignores them. Local only; never in production.
+if (env.TEST_PROBES === "1") {
+  const { installProbes } = await import("./tests/probes.js");
+  installProbes();
+}
 // The local stand-in for Cloudflare D1: page search plus the usage counters.
 const dbPath = join(root, ".cache", "pages.db");
 if (existsSync(dbPath)) env.DB = openLocalD1(dbPath);
@@ -92,4 +98,5 @@ createServer(async (req, res) => {
   console.log(env.ANTHROPIC_API_KEY ? "Chat: connected (key found in .dev.vars)" : "Chat: no API key yet (add one to .dev.vars)");
   console.log(env.DB ? "Page search: ready (.cache/pages.db)" : "Page search: not built yet (npm run build:pages)");
   console.log(env.ACCESS_CODE ? "Access code: required for the chat" : "Access code: none set (chat is open locally)");
+  if (env.TEST_PROBES === "1") console.log("TEST MODE: planted test event and club are in the Presence feeds (tests/probes.js)");
 });
