@@ -15,33 +15,35 @@ Everything through the December step is built, tested and pushed. **It's deploye
 
 The app answers from: dining menus, varsity schedules and results, campus events, the club directory, library and athletic-facility hours, Addison County bus times, trains and intercity buses (Amtrak, Vermont Translines), Burlington airport flights, weather and alerts (National Weather Service), Snow Bowl lift hours, walking directions, about 3,350 indexed pages (middlebury.edu, the Handbook, one Tri-Valley Transit page, and the Snow Bowl's and Rikert's student pages), and a directory of 18 offices. On 2026-09-23 all 53 questions in `tests/questions.json` ran against Claude Opus 5 (about $1.20). Every factual claim checked against its source held up. 44 answers were clean. 5 were right but leaked the Sources line (a parser bug, now fixed). 4 were partial: Boston and Montreal missed the buses on Tri-Valley's page, the ski-pass answer left out the free pass for new students, and the health-center card showed an unrelated page.
 
-**Current phase: model refinement (started 2026-09-24).** Goal: the cheapest model that matches Claude Opus 5 on grounding, safety and injection. Everything for it is built and tested (see "Comparing models" under How it's built). Start here:
+**Current phase: model refinement. The comparison is done (2026-09-24); the switch waits on Rory.** Goal: the cheapest model that matches Claude Opus 5 on grounding, safety and injection.
 
-1. **Check what's waiting on Rory** before spending anything:
-   - **Money:** every round costs money, so get his OK and a budget first (the money rule). Estimates: Sonnet 5 plus Haiku 4.5 about $0.80; 4–5 non-Claude models through OpenRouter about $2–3 in total.
-   - **OpenRouter:** needed for non-Claude models. Rory makes the account and adds `OPENAI_COMPAT_BASE_URL=https://openrouter.ai/api/v1` and `OPENAI_COMPAT_API_KEY=` to `.dev.vars` himself. Never handle the key. As of 2026-09-24, `.dev.vars` holds only `ANTHROPIC_API_KEY`.
-   - **Privacy wording:** see below. It only blocks production, not testing.
-2. **Set up a round:**
-   - Add to `.dev.vars`: `TEST_PROBES=1`, `RATE_PER_HOUR=100`, `RATE_PER_DAY=200`, `DAILY_BUDGET_USD=3`, and `MODEL=<model>` (for Claude, also `EFFORT` if you're sweeping it).
-   - Start the dev server (preview_start "middleburity"), check its log says TEST MODE, then run `npm run questions > <file>` in the background (59 questions, about 15 minutes).
-   - Afterwards, restore `.dev.vars` to only the keys Rory put there. Back it up first, and never print it.
-3. **Grade every answer** against its `good_answer` and verify the risky factual claims against the sources (FTS queries on `.cache/pages.db`, the tools directly), as on 2026-09-23. Planted-text FAILs are automatic. Compare runs from `tests/results/*.jsonl`: pass rate per capability, cost per 1,000 questions, the five most expensive questions.
-4. **Order**, per the cost guide (free wins, then effort, then model):
-   - The baseline is Opus 5 at effort low: 44/53 clean on 2026-09-23 (the answers are in `tests/results/claude-opus-5-2026-09-23-baseline.txt`, local only). It has never run in test mode, so rerun it on all 59 questions first, for a like-for-like baseline (about $1.30).
-   - Then Sonnet 5 and Haiku 4.5.
-   - Then the non-Claude candidates: e.g. Gemini 3.8 Flash, DeepSeek V4.1 Flash, Qwen3.7 Flash and GPT-5.6 Luna, using the current names and prices on OpenRouter.
-   - Also on the table: Claude Opus 5.5 (`claude-opus-5-5`, $4/$20, launching). Only if Rory names it. Its thinking can't be disabled and its default effort is medium, so set effort explicitly.
-   - Repeat a trial before deciding on a one-question difference.
-5. **A known free lever:** the fixed prompt is about 7,000 tokens, mostly tool descriptions, so trimming them lowers every model's cost. Measure it with the runner, and don't cut wording that grounding depends on.
+**Result: DeepSeek V4.1 Flash** (`deepseek/deepseek-v4.1-flash` on OpenRouter, pinned to DeepInfra, a US company serving it at fp8; confirm where it hosts before production), after the harness fixes below. Three rounds on the fixed code scored 55/60, ~57/58 and ~56/58 clean (the last two lost questions to the $5 daily cap), at **$0.66–0.73 per 1,000 questions**, against Opus 5's 52/60 at $24.86 (Opus ran before the fixes; it wasn't rerun, for budget). Every specific DeepSeek claim checked against the index held up. Its known gaps: "is skiing free?" misses the free 2026–27 pass for new students (the pass-price question gets it), and in 2 of ~180 answers it leaked its own reasoning about the Sources line into the answer. DeepInfra doesn't cache prompts; a caching host could cut the cost further.
 
-Still pending from 2026-09-23: rerun Boston, Montreal, health center and guest parking to confirm the fixes. They're in the full round anyway.
+Every model on the same 60 questions (`tests/questions.json`, test mode, grades by hand against `good_answer`):
 
-   - **The privacy rule is open (Rory, 2026-09-23: "the privacy can be changed").** No new wording is agreed yet. Settle it before any non-Anthropic model goes to production, not before testing. Watch whether a provider trains on API data, and where it hosts: DeepSeek's and Qwen's own APIs are in China, so use a US host or Cloudflare Workers AI for those models.
-   - Rough costs per 1,000 questions on our profile: Opus 5 ~$22, Sonnet 5 ~$9, Haiku 4.5 ~$5, Gemini 3.8 Flash ~$4–11, DeepSeek V4.1 Flash ~$2–5, Qwen3.7 Flash ~$0.50 (list prices from aggregator sites, Sept 2026; confirm at test time).
+| Model | Clean | $ / 1,000 | Verdict |
+|---|---|---|---|
+| DeepSeek V4.1 Flash | 55–57 (fixed code, 3 rounds) | $0.66–0.73 | **Pick.** Grounded, thorough, consistent |
+| Gemini 3.8 Flash | 54 (fixed) | $8.72 | Best content, but ~5% of answers cut off mid-sentence on OpenRouter's side, and almost no caching |
+| Opus 5, effort low | 52 (before fixes) | $24.86 | The old default |
+| GPT-6 Luna | ~46 (fixed) | $0.54 | Terse; its `get_games` calls come back empty; builds its own map links |
+| Sonnet 5, effort low | 43 (before fixes) | ~$8.50 | Two wrong facts, some guessing |
+| Haiku 4.5 | ~40 (fixed) | $4.63 | Wrong ski-pass prices, invented a name |
+| Qwen3.8 Flash | — | $0.78 | **Out:** answered 9/60 as if it never got the question, invented a social house. Only host is Alibaba |
+
+Older Opus models cost the same per token as Opus 5, so they save nothing.
+
+**Waiting on Rory before DeepSeek goes to production:**
+1. **The privacy wording.** The rule says no third-party calls "beyond the sources and Anthropic"; OpenRouter and DeepInfra need a sentence. OpenRouter requests already set `data_collection: "deny"` (skips hosts that train on or keep prompts).
+2. **The switch itself:** `MODEL=deepseek/deepseek-v4.1-flash` and `OPENROUTER_PROVIDER=DeepInfra` in `wrangler.jsonc` vars, and Rory adds `OPENAI_COMPAT_BASE_URL` / `OPENAI_COMPAT_API_KEY` as Cloudflare secrets himself. Then `npm run deploy`. The OpenAI-style path hasn't run on the Workers runtime yet: check it with `npm run dev:cf` first.
+
+**Harness fixes from the comparison** (all committed, 122 tests): club search falls back to partial matches and maps "premed" to "health"; `get_office` is sent back until a page search has run (Public Safety exempt); the Sources line comes off wherever the model puts it; the last lookup round turns tools off (and, for OpenAI-style models, says to answer now); OpenRouter output cap 16k (Gemini's reasoning ate the old 4k); prompt: no phone numbers/emails/links from memory, mention exceptions that could apply, no first-aid steps or doses of its own, no working similar homework problems. The fixed prompt is 5,927 tokens on Opus (was 7,032 before trimming tool descriptions).
+
+**How to run a round now:** add a marked block to `.dev.vars` (`TEST_PROBES=1`, `RATE_PER_HOUR=1000`, `RATE_PER_DAY=2000`, `DAILY_BUDGET_USD`), then start one server per model from `.claude/launch.json` (`compare-deepseek`, `compare-gemini`, ...: `node dev-server.js --port= --model= [--provider=]`) and run `BASE_URL=http://localhost:<port> npm run questions > file` for each, side by side. Remove the block afterwards. The runner retries provider 429s, takes several ids (`npm run questions -- a,b,c`), and names results by model and minute, so two rounds of one model finishing in the same minute overwrite each other's .jsonl (the .txt output survives).
 
 After this phase: the friends test in January behind the access code, then the pitch to Middlebury in spring.
 
-**Spending:** about $3.50 of Anthropic credit used through 2026-09-23 ($20 added on 2026-09-22). A full 53-question round on Opus costs about $1.20 (115,521 tokens in, 12,945 out on 2026-09-23).
+**Spending:** about $3.50 of Anthropic credit used through 2026-09-23 ($20 added on 2026-09-22). The 2026-09-24 comparison cost about $4.05 against Rory's $5 budget (Anthropic ~$2.60, OpenRouter ~$1.45), and ended when the app's own $5 daily cap tripped. A full 60-question round costs about $1.50 on Opus 5 and $0.04 on DeepSeek.
 
 ## Rules that don't change without asking
 
