@@ -4,14 +4,72 @@
     {
       "name": "middleburity",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["dev-server.js"],
+      "runtimeArgs": [
+        "dev-server.js"
+      ],
       "port": 8787
     },
     {
       "name": "cloudflare-local",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/wrangler/bin/wrangler.js", "dev", "--port", "8788"],
+      "runtimeArgs": [
+        "node_modules/wrangler/bin/wrangler.js",
+        "dev",
+        "--port",
+        "8788"
+      ],
       "port": 8788
+    },
+    {
+      "name": "compare-luna",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8791",
+        "--model=openai/gpt-6-luna"
+      ],
+      "port": 8791
+    },
+    {
+      "name": "compare-deepseek",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8792",
+        "--model=deepseek/deepseek-v4.1-flash",
+        "--provider=DeepInfra"
+      ],
+      "port": 8792
+    },
+    {
+      "name": "compare-qwen",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8793",
+        "--model=qwen/qwen3.8-flash"
+      ],
+      "port": 8793
+    },
+    {
+      "name": "compare-haiku",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8794",
+        "--model=claude-haiku-4-5"
+      ],
+      "port": 8794
+    },
+    {
+      "name": "compare-gemini",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8795",
+        "--model=google/gemini-3.8-flash"
+      ],
+      "port": 8795
     }
   ]
 }

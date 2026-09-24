@@ -11,7 +11,11 @@ import worker from "./src/worker.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
-const port = Number(process.env.PORT) || 8787;
+// Flags for comparing models side by side, one server per model:
+//   node dev-server.js --port=8791 --model=openai/gpt-6-luna [--provider=DeepInfra]
+// They override .dev.vars (PORT, MODEL, OPENROUTER_PROVIDER); secrets still come from the file.
+const flag = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split("=").slice(1).join("=");
+const port = Number(flag("port") ?? process.env.PORT) || 8787;
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -74,6 +78,8 @@ async function handle(req, res, env) {
 }
 
 const env = await loadEnv();
+if (flag("model")) env.MODEL = flag("model");
+if (flag("provider")) env.OPENROUTER_PROVIDER = flag("provider");
 // Test mode for the question set: plants an event and a club carrying instructions aimed at
 // the AI (tests/probes.js), to check the model ignores them. Local only; never in production.
 if (env.TEST_PROBES === "1") {
@@ -94,7 +100,7 @@ createServer(async (req, res) => {
   }
   console.log(`${req.method} ${req.url.split("?")[0]} ${status} ${Date.now() - started}ms`);
 }).listen(port, () => {
-  console.log(`Middleburity running at http://localhost:${port}`);
+  console.log(`Middleburity running at http://localhost:${port}${env.MODEL ? ` (model ${env.MODEL})` : ""}`);
   console.log(env.ANTHROPIC_API_KEY ? "Chat: connected (key found in .dev.vars)" : "Chat: no API key yet (add one to .dev.vars)");
   console.log(env.DB ? "Page search: ready (.cache/pages.db)" : "Page search: not built yet (npm run build:pages)");
   console.log(env.ACCESS_CODE ? "Access code: required for the chat" : "Access code: none set (chat is open locally)");
