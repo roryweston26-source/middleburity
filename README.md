@@ -7,7 +7,7 @@ An unofficial, student-built assistant for Middlebury College. Ask a question, g
 ## How it answers
 
 1. You ask a question.
-2. The AI (Anthropic's Claude) decides which source to check.
+2. The AI (DeepSeek's model, through OpenRouter) decides which source to check.
 3. The server fetches that source live, and the AI answers from what came back.
 4. Under the answer, a card shows the source's own data and when it was checked, not the AI's retelling.
 
@@ -83,7 +83,7 @@ Not planned without Middlebury's permission: the course catalog (its robots.txt 
 ## Privacy
 
 - The server stores nothing and doesn't log questions. It logs only the method, path, status, and timing of each request.
-- To write an answer, your question is sent to Anthropic's API, and Anthropic's data policies apply to it.
+- To write an answer, your question is sent through OpenRouter to DeepSeek's model, hosted by DeepInfra. Requests tell OpenRouter to use only hosts that don't train on or keep prompts (`data_collection: "deny"`), and OpenRouter's and DeepInfra's own policies apply. (Set `MODEL` to a Claude model and it goes to Anthropic's API instead, under Anthropic's policies.)
 - The conversation lives in the page's memory only. Reloading clears it.
 - Walking directions are a link to Google Maps. Nothing goes to Google unless you tap it.
 - For the usage limits, the server keeps a count of questions per visitor. A visitor is an anonymous code: a hash of the date, a secret, and their IP address. The IP address isn't stored, codes change every day so one day can't be linked to the next, and counts are deleted after two days.
@@ -126,11 +126,11 @@ These steps need your Cloudflare account, so they're yours to run:
 3. Run `npx wrangler d1 create middleburity`, then paste the `database_id` it prints into `wrangler.jsonc`.
 4. Load the search index into the database with `npm run db:remote`.
 5. Set the three secrets. Each command asks for the value, so it never lands in a file:
-   - `npx wrangler secret put ANTHROPIC_API_KEY`
+   - `npx wrangler secret put OPENAI_COMPAT_API_KEY`, your OpenRouter key (or `ANTHROPIC_API_KEY` if `MODEL` is a Claude model)
    - `npx wrangler secret put ACCESS_CODE`, the code you'll give friends
    - `npx wrangler secret put VISITOR_SALT`, any long random string
 6. Run `npm run deploy`. It prints the app's `workers.dev` address.
-7. In the Anthropic Console, set a monthly spend limit. The app's own daily cap is the first line of defense; the Console limit is the hard backstop.
+7. In OpenRouter (or the Anthropic Console), set a credit limit on the key. The app's own daily cap is the first line of defense; that limit is the hard backstop.
 
 To refresh the index later, run `npm run build:pages`, then `npm run db:remote`.
 
@@ -139,7 +139,7 @@ To refresh the index later, run `npm run build:pages`, then `npm run db:remote`.
 `src/limits.js` protects the bill before anything reaches the model:
 
 - **Per-visitor limits:** 20 questions an hour and 60 a day.
-- **A daily cap for the whole app:** $2, estimated from each answer's token counts at Anthropic's list prices.
+- **A daily cap for the whole app:** $2, from the cost OpenRouter reports for each answer (for Claude, estimated from token counts at Anthropic's list prices).
 - **An access code** (`ACCESS_CODE`) keeps the chat to invited testers. The home screen stays open, since it costs nothing.
 
 All three numbers are settings in `wrangler.jsonc`.

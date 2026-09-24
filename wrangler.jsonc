@@ -1,5 +1,6 @@
 // Cloudflare config. Nothing here is secret; secrets are set with `npx wrangler secret put NAME`
-// (ANTHROPIC_API_KEY, ACCESS_CODE, VISITOR_SALT) and never live in this file or in git.
+// (OPENAI_COMPAT_API_KEY, ACCESS_CODE, VISITOR_SALT, and ANTHROPIC_API_KEY for Claude) and never
+// live in this file or in git.
 // Locally, `npm run dev:cf` runs this same config on Cloudflare's own runtime, reading .dev.vars.
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
@@ -23,7 +24,12 @@
     }
   ],
   "vars": {
-    "MODEL": "claude-opus-5",
+    // The model that writes answers, through OpenRouter. Chosen 2026-09-24 after comparing seven
+    // models on tests/questions.json (see CLAUDE.md). A "claude-..." name goes to Anthropic instead.
+    "MODEL": "deepseek/deepseek-v4.1-flash",
+    "OPENAI_COMPAT_BASE_URL": "https://openrouter.ai/api/v1",
+    // One host, no fallback, so every answer comes from the same copy of the model.
+    "OPENROUTER_PROVIDER": "DeepInfra",
     // Spending protection (see src/limits.js). Change these, then redeploy.
     "DAILY_BUDGET_USD": "2",
     "RATE_PER_HOUR": "20",
