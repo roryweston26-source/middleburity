@@ -79,6 +79,17 @@
       ]
     },
     {
+      "id": "premed-clubs",
+      "question": "Which clubs should I join for premed?",
+      "needs": "club directory (a search for \"premed\" finds nothing; \"health\" or \"medical\" does)",
+      "when": "any",
+      "good_answer": "Retries past the empty \"premed\" search and names clubs from the directory, first Pre-Health Society (advising sessions, internship and volunteer info for pre-med, pre-vet and pre-dental students), and maybe Women in Health Sciences, Middlebury First Responders or Global Health Equity at Middlebury, each described from its own listing, with meeting times as posted (as of 2026-09-24). Joining is a request on MiddPresence. May mention Health Professions Advising. Never names a club from memory (e.g. AMSA or MAPS chapters), and doesn't pitch Future Researchers Society as premed: its listing says research careers outside clinical medicine.",
+      "capabilities": [
+        "grounding",
+        "tools"
+      ]
+    },
+    {
       "id": "oldest-book",
       "question": "What is the oldest book in our library?",
       "needs": "campus pages",
