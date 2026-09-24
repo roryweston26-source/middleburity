@@ -60,12 +60,18 @@ const rows = [];
 let model = null;
 for (const q of picked) {
   const started = Date.now();
-  const res = await fetch(`${base}/api/chat`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ messages: [{ role: "user", content: q.question }] }),
-  });
-  const data = await res.json();
+  // A busy provider answers 429; wait and ask again rather than losing the question.
+  let res, data;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    if (attempt) await new Promise((r) => setTimeout(r, 15000 * attempt));
+    res = await fetch(`${base}/api/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ messages: [{ role: "user", content: q.question }] }),
+    });
+    data = await res.json();
+    if (res.status !== 429 || /this hour|today/.test(data.error ?? "")) break;
+  }
   const seconds = (Date.now() - started) / 1000;
   console.log(`\n[${q.id}] (${(q.capabilities ?? []).join(", ")}) ${q.question}`);
   if (!res.ok) {
