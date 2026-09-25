@@ -177,6 +177,22 @@ function reviewsCard(card) {
   );
 }
 
+// A Google Maps search for a kind of business. The app never reads or ranks what it finds.
+function mapSearchCard(card) {
+  return el(
+    "article",
+    { class: "card" },
+    el(
+      "a",
+      { class: "office", href: card.url, target: "_blank", rel: "noopener" },
+      el("span", { class: "office-name", text: `Search Google Maps: ${card.what} near ${card.place}` }),
+      el("span", { class: "chevron", "aria-hidden": "true", text: "›" }),
+      el("span", { class: "office-url", text: "google.com/maps" }),
+    ),
+    el("div", { class: "source" }, "A map search, not a Middlebury source. Middleburity doesn't see or rank the results."),
+  );
+}
+
 // ---------- Games, events, directions ----------
 
 const TZ = "America/New_York";
@@ -461,6 +477,7 @@ function renderCard(card) {
   if (card.type === "clubs") return clubsCard(card);
   if (card.type === "office") return officeCard(card);
   if (card.type === "reviews") return reviewsCard(card);
+  if (card.type === "mapsearch") return mapSearchCard(card);
   if (card.type === "jobs") return jobsCard(card);
   if (card.type === "studyrooms") return studyRoomsCard(card);
   if (card.type === "games") return gamesCard(card);

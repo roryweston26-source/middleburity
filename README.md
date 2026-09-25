@@ -55,6 +55,7 @@ Each source is read politely: every request identifies the project with a User-A
 | OpenStreetMap (© OpenStreetMap contributors, ODbL) | Where campus buildings are, for Google Maps walking links | extracted by `npm run build:places` |
 | 18 office pages on middlebury.edu | Pointing people to the right office, with a real link | checked by `npm run check:feeds` |
 | RateMyProfessors | A link to a named professor's page, only. Reviews are never read, summarized or ranked | link only |
+| Google Maps | A map search for a kind of local business (a barber, a pharmacy) when Middlebury's pages don't list one. Results are never read, named or ranked | link only |
 
 Emails and phone numbers are removed from indexed page text. Pages over a year old are flagged as possibly out of date, and when two Middlebury pages disagree, the answer says so.
 
@@ -106,10 +107,10 @@ To run on Cloudflare's own runtime locally, load the index into a local D1 datab
 
 | Command | What it does | Costs money? |
 |---|---|---|
-| `npm test` | 138 unit tests. No network, no AI calls | No |
+| `npm test` | 144 unit tests. No network, no AI calls | No |
 | `npm run check:feeds` | Checks every live source still parses, office links still resolve, and saved timetables aren't about to expire | No |
 | `npm run eval:search` | Scores page search on 67 labeled queries | No |
-| `npm run questions` | Asks the 82 questions in `tests/questions.json` through the running dev server, for grading against each one's expected answer | Yes, about $0.07 a round on DeepSeek |
+| `npm run questions` | Asks the 85 questions in `tests/questions.json` through the running dev server, for grading against each one's expected answer | Yes, about $0.07 a round on DeepSeek |
 
 The question set tags each question with what it tests: grounding, tool choice, safety, time handling, format, and prompt injection. Injection questions need test mode (`TEST_PROBES=1` in `.dev.vars`), which plants an event and a club carrying instructions aimed at the AI; the runner fails any answer that follows them. Production never loads test mode.
 

@@ -13,13 +13,14 @@ import { flightsTool } from "./flights.js";
 import { hoursTool } from "./hours.js";
 import { intercityTool } from "./intercity.js";
 import { jobsTool } from "./jobs.js";
+import { mapSearchTool } from "./mapsearch.js";
 import { officesTool } from "./offices.js";
 import { pagesTool } from "./pages.js";
 import { reviewsTool } from "./reviews.js";
 import { studyRoomsTool } from "./studyrooms.js";
 import { weatherTool } from "./weather.js";
 
-const TOOLS = [diningTool, athleticsTool, eventsTool, collegeEventsTool, clubsTool, hoursTool, weatherTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool, reviewsTool, jobsTool, studyRoomsTool];
+const TOOLS = [diningTool, athleticsTool, eventsTool, collegeEventsTool, clubsTool, hoursTool, weatherTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool, reviewsTool, jobsTool, studyRoomsTool, mapSearchTool];
 
 export const TOOL_DEFINITIONS = TOOLS.map((t) => t.definition);
 

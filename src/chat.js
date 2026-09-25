@@ -74,7 +74,8 @@ export function mergeCards(cards) {
 // The model ends an answer that used Middlebury's pages with "Sources: <url>, <url>" (or
 // "Sources: none"). That line comes off the answer, and the pages card keeps just those
 // pages, at most three, in the order cited. Only pages a search actually returned can be
-// shown, so the card is still the search's own data. Without the line, the top three stay.
+// shown, so the card is still the search's own data. Without the line, the top three stay
+// (unless the answer ended in a map search).
 const MAX_SOURCES = 3;
 const sameUrl = (u) => u.trim().replace(/[)>\].,;]+$/, "").replace(/\/+$/, "").toLowerCase();
 
@@ -121,7 +122,9 @@ export function applySources(answer, cards) {
   const merged = mergeCards(cards);
   const pagesCard = merged.find((c) => c.type === "pages");
   if (!pagesCard) return { answer: text, cards: merged };
-  let keep = pagesCard.pages.slice(0, MAX_SOURCES);
+  // A map search means the pages didn't answer, so with no Sources line there are no pages to show.
+  // In testing, "where can I get a prescription?" otherwise showed the drug-misuse policy as a source.
+  let keep = merged.some((c) => c.type === "mapsearch") ? [] : pagesCard.pages.slice(0, MAX_SOURCES);
   if (cited !== null) {
     const byUrl = new Map(pagesCard.pages.map((p) => [sameUrl(p.url), p]));
     const urls = [...new Set((cited.match(/https?:\/\/[^\s,<>]+/g) ?? []).map(sameUrl))];
@@ -138,9 +141,17 @@ export function applySources(answer, cards) {
 const SEARCH_FIRST =
   "Search Middlebury's pages with search_pages before pointing to an office: the answer may be on them. Point to an office only if the search doesn't answer the question.";
 
+// Map searches wait for a page search the same way: Middlebury's pages list some local
+// businesses (banks, phone stores, thrift shops), and those beat a bare map search.
+const SEARCH_BEFORE_MAP =
+  "Search Middlebury's pages with search_pages before a map search: they list some local businesses. Use a map search only if the pages don't answer the question.";
+
 export async function runLookup(name, input, env, lookups) {
   if (name === "get_office" && input?.id !== "public-safety" && !lookups.includes("search_pages")) {
     return { content: SEARCH_FIRST, isError: true, searchFirst: true };
+  }
+  if (name === "get_map_search" && !lookups.includes("search_pages")) {
+    return { content: SEARCH_BEFORE_MAP, isError: true, searchFirst: true };
   }
   return runTool(name, input, env);
 }

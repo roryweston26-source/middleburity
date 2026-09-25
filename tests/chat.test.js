@@ -141,6 +141,51 @@ test("an office referral before any page search is sent back to search first", a
   assert.deepEqual(result.cards, []);
 });
 
+test("a map search before any page search is sent back to search first", async () => {
+  const client = fakeClient([
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [
+        { type: "text", text: "Here's a map search." },
+        { type: "tool_use", id: "m1", name: "get_map_search", input: { what: "bank" } },
+      ],
+    },
+    { stop_reason: "end_turn", model: "claude-opus-5", usage, content: [{ type: "text", text: "Middlebury's page lists four banks." }] },
+  ]);
+  const result = await answerQuestion([{ role: "user", content: "where's a bank" }], { client, now });
+  assert.equal(client.requests.length, 2);
+  const [sent] = client.requests[1].messages.at(-1).content;
+  assert.equal(sent.is_error, true);
+  assert.match(sent.content, /search_pages before a map search/);
+  assert.deepEqual(result.cards, []);
+});
+
+test("a map search after a page search is the answer's card, with no second model call", async () => {
+  const client = fakeClient([
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [{ type: "tool_use", id: "s1", name: "search_pages", input: { query: "barber haircut" } }],
+    },
+    {
+      stop_reason: "tool_use",
+      model: "claude-opus-5",
+      usage,
+      content: [
+        { type: "text", text: "Middlebury's pages don't list barbers. Here's a map search." },
+        { type: "tool_use", id: "m1", name: "get_map_search", input: { what: "barber" } },
+      ],
+    },
+  ]);
+  const result = await answerQuestion([{ role: "user", content: "haircut?" }], { client, now });
+  assert.equal(client.requests.length, 2);
+  assert.equal(result.answer, "Middlebury's pages don't list barbers. Here's a map search.");
+  assert.deepEqual(result.cards.map((c) => c.type), ["mapsearch"]);
+});
+
 test("a refusal gets a plain apology instead of an empty answer", async () => {
   const client = fakeClient([{ stop_reason: "refusal", model: "claude-opus-5", usage, content: [] }]);
   const result = await answerQuestion([{ role: "user", content: "hi" }], { client, now });
@@ -219,6 +264,13 @@ test("'Sources: none' drops the pages card; a missing line keeps the top three",
   const missing = applySources("An answer with no Sources line.", [pagesCard(A, B, C, D)]);
   assert.equal(missing.answer, "An answer with no Sources line.");
   assert.equal(missing.cards[0].pages.length, 3);
+});
+
+test("an answer that ends in a map search shows no pages unless it cites some", () => {
+  const map = { type: "mapsearch", what: "pharmacy", place: "Middlebury, VT", url: "https://www.google.com/maps/search/?api=1&query=x" };
+  assert.deepEqual(applySources("The pages don't list one; here's a map search.", [pagesCard(A, B), map]).cards, [map]);
+  const cited = applySources(`Health and Wellness can transfer prescriptions.\nSources: ${B}`, [pagesCard(A, B), map]);
+  assert.deepEqual(cited.cards.at(-1).pages.map((p) => p.url), [B]);
 });
 
 // Shapes the model actually used in the 2026-09-23 round.
