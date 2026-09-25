@@ -15,7 +15,7 @@ import { todaysEvents } from "./tools/events.js";
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" },
   });
 }
 
@@ -29,7 +29,7 @@ function sameText(a, b) {
 }
 
 async function handleChat(request, env) {
-  // A non-Claude model under test needs its own provider key instead (checked when it's called).
+  // A non-Claude model needs its own provider key instead (checked when it's called).
   if (!env.ANTHROPIC_API_KEY && (env.MODEL ?? "claude-").startsWith("claude-")) {
     return json({ error: "The chat isn't connected yet: the server has no Anthropic API key." }, 503);
   }
@@ -69,13 +69,15 @@ async function handleChat(request, env) {
       console.error(`AI service error ${err.status}: ${err.message}`);
       return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
     }
-    // A non-Claude model under comparison testing (src/providers/openai-compatible.js).
+    // A non-Claude model, like production's DeepSeek (src/providers/openai-compatible.js).
     if (err instanceof ProviderError) {
       console.error(`model provider error ${err.status}: ${err.message}`);
       if (err.status === 401 || err.status === 403) return json({ error: "The model provider rejected the server's key." }, 503);
       if (err.status === 429) return json({ error: "Too many questions at once. Try again in a minute." }, 429);
       return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
     }
+    // The provider call's own timeout (openai-compatible.js) rather than a crash.
+    if (err?.name === "TimeoutError") return json({ error: "The AI service took too long. Try again in a moment." }, 504);
     console.error(`chat failed: ${err?.name}: ${err?.message}`);
     return json({ error: "Something broke on our end." }, 500);
   }

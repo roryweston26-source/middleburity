@@ -154,8 +154,8 @@ function addUsage(total, usage = {}) {
 export async function answerQuestion(history, { env = {}, client, now = new Date() } = {}) {
   const model = env.MODEL || DEFAULT_MODEL;
   const messages = cleanHistory(history);
-  // Claude always goes through Anthropic's SDK. Other models (for comparison testing) go
-  // through an OpenAI-style endpoint set in OPENAI_COMPAT_BASE_URL.
+  // Claude always goes through Anthropic's SDK. Other models (production runs DeepSeek through
+  // OpenRouter) go through an OpenAI-style endpoint set in OPENAI_COMPAT_BASE_URL.
   if (!model.startsWith("claude-")) return answerWithOpenAICompatible(messages, { env, model, now });
   client ??= new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const options = modelOptions(model, env.EFFORT);

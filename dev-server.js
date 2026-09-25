@@ -4,7 +4,7 @@
 import { existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, normalize } from "node:path";
+import { extname, join, normalize, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { openLocalD1 } from "./src/db/node-d1.js";
 import worker from "./src/worker.js";
@@ -44,7 +44,7 @@ async function loadEnv() {
 async function serveStatic(pathname, res) {
   const rel = pathname === "/" ? "index.html" : pathname.slice(1);
   const file = normalize(join(publicDir, rel));
-  if (!file.startsWith(publicDir)) {
+  if (!file.startsWith(publicDir + sep)) {
     res.writeHead(403).end();
     return 403;
   }
@@ -101,7 +101,8 @@ createServer(async (req, res) => {
   console.log(`${req.method} ${req.url.split("?")[0]} ${status} ${Date.now() - started}ms`);
 }).listen(port, () => {
   console.log(`Middleburity running at http://localhost:${port}${env.MODEL ? ` (model ${env.MODEL})` : ""}`);
-  console.log(env.ANTHROPIC_API_KEY ? "Chat: connected (key found in .dev.vars)" : "Chat: no API key yet (add one to .dev.vars)");
+  const hasKey = (env.MODEL ?? "claude-").startsWith("claude-") ? env.ANTHROPIC_API_KEY : env.OPENAI_COMPAT_API_KEY;
+  console.log(hasKey ? "Chat: connected (key found in .dev.vars)" : "Chat: no API key for this model yet (add one to .dev.vars)");
   console.log(env.DB ? "Page search: ready (.cache/pages.db)" : "Page search: not built yet (npm run build:pages)");
   console.log(env.ACCESS_CODE ? "Access code: required for the chat" : "Access code: none set (chat is open locally)");
   if (env.TEST_PROBES === "1") console.log("TEST MODE: planted test event and club are in the Presence feeds (tests/probes.js)");

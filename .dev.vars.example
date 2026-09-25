@@ -1,9 +1,17 @@
-# Copy this file to .dev.vars and fill it in. .dev.vars is git-ignored, so the key never lands in the repo.
-# Get a key from the Anthropic Console (https://console.anthropic.com). Set a monthly spend limit there too.
-ANTHROPIC_API_KEY=
+# Copy this file to .dev.vars and fill it in. .dev.vars is git-ignored, so keys never land in the repo.
 
-# Optional. Default is claude-opus-5. claude-haiku-4-5 costs about a fifth as much per token.
-# MODEL=claude-opus-5
+# The model that writes answers. Production runs DeepSeek through OpenRouter (see wrangler.jsonc).
+MODEL=deepseek/deepseek-v4.1-flash
+OPENAI_COMPAT_BASE_URL=https://openrouter.ai/api/v1
+# Optional: pin one OpenRouter host, with no fallback.
+OPENROUTER_PROVIDER=DeepInfra
+# An OpenRouter key (https://openrouter.ai/keys). Set a credit limit on it there too.
+OPENAI_COMPAT_API_KEY=
 
-# Optional. low | medium | high. Default is low. Ignored on Haiku.
+# Or use Claude: set MODEL to a Claude model (e.g. claude-opus-5) and add an Anthropic key.
+# ANTHROPIC_API_KEY=
+# low | medium | high. Default is low. Claude only; ignored on Haiku.
 # EFFORT=low
+
+# Optional. When set, the chat asks for this code (the home screen stays open).
+# ACCESS_CODE=

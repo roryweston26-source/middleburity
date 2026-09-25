@@ -1,9 +1,10 @@
 // Runs a question on a non-Claude model through an OpenAI-style chat completions endpoint
-// (OpenRouter, OpenAI, Gemini's and DeepSeek's compatible APIs, Cloudflare Workers AI...), so
-// other models can be compared on the same question set. Same tools, same system prompt, same
-// Sources handling and lookup ceiling as the Claude path in chat.js; plain fetch, no SDK.
+// (OpenRouter, OpenAI, Gemini's and DeepSeek's compatible APIs, Cloudflare Workers AI...).
+// Production runs DeepSeek this way, through OpenRouter, and the same path compares other models
+// on the question set. Same tools, same system prompt, same Sources handling and lookup ceiling
+// as the Claude path in chat.js; plain fetch, no SDK.
 //
-// Settings (in .dev.vars): MODEL (the provider's model name, e.g. "qwen/qwen3.7-flash"),
+// Settings (wrangler.jsonc vars, or .dev.vars locally): MODEL (the provider's model name, e.g. "qwen/qwen3.7-flash"),
 // OPENAI_COMPAT_BASE_URL (e.g. "https://openrouter.ai/api/v1") and OPENAI_COMPAT_API_KEY.
 // Optional on OpenRouter: OPENROUTER_PROVIDER, the host (or comma-separated hosts) to use.
 import { campusNowLabel } from "../campus-time.js";

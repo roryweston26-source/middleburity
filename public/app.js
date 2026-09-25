@@ -11,6 +11,8 @@ function el(tag, props = {}, ...children) {
     if (value === undefined || value === false) continue;
     if (key === "class") node.className = value;
     else if (key === "text") node.textContent = value;
+    // Links come from source feeds; only web addresses become links (never javascript: and the like).
+    else if (key === "href" && !/^https?:\/\//i.test(value)) continue;
     else node.setAttribute(key, value === true ? "" : value);
   }
   for (const child of children.flat(Infinity)) {
