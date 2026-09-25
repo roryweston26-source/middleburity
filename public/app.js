@@ -116,6 +116,27 @@ function officeCard(card) {
   );
 }
 
+// A link out to RateMyProfessors. The app never reads the reviews, and the card says so.
+function reviewsCard(card) {
+  return el(
+    "article",
+    { class: "card" },
+    el(
+      "a",
+      { class: "office", href: card.url, target: "_blank", rel: "noopener" },
+      el("span", { class: "office-name", text: `${card.professor} on RateMyProfessors` }),
+      el("span", { class: "chevron", "aria-hidden": "true", text: "›" }),
+      el("span", { class: "office-url", text: "ratemyprofessors.com" }),
+    ),
+    el(
+      "div",
+      { class: "source" },
+      "Student reviews: unofficial and unverified, not from Middlebury. Middleburity doesn't read them. ",
+      el("a", { href: card.profile, target: "_blank", rel: "noopener", text: "Middlebury profile" }),
+    ),
+  );
+}
+
 // ---------- Games, events, directions ----------
 
 const TZ = "America/New_York";
@@ -398,6 +419,7 @@ function renderCard(card) {
   if (card.type === "pages") return pagesCard(card);
   if (card.type === "clubs") return clubsCard(card);
   if (card.type === "office") return officeCard(card);
+  if (card.type === "reviews") return reviewsCard(card);
   if (card.type === "games") return gamesCard(card);
   if (card.type === "events") return eventsCard(card);
   if (card.type === "directions") return directionsCard(card);

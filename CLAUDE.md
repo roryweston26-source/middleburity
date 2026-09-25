@@ -51,6 +51,7 @@ After this phase: the friends test in January behind the access code, then the p
 - **Unofficial.** Don't use Middlebury's shield or panther logos, and don't make it look like a college product. "Middlebury College" is a registered trademark; raise the name with Communications before any launch.
 - **Privacy:** no logging of questions, no analytics, no third-party calls beyond the sources and the model provider (from the switch: OpenRouter to DeepSeek on DeepInfra, with `data_collection: "deny"`; Anthropic when `MODEL` is Claude). The conversation stays in page memory.
 - **Safety lines in the prompt:** never call food allergy-safe; emergencies mean 911 first; no medical advice; no homework.
+- **RateMyProfessors: link only, never read (Rory, 2026-09-24).** `get_reviews_link` (src/tools/reviews.js) gives a card linking a named professor's RMP search (Middlebury is school 605), checked against the faculty profiles first; not for rankings ("easiest grader"). RMP's robots.txt disallows every bot but Google's and names AI crawlers, so the app never fetches, summarizes or ranks reviews. "Accessible" questions get posted office hours from the profiles instead.
 - **Off-limits without Middlebury's permission:** catalog.middlebury.edu (its robots.txt says `ai-input=no`) and social house party data (not public). Ask rather than work around.
 - **Anthropic's terms** bar training chatbot models on Claude outputs without written permission. Classifiers are allowed. This matters for the fine-tuning plans.
 
