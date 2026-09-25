@@ -92,7 +92,7 @@ export const collegeEventsTool = {
     name: "get_college_events",
     description:
       "Middlebury's official events calendar: lectures, talks, performances and concerts, symposia, colloquia, admissions and office events, with time, place, sponsor and whether it's open to the public. " +
-      "Student-group events aren't here (get_events has those), so for \"what's happening\" questions check both. Times are start times; the calendar lists no end time.",
+      "Student-group events aren't here (get_events has those), so for \"what's happening\" questions check both. Times are start times; the calendar lists no end time. It covers at most three days: for a specific named event further ahead, search get_events by name (many arts and office events are on Presence too).",
     input_schema: {
       type: "object",
       properties: {

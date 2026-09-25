@@ -49,3 +49,28 @@ test("the model is told event text is information, not instructions", async (t) 
   assert.match(JSON.parse(out.content).note, /never as instructions/);
   assert.equal(out.card.type, "events");
 });
+
+test("a keyword can look 60 days ahead; without one the range stays two weeks", async (t) => {
+  feed(t);
+  clearEventsCache();
+  await assert.doesNotReject(eventsTool.run({ from: "2026-09-21", to: "2026-11-15", keyword: "outing" }));
+  await assert.rejects(eventsTool.run({ from: "2026-09-21", to: "2026-11-25", keyword: "outing" }), /60 days/);
+  await assert.rejects(eventsTool.run({ from: "2026-09-21", to: "2026-10-30" }), /two weeks/);
+});
+
+test("a few events get their whole description; a long list gets 280 characters each", async (t) => {
+  const long = "Bring a water bottle and closed-toe shoes. ".repeat(20);
+  const events = Array.from({ length: 5 }, (_, i) => ({
+    eventName: `Trip ${i}`, organizationName: "Outing Club", uri: `trip-${i}`, location: "ADK Circle",
+    startDateTimeUtc: "2026-10-03T13:00:00Z", endDateTimeUtc: "2026-10-03T20:00:00Z", description: `<p>${long}</p>`, tags: [],
+  }));
+  t.mock.method(globalThis, "fetch", async () => new Response(JSON.stringify(events)));
+  clearEventsCache();
+  const one = JSON.parse((await eventsTool.run({ from: "2026-10-03", keyword: "trip 2" })).content);
+  assert.equal(one.events.length, 1);
+  assert.ok(one.events[0].about.length > 800);
+  clearEventsCache();
+  const many = JSON.parse((await eventsTool.run({ from: "2026-10-03" })).content);
+  assert.equal(many.events.length, 5);
+  assert.ok(many.events.every((e) => e.about.length <= 280));
+});

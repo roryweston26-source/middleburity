@@ -843,6 +843,40 @@
         "tools",
         "grounding"
       ]
+    },
+    {
+      "id": "acappella-show",
+      "question": "when is the next acapella preformance?",
+      "needs": "Presence events + clubs",
+      "when": "now",
+      "good_answer": "If none is posted: says so and how far ahead it looked (the feed ran to mid-December on 2026-09-24, with only Mischords rehearsals); never sends the student to 'check MiddPresence', since it just did; offers the groups' listed contacts. If one is posted, its date, time and place.",
+      "capabilities": [
+        "tools",
+        "grounding",
+        "time"
+      ]
+    },
+    {
+      "id": "event-details",
+      "question": "How much are student tickets for The Ford/Hill Project, and when is it?",
+      "needs": "Presence event description",
+      "when": "fall 2026",
+      "good_answer": "Sept 30 and Oct 1, 7:30 PM, Wright Theatre; $5 Middlebury students ($30 public, $20 ID holders/PASS, $10 under 21), from the event's own description (past the first 280 characters). No invented prices.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
+    },
+    {
+      "id": "club-sports-all",
+      "question": "What club sports are there?",
+      "needs": "club directory",
+      "when": "any",
+      "good_answer": "All the club sports in the directory (27 on 2026-09-24), not 'see MiddPresence for the rest'.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
     }
   ]
 }

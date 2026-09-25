@@ -503,6 +503,43 @@
         "tools",
         "grounding"
       ]
+    },
+    {
+      "id": "x-club-sports",
+      "question": "What club sports are there?",
+      "good_answer": "All club sports from the directory (27 on 2026-09-24), not 'see MiddPresence for the rest'.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-event-tickets",
+      "question": "How much are student tickets for The Ford/Hill Project, and when is it?",
+      "good_answer": "$5 for Middlebury students (from the event's own description), the dates/times posted, and go/tickets. No invented prices.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-next-trip",
+      "question": "When's the next Mountain Club trip?",
+      "good_answer": "The next posted Mountain Club event from Presence, even if it's more than two weeks out; says none posted if so.",
+      "capabilities": [
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "x-acappella-show",
+      "question": "when is the next acapella preformance?",
+      "good_answer": "No a cappella performance posted through the feed's horizon (mid-December on 2026-09-24), only Mischords rehearsals; doesn't tell them to check MiddPresence; may note groups often perform in Middlebury Chapel (Chapel page) and offer the groups' contacts.",
+      "capabilities": [
+        "tools",
+        "grounding",
+        "time"
+      ]
     }
   ]
 }
