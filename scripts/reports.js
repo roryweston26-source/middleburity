@@ -19,10 +19,11 @@ function rows() {
     const hasTable = db.prepare("SELECT 1 FROM sqlite_master WHERE name = 'reports'").get();
     return hasTable ? db.prepare(sql).all() : [];
   }
-  const out = execFileSync("npx", ["wrangler", "d1", "execute", "middleburity", "--remote", "--json", "--command", sql], {
+  // Wrangler's own script under Node, with no shell in between: a Windows shell splits the SQL apart.
+  const wrangler = "node_modules/wrangler/bin/wrangler.js";
+  const out = execFileSync(process.execPath, [wrangler, "d1", "execute", "middleburity", "--remote", "--json", "--command", sql], {
     encoding: "utf8",
-    shell: process.platform === "win32",
-    stdio: ["ignore", "pipe", "inherit"],
+    stdio: ["ignore", "pipe", "pipe"],
   });
   return JSON.parse(out)[0]?.results ?? [];
 }
