@@ -1,15 +1,15 @@
 // The whole server. It's written as a Cloudflare Worker (web-standard Request/Response),
 // so the same file runs locally under dev-server.js and in production on Cloudflare.
 // Privacy: nothing here logs or stores what people ask. The only thing stored per visitor
-// is an anonymous daily count, for the limits in limits.js. The one exception is an answer
-// someone chooses to report (reports.js), saved with nothing about who sent it.
+// is an anonymous daily count, for the limits in limits.js. The one exception is feedback
+// someone chooses to send on an answer (feedback.js), saved with nothing about who sent it.
 import Anthropic from "@anthropic-ai/sdk";
 import { campusDate } from "./campus-time.js";
 import { ChatInputError, answerQuestion } from "./chat.js";
 import { ProviderError } from "./providers/openai-compatible.js";
 import { admit, limitsFrom, recordSpend, visitorId } from "./limits.js";
 import { estimateUsd } from "./pricing.js";
-import { ReportInputError, cleanReport, saveReport } from "./reports.js";
+import { FeedbackInputError, cleanFeedback, saveFeedback } from "./feedback.js";
 import { nextHomeGames } from "./tools/athletics.js";
 import { todaysMenus } from "./tools/dining.js";
 import { todaysEvents } from "./tools/events.js";
@@ -30,7 +30,7 @@ function sameText(a, b) {
   return diff === 0;
 }
 
-// A friends-only test: when ACCESS_CODE is set, the chat and reports need it. Menus and the
+// A friends-only test: when ACCESS_CODE is set, the chat and feedback need it. Menus and the
 // home screen stay open, since they cost nothing.
 function needsCode(request, env) {
   if (env.ACCESS_CODE && !sameText(request.headers.get("x-access-code") ?? "", env.ACCESS_CODE)) {
@@ -39,20 +39,20 @@ function needsCode(request, env) {
   return null;
 }
 
-// "Report this answer" (src/reports.js): saved only when someone taps it, with nothing about who.
-async function handleReport(request, env) {
+// Feedback on an answer (src/feedback.js): saved only when someone sends it, with nothing about who.
+async function handleFeedback(request, env) {
   const refused = needsCode(request, env);
   if (refused) return refused;
-  if (!env.DB) return json({ error: "Reports aren't available right now." }, 503);
+  if (!env.DB) return json({ error: "Feedback isn't available right now." }, 503);
   try {
-    const report = cleanReport(await request.json().catch(() => null));
-    const saved = await saveReport(env.DB, report);
-    if (!saved.ok) return json({ error: "Too many reports today. Send a screenshot instead." }, 429);
+    const feedback = cleanFeedback(await request.json().catch(() => null));
+    const saved = await saveFeedback(env.DB, feedback);
+    if (!saved.ok) return json({ error: "Too much feedback today. Send a screenshot instead." }, 429);
     return json({ ok: true });
   } catch (err) {
-    if (err instanceof ReportInputError) return json({ error: err.message }, 400);
-    console.error(`report failed: ${err?.name}: ${err?.message}`);
-    return json({ error: "Couldn't send the report. Try again." }, 500);
+    if (err instanceof FeedbackInputError) return json({ error: err.message }, 400);
+    console.error(`feedback failed: ${err?.name}: ${err?.message}`);
+    return json({ error: "Couldn't send the feedback. Try again." }, 500);
   }
 }
 
@@ -125,9 +125,9 @@ export default {
       return handleChat(request, env);
     }
 
-    if (pathname === "/api/report") {
+    if (pathname === "/api/feedback") {
       if (request.method !== "POST") return json({ error: "Use POST." }, 405);
-      return handleReport(request, env);
+      return handleFeedback(request, env);
     }
 
     if (pathname.startsWith("/api/")) return json({ error: "Not found." }, 404);

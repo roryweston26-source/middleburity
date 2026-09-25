@@ -265,22 +265,46 @@ input {
   cursor: pointer;
 }
 
-/* "Report this answer", under each answer's cards */
-.report {
+/* Feedback (👍 / 👎) under each answer's cards */
+.feedback {
   margin-top: 6px;
 }
 
-.report-form {
+.feedback-prompt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feedback-prompt .muted {
+  margin-right: 4px;
+}
+
+.thumb {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 2px 10px;
+  font-size: 1rem;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.thumb:hover {
+  border-color: var(--accent);
+}
+
+.feedback-form {
   display: grid;
   gap: 8px;
   margin-top: 4px;
 }
 
-.report-form p {
+.feedback-form p {
   margin: 0;
 }
 
-.report-note {
+.feedback-note {
   width: 100%;
   box-sizing: border-box;
   border: 1px solid var(--line);
@@ -292,7 +316,7 @@ input {
   resize: vertical;
 }
 
-.report-actions {
+.feedback-actions {
   display: flex;
   align-items: center;
   gap: 16px;

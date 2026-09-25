@@ -69,7 +69,7 @@ Emails and phone numbers are removed from indexed page text. Pages over a year o
 ## Privacy
 
 - The server doesn't store or log questions or answers. It logs only each request's method, path, status and timing.
-- **The one exception is "Report this answer".** Only when someone taps it and presses Send, the server saves that question and answer, up to four earlier turns of the conversation, their optional note, and which lookups and model answered. Nothing about who sent it (no IP address or visitor code). Reports are deleted after 60 days, capped at 200 a day, and read with `npm run reports`.
+- **The one exception is feedback on an answer (👍 / 👎).** Only when someone taps a thumb and presses Send, the server saves that question and answer, up to four earlier turns of the conversation, the rating, their optional note, and which lookups and model answered. Nothing about who sent it (no IP address or visitor code). Feedback is deleted after 60 days, capped at 200 a day, and read with `npm run feedback`.
 - To write an answer, your question goes through OpenRouter to DeepSeek's model, hosted by DeepInfra. Requests tell OpenRouter to use only hosts that don't train on or keep prompts (`data_collection: "deny"`), and those services' own policies apply.
 - The conversation lives in the page's memory only. Reloading clears it.
 - No analytics, cookies or third-party scripts. Walking directions are a link to Google Maps; nothing goes to Google unless you tap it.

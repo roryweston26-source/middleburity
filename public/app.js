@@ -549,35 +549,48 @@ function codePrompt(answer, question, message) {
   input.focus();
 }
 
-// "Report this answer": sends this one answer, only when tapped (src/reports.js). The form says
-// exactly what goes, since it's the one thing the app keeps.
-function reportControl(report) {
-  const wrap = el("div", { class: "report" });
-  const open = el("button", { type: "button", class: "link-button", text: "Report this answer" });
-  open.addEventListener("click", () => {
-    const note = el("textarea", { class: "report-note", rows: "2", maxlength: "1000", placeholder: "What was wrong? (optional)", "aria-label": "What was wrong" });
-    const send = el("button", { type: "submit", class: "code-button", text: "Send report" });
+// Feedback on an answer (👍 / 👎): nothing is sent until a thumb is tapped and Send is pressed
+// (src/feedback.js). The form says exactly what goes, since it's the one thing the app keeps.
+function feedbackControl(feedback) {
+  const wrap = el("div", { class: "feedback" });
+  const thumb = (rating, emoji, label) => {
+    const b = el("button", { type: "button", class: "thumb", "aria-label": label, title: label, text: emoji });
+    b.addEventListener("click", () => openForm(rating));
+    return b;
+  };
+  const prompt = el("div", { class: "feedback-prompt" }, el("span", { class: "muted small", text: "Was this helpful?" }), thumb("up", "👍", "Helpful"), thumb("down", "👎", "Not helpful"));
+
+  function openForm(rating) {
+    const up = rating === "up";
+    const note = el("textarea", {
+      class: "feedback-note",
+      rows: "2",
+      maxlength: "1000",
+      placeholder: up ? "What was good? (optional)" : "What was wrong? (optional)",
+      "aria-label": up ? "What was good" : "What was wrong",
+    });
+    const send = el("button", { type: "submit", class: "code-button", text: `Send ${up ? "👍" : "👎"}` });
     const cancel = el("button", { type: "button", class: "link-button", text: "Cancel" });
     const status = el("p", { class: "muted small", role: "status" });
     const form = el(
       "form",
-      { class: "report-form" },
-      el("p", { class: "muted small", text: "Sends this question and answer (plus the earlier ones in this conversation) and your note to Middleburity's developer, to fix mistakes. Nothing about who you are. Kept 60 days." }),
+      { class: "feedback-form" },
+      el("p", { class: "muted small", text: "Sends this question and answer (plus the earlier ones in this conversation), your rating and your note to Middleburity's developer. Nothing about who you are. Kept 60 days." }),
       note,
-      el("div", { class: "report-actions" }, send, cancel),
+      el("div", { class: "feedback-actions" }, send, cancel),
       status,
     );
-    cancel.addEventListener("click", () => wrap.replaceChildren(open));
+    cancel.addEventListener("click", () => wrap.replaceChildren(prompt));
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       send.disabled = true;
       try {
         const headers = { "content-type": "application/json" };
         if (savedCode()) headers["x-access-code"] = savedCode();
-        const res = await fetch("/api/report", { method: "POST", headers, body: JSON.stringify({ ...report, note: note.value }) });
+        const res = await fetch("/api/feedback", { method: "POST", headers, body: JSON.stringify({ ...feedback, rating, note: note.value }) });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || "Couldn't send the report. Try again.");
-        wrap.replaceChildren(el("p", { class: "muted small", text: "Thanks, report sent." }));
+        if (!res.ok) throw new Error(data.error || "Couldn't send the feedback. Try again.");
+        wrap.replaceChildren(el("p", { class: "muted small", text: "Thanks for the feedback." }));
       } catch (err) {
         status.textContent = err.message;
         send.disabled = false;
@@ -585,8 +598,9 @@ function reportControl(report) {
     });
     wrap.replaceChildren(form);
     note.focus();
-  });
-  wrap.append(open);
+  }
+
+  wrap.append(prompt);
   return wrap;
 }
 
@@ -619,7 +633,7 @@ async function ask(question) {
       if (node) block.append(node);
     }
     block.append(
-      reportControl({
+      feedbackControl({
         question,
         answer: data.answer,
         context: history.slice(-4),
