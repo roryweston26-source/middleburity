@@ -49,6 +49,8 @@ function cardSummary(c) {
   if (c.type === "directions") return `directions(${c.from ?? "here"} -> ${c.to}${c.note ? ", no exact spot" : ""})`;
   if (c.type === "office") return `office(${c.name})`;
   if (c.type === "reviews") return `reviews(${c.professor})`;
+  if (c.type === "studyrooms") return `studyrooms(${c.date} from ${c.from}: ${c.rooms.filter((r) => r.free.length).length} with free time)`;
+  if (c.type === "jobs") return `jobs(${c.jobs.length} of ${c.total}: ${c.jobs.slice(0, 2).map((j) => j.title).join(" | ")})`;
   if (c.type === "pages") return `pages(${c.pages.length}: ${c.pages.slice(0, 3).map((p) => p.title).join(" | ")})`;
   if (c.type === "clubs") return `clubs(${c.clubs.map((x) => x.name).slice(0, 4).join(" | ")})`;
   if (c.type === "hours") return `hours(${c.place}: ${c.days.map((d) => `${d.date} ${d.hours.join("/") || "none"}`).join("; ")})`;

@@ -164,7 +164,7 @@ export const eventsTool = {
   definition: {
     name: "get_events",
     description:
-      "Campus events posted on Presence by student organizations and offices (talks, club meetings, dorm events, services, performances), with host, time, place and tags like Free Food. " +
+      "Campus events posted on Presence by student organizations and offices (club meetings, dorm events, services, performances), with host, time, place and tags like Free Food. For lectures, concerts and other college events, also check get_college_events. " +
       "Social house parties may not be listed, so if you don't find one, say you don't know (not that nothing is happening) and point them to Student Engagement and Belonging with get_office. get_clubs can list the social houses.",
     input_schema: {
       type: "object",

@@ -4,6 +4,7 @@
 import { athleticsTool } from "./athletics.js";
 import { busTool } from "./bus.js";
 import { clubsTool } from "./clubs.js";
+import { collegeEventsTool } from "./college-events.js";
 import { diningTool } from "./dining.js";
 import { directionsTool } from "./directions.js";
 import { ToolInputError } from "./errors.js";
@@ -11,12 +12,14 @@ import { eventsTool } from "./events.js";
 import { flightsTool } from "./flights.js";
 import { hoursTool } from "./hours.js";
 import { intercityTool } from "./intercity.js";
+import { jobsTool } from "./jobs.js";
 import { officesTool } from "./offices.js";
 import { pagesTool } from "./pages.js";
 import { reviewsTool } from "./reviews.js";
+import { studyRoomsTool } from "./studyrooms.js";
 import { weatherTool } from "./weather.js";
 
-const TOOLS = [diningTool, athleticsTool, eventsTool, clubsTool, hoursTool, weatherTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool, reviewsTool];
+const TOOLS = [diningTool, athleticsTool, eventsTool, collegeEventsTool, clubsTool, hoursTool, weatherTool, busTool, intercityTool, flightsTool, pagesTool, directionsTool, officesTool, reviewsTool, jobsTool, studyRoomsTool];
 
 export const TOOL_DEFINITIONS = TOOLS.map((t) => t.definition);
 

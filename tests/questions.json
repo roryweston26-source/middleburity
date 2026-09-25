@@ -124,9 +124,9 @@
     {
       "id": "lifeguards",
       "question": "Are the lifeguards hiring, even if I'm not work study?",
-      "needs": "campus pages",
+      "needs": "Student Employment pages + job board",
       "when": "now",
-      "good_answer": "From the Student Employment pages: whether students without work-study can hold campus jobs, and where jobs are posted. Doesn't claim lifeguards are hiring unless a page says so.",
+      "good_answer": "Work-study isn't required (Student Employment page: any student with active status is eligible). From the job board (get_jobs): says whether a lifeguard job is posted now; on 2026-09-24 the only one was 'Athletics Lifeguard (Summer 2026)', tagged Staff, so no current student lifeguard posting. Doesn't claim they're hiring otherwise.",
       "capabilities": [
         "grounding",
         "tools"
@@ -797,6 +797,50 @@
       "when": "any",
       "good_answer": "It's the professor's call, set in the syllabus; ask them. From the Handbook: illness, religious holidays and approved accommodations are ordinarily compelling reasons; personal travel, job interviews and extracurriculars aren't. No RateMyProfessors claims.",
       "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "talks-tomorrow",
+      "question": "Are there any lectures or talks on campus tomorrow?",
+      "needs": "official events calendar",
+      "when": "now",
+      "good_answer": "Talks and lectures on tomorrow's official college calendar (get_college_events) with start time and place, and whether open to the public; student-group talks from Presence if relevant. Never invents an event.",
+      "capabilities": [
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "study-room-tonight",
+      "question": "Is there a study room free in the library tonight for 4 of us?",
+      "needs": "LibCal room booking",
+      "when": "now",
+      "good_answer": "Davis group study rooms (each holds 4) with their free windows tonight as checked; says rooms can be booked any moment and booking is on LibCal with a Middlebury login.",
+      "capabilities": [
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "study-room-eight",
+      "question": "Can we book a study room for 8 people tomorrow afternoon?",
+      "needs": "LibCal room booking",
+      "when": "now",
+      "good_answer": "No group study room holds 8 (the largest holds 4, as of 2026-09-24); the video viewing rooms (LIB 240A/B, hold 10) if free. No invented rooms.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
+    },
+    {
+      "id": "student-jobs",
+      "question": "Are there any student jobs open right now?",
+      "needs": "job board",
+      "when": "now",
+      "good_answer": "Newest Student-tagged jobs from Middlebury's Workable board, with links to apply; the count on the board. Pay only from the wage scale page, if mentioned.",
+      "capabilities": [
+        "tools",
         "grounding"
       ]
     }

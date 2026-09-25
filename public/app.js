@@ -116,6 +116,44 @@ function officeCard(card) {
   );
 }
 
+function jobsCard(card) {
+  const rows = card.jobs.map((j) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main" }, el("a", { href: j.url, target: "_blank", rel: "noopener", text: j.title })),
+      el("div", { class: "row-meta", text: [j.department, j.type, j.posted && `posted ${j.posted}`].filter(Boolean).join(" · ") }),
+    ),
+  );
+  const more = card.total > card.jobs.length ? ` Showing ${card.jobs.length} of ${card.total}.` : "";
+  return el(
+    "article",
+    { class: "card" },
+    cardHead("Open jobs"),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No matching jobs on the board." }),
+    sourceLine(card.source, `${more} Apply on the board.`),
+  );
+}
+
+function studyRoomsCard(card) {
+  const rows = card.rooms.map((r) =>
+    el(
+      "li",
+      { class: "row" },
+      el("div", { class: "row-main", text: `${r.name}${r.capacity ? ` · holds ${r.capacity}` : ""}` }),
+      el("div", { class: r.free.length ? "row-meta" : "row-meta note", text: r.free.length ? `Free ${r.free.join(", ")}` : "Nothing free" }),
+    ),
+  );
+  const day = new Date(`${card.date}T12:00:00`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return el(
+    "article",
+    { class: "card" },
+    cardHead("Study rooms, Davis Library", `${day}, from ${card.from}`),
+    rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "No room fits." }),
+    sourceLine(card.source, " Rooms can be booked at any moment; book on LibCal with your Middlebury login."),
+  );
+}
+
 // A link out to RateMyProfessors. The app never reads the reviews, and the card says so.
 function reviewsCard(card) {
   return el(
@@ -192,7 +230,8 @@ function gamesCard(card) {
 }
 
 function eventWhen(e) {
-  return `${new Date(e.start).toLocaleString("en-US", dayTime)} – ${new Date(e.end).toLocaleTimeString("en-US", timeOnly)}`;
+  const start = new Date(e.start).toLocaleString("en-US", dayTime);
+  return e.end ? `${start} – ${new Date(e.end).toLocaleTimeString("en-US", timeOnly)}` : start;
 }
 
 function eventsCard(card) {
@@ -210,7 +249,7 @@ function eventsCard(card) {
     { class: "card" },
     cardHead(card.title, more),
     rows.length ? el("ul", { class: "rows" }, rows) : el("p", { class: "status", text: "Nothing else posted for today." }),
-    sourceLine(card.source, " Posted by the groups hosting them."),
+    sourceLine(card.source, card.note ?? " Posted by the groups hosting them."),
   );
 }
 
@@ -420,6 +459,8 @@ function renderCard(card) {
   if (card.type === "clubs") return clubsCard(card);
   if (card.type === "office") return officeCard(card);
   if (card.type === "reviews") return reviewsCard(card);
+  if (card.type === "jobs") return jobsCard(card);
+  if (card.type === "studyrooms") return studyRoomsCard(card);
   if (card.type === "games") return gamesCard(card);
   if (card.type === "events") return eventsCard(card);
   if (card.type === "directions") return directionsCard(card);

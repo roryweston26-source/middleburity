@@ -25,6 +25,12 @@ export function campusHour(date = new Date()) {
   return Number(parts(date).hour);
 }
 
+// "18:42"
+export function campusTime(date = new Date()) {
+  const p = parts(date);
+  return `${p.hour}:${p.minute}`;
+}
+
 // "2026-09-21" -> "2026-09-22"
 export function addDays(isoDate, days) {
   const d = new Date(`${isoDate}T12:00:00Z`);

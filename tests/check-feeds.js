@@ -231,5 +231,48 @@ try {
   console.log("  FAIL  no index yet. Run npm run build:pages.");
 }
 
+// College events calendar: the listing should parse into events with times and links.
+try {
+  const { parseListing, LISTING } = await import("../src/tools/college-events.js");
+  const res = await fetch(LISTING, { headers: { "user-agent": USER_AGENT } });
+  const events = parseListing(await res.text());
+  console.log(`College events: ${events.length} on the first page, ${events.filter((e) => !e.studentOrg).length} not from student groups.`);
+  if (!events.length || events.some((e) => !e.start || !e.url)) {
+    problems++;
+    console.log("  FAIL  the events listing didn't parse. middlebury.edu/events may have changed its markup.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  events calendar: ${err.message}`);
+}
+
+// Jobs: the board should list jobs, some tagged Student.
+try {
+  const { getJobs } = await import("../src/tools/jobs.js");
+  const jobs = await getJobs({});
+  console.log(`Jobs: ${jobs.onBoard} on the board, ${jobs.total} tagged Student.`);
+  if (!jobs.onBoard || !jobs.total) {
+    problems++;
+    console.log("  FAIL  no jobs (or no Student jobs). Workable's API may have changed.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  job board: ${err.message}`);
+}
+
+// Study rooms: LibCal should list rooms, and the availability grid should answer.
+try {
+  const { getStudyRooms } = await import("../src/tools/studyrooms.js");
+  const rooms = await getStudyRooms({ date: campusDate(new Date(Date.now() + 864e5)), after: "00:00" });
+  console.log(`Study rooms: ${rooms.rooms.length} rooms, ${rooms.rooms.filter((r) => r.free.length).length} with free time tomorrow.`);
+  if (!rooms.rooms.length || !rooms.anyPosted) {
+    problems++;
+    console.log("  FAIL  no rooms or no slots. LibCal's booking page may have changed.");
+  }
+} catch (err) {
+  problems++;
+  console.log(`  FAIL  study rooms: ${err.message}`);
+}
+
 console.log(problems ? `\n${problems} problem(s) found.` : "\nAll sources look fine.");
 process.exitCode = problems ? 1 : 0;

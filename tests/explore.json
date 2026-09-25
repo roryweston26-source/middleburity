@@ -467,6 +467,42 @@
         "grounding",
         "tools"
       ]
+    },
+    {
+      "id": "x-lecture-tonight",
+      "question": "Are there any lectures or talks on campus tomorrow?",
+      "good_answer": "Official calendar talks/lectures for tomorrow with time and place; Presence too if relevant. No invented events.",
+      "capabilities": [
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "x-study-room",
+      "question": "Is there a study room free in the library tonight for 4 of us?",
+      "good_answer": "Free Davis group study rooms tonight (capacity 4) with free windows as checked; says they can be booked any moment and booking needs a Middlebury login on LibCal.",
+      "capabilities": [
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "x-study-room-big",
+      "question": "Can we book a study room for 8 people tomorrow afternoon?",
+      "good_answer": "Says no study room holds 8 (largest holds 4); may mention the video viewing rooms if they fit; no invented rooms.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-jobs",
+      "question": "Are there any student jobs open right now?",
+      "good_answer": "Newest Student-tagged jobs from the Workable board with links; how to apply (Workable). Pay only from the wage scale page if mentioned.",
+      "capabilities": [
+        "tools",
+        "grounding"
+      ]
     }
   ]
 }
