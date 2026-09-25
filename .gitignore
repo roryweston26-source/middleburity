@@ -6,3 +6,4 @@ node_modules/
 src/data/pages.json
 # Question-set runs (answers and token counts), kept locally for comparing models
 tests/results/
+CLAUDE.local.md
