@@ -265,6 +265,39 @@ input {
   cursor: pointer;
 }
 
+/* "Report this answer", under each answer's cards */
+.report {
+  margin-top: 6px;
+}
+
+.report-form {
+  display: grid;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.report-form p {
+  margin: 0;
+}
+
+.report-note {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  resize: vertical;
+}
+
+.report-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .thinking::after {
   content: "…";
   display: inline-block;

@@ -1,13 +1,15 @@
 // The whole server. It's written as a Cloudflare Worker (web-standard Request/Response),
 // so the same file runs locally under dev-server.js and in production on Cloudflare.
 // Privacy: nothing here logs or stores what people ask. The only thing stored per visitor
-// is an anonymous daily count, for the limits in limits.js.
+// is an anonymous daily count, for the limits in limits.js. The one exception is an answer
+// someone chooses to report (reports.js), saved with nothing about who sent it.
 import Anthropic from "@anthropic-ai/sdk";
 import { campusDate } from "./campus-time.js";
 import { ChatInputError, answerQuestion } from "./chat.js";
 import { ProviderError } from "./providers/openai-compatible.js";
 import { admit, limitsFrom, recordSpend, visitorId } from "./limits.js";
 import { estimateUsd } from "./pricing.js";
+import { ReportInputError, cleanReport, saveReport } from "./reports.js";
 import { nextHomeGames } from "./tools/athletics.js";
 import { todaysMenus } from "./tools/dining.js";
 import { todaysEvents } from "./tools/events.js";
@@ -28,16 +30,39 @@ function sameText(a, b) {
   return diff === 0;
 }
 
+// A friends-only test: when ACCESS_CODE is set, the chat and reports need it. Menus and the
+// home screen stay open, since they cost nothing.
+function needsCode(request, env) {
+  if (env.ACCESS_CODE && !sameText(request.headers.get("x-access-code") ?? "", env.ACCESS_CODE)) {
+    return json({ error: "This is a friends-only test. Enter the access code to ask questions.", needsCode: true }, 401);
+  }
+  return null;
+}
+
+// "Report this answer" (src/reports.js): saved only when someone taps it, with nothing about who.
+async function handleReport(request, env) {
+  const refused = needsCode(request, env);
+  if (refused) return refused;
+  if (!env.DB) return json({ error: "Reports aren't available right now." }, 503);
+  try {
+    const report = cleanReport(await request.json().catch(() => null));
+    const saved = await saveReport(env.DB, report);
+    if (!saved.ok) return json({ error: "Too many reports today. Send a screenshot instead." }, 429);
+    return json({ ok: true });
+  } catch (err) {
+    if (err instanceof ReportInputError) return json({ error: err.message }, 400);
+    console.error(`report failed: ${err?.name}: ${err?.message}`);
+    return json({ error: "Couldn't send the report. Try again." }, 500);
+  }
+}
+
 async function handleChat(request, env) {
   // A non-Claude model needs its own provider key instead (checked when it's called).
   if (!env.ANTHROPIC_API_KEY && (env.MODEL ?? "claude-").startsWith("claude-")) {
     return json({ error: "The chat isn't connected yet: the server has no Anthropic API key." }, 503);
   }
-  // A friends-only test: when ACCESS_CODE is set, the chat needs it. Menus and the home
-  // screen stay open, since they cost nothing.
-  if (env.ACCESS_CODE && !sameText(request.headers.get("x-access-code") ?? "", env.ACCESS_CODE)) {
-    return json({ error: "This is a friends-only test. Enter the access code to ask questions.", needsCode: true }, 401);
-  }
+  const refused = needsCode(request, env);
+  if (refused) return refused;
   let body;
   try {
     body = await request.json();
@@ -98,6 +123,11 @@ export default {
     if (pathname === "/api/chat") {
       if (request.method !== "POST") return json({ error: "Use POST." }, 405);
       return handleChat(request, env);
+    }
+
+    if (pathname === "/api/report") {
+      if (request.method !== "POST") return json({ error: "Use POST." }, 405);
+      return handleReport(request, env);
     }
 
     if (pathname.startsWith("/api/")) return json({ error: "Not found." }, 404);

@@ -69,6 +69,7 @@ Emails and phone numbers are removed from indexed page text. Pages over a year o
 ## Privacy
 
 - The server doesn't store or log questions or answers. It logs only each request's method, path, status and timing.
+- **The one exception is "Report this answer".** Only when someone taps it and presses Send, the server saves that question and answer, up to four earlier turns of the conversation, their optional note, and which lookups and model answered. Nothing about who sent it (no IP address or visitor code). Reports are deleted after 60 days, capped at 200 a day, and read with `npm run reports`.
 - To write an answer, your question goes through OpenRouter to DeepSeek's model, hosted by DeepInfra. Requests tell OpenRouter to use only hosts that don't train on or keep prompts (`data_collection: "deny"`), and those services' own policies apply.
 - The conversation lives in the page's memory only. Reloading clears it.
 - No analytics, cookies or third-party scripts. Walking directions are a link to Google Maps; nothing goes to Google unless you tap it.
@@ -107,7 +108,7 @@ To run on Cloudflare's own runtime locally, load the index into a local D1 datab
 
 | Command | What it does | Costs money? |
 |---|---|---|
-| `npm test` | 144 unit tests. No network, no AI calls | No |
+| `npm test` | 148 unit tests. No network, no AI calls | No |
 | `npm run check:feeds` | Checks every live source still parses, office links still resolve, and saved timetables aren't about to expire | No |
 | `npm run eval:search` | Scores page search on 67 labeled queries | No |
 | `npm run questions` | Asks the 85 questions in `tests/questions.json` through the running dev server, for grading against each one's expected answer | Yes, about $0.07 a round on DeepSeek |

@@ -549,6 +549,47 @@ function codePrompt(answer, question, message) {
   input.focus();
 }
 
+// "Report this answer": sends this one answer, only when tapped (src/reports.js). The form says
+// exactly what goes, since it's the one thing the app keeps.
+function reportControl(report) {
+  const wrap = el("div", { class: "report" });
+  const open = el("button", { type: "button", class: "link-button", text: "Report this answer" });
+  open.addEventListener("click", () => {
+    const note = el("textarea", { class: "report-note", rows: "2", maxlength: "1000", placeholder: "What was wrong? (optional)", "aria-label": "What was wrong" });
+    const send = el("button", { type: "submit", class: "code-button", text: "Send report" });
+    const cancel = el("button", { type: "button", class: "link-button", text: "Cancel" });
+    const status = el("p", { class: "muted small", role: "status" });
+    const form = el(
+      "form",
+      { class: "report-form" },
+      el("p", { class: "muted small", text: "Sends this question and answer (plus the earlier ones in this conversation) and your note to Middleburity's developer, to fix mistakes. Nothing about who you are. Kept 60 days." }),
+      note,
+      el("div", { class: "report-actions" }, send, cancel),
+      status,
+    );
+    cancel.addEventListener("click", () => wrap.replaceChildren(open));
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      send.disabled = true;
+      try {
+        const headers = { "content-type": "application/json" };
+        if (savedCode()) headers["x-access-code"] = savedCode();
+        const res = await fetch("/api/report", { method: "POST", headers, body: JSON.stringify({ ...report, note: note.value }) });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || "Couldn't send the report. Try again.");
+        wrap.replaceChildren(el("p", { class: "muted small", text: "Thanks, report sent." }));
+      } catch (err) {
+        status.textContent = err.message;
+        send.disabled = false;
+      }
+    });
+    wrap.replaceChildren(form);
+    note.focus();
+  });
+  wrap.append(open);
+  return wrap;
+}
+
 async function ask(question) {
   question = question.trim();
   if (!question) return;
@@ -577,6 +618,16 @@ async function ask(question) {
       const node = renderCard(card);
       if (node) block.append(node);
     }
+    block.append(
+      reportControl({
+        question,
+        answer: data.answer,
+        context: history.slice(-4),
+        tools: data.tools,
+        cards: (data.cards ?? []).map((c) => c.type),
+        model: data.model,
+      }),
+    );
     history.push({ role: "user", content: question }, { role: "assistant", content: data.answer });
     history.splice(0, Math.max(0, history.length - MAX_HISTORY));
   } catch (err) {
