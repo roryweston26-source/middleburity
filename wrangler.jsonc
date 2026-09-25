@@ -32,7 +32,7 @@
     "OPENROUTER_PROVIDER": "DeepInfra",
     // Spending protection (see src/limits.js). Change these, then redeploy.
     "DAILY_BUDGET_USD": "2",
-    "RATE_PER_HOUR": "20",
-    "RATE_PER_DAY": "60"
+    "RATE_PER_HOUR": "100",
+    "RATE_PER_DAY": "300"
   }
 }

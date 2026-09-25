@@ -153,7 +153,7 @@ After `npm run build:pages`, run `npm run db:remote` again so production matches
 
 `src/limits.js` checks every question before it reaches the model:
 
-- **Per visitor:** 20 questions an hour and 60 a day.
+- **Per visitor:** 100 questions an hour and 300 a day. A visitor is an IP address, and everyone on one network (a dorm, campus Wi-Fi) shares one, so the limits are set for a shared network.
 - **For the whole app:** a daily dollar cap ($2), from the cost the provider reports for each answer.
 - **An access code** keeps the chat to invited testers. The home screen stays open, since it costs nothing.
 
