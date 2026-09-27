@@ -98,7 +98,9 @@ const siteNote = (url) => {
 export async function searchPages(db, query, { limit = 5, perPage = 2, scope = "all", now = new Date(), weights = WEIGHTS, synonyms = true } = {}) {
   const match = matchExpression(query, { synonyms });
   if (!match) return [];
-  const where = scope === "faculty" ? "AND p.section = 'college/people'" : scope === "not-faculty" ? "AND p.section != 'college/people'" : "";
+  // Faculty profiles are under college/people, librarians' under library/people.
+  const people = "p.section IN ('college/people', 'library/people')";
+  const where = scope === "faculty" ? `AND ${people}` : scope === "not-faculty" ? `AND NOT ${people}` : "";
   const { title, heading, path, body } = weights;
   const { results } = await db
     .prepare(

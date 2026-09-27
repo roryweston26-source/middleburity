@@ -34,18 +34,30 @@ const SECTIONS = [
   "college/student-life", "college/admissions", "college/orientation", "college/feb-celebration",
   "college/academics", "college/people",
   "library/services", "library/special-collections", "library/spaces", "library/collections", "library/about", "library/search-find",
+  // Added 2026-09-27 from a sitemap pass over the sections not yet indexed. "anderson-freeman" and
+  // "measles" were missed paths for offices already covered.
+  "anderson-freeman", "measles",
+  "sustainability-environmental-affairs", "community-engagement", "rohatyn",
+  "innovation-hub", "elizabeth-hackett-robinson-84-innovation-hub", "middcore",
+  "event-management", "college/arts", "college/box-office", "college/commencement",
+  "about", "college-lands",
+  "library/people", "axinn-center-humanities", "conflict-transformation", "alumni-and-families",
 ];
-// Single pages whose sections are otherwise out of scope (the library's own news and staff pages aren't wanted;
-// the rest of Facilities, Business Services and the arts site is for staff and visitors).
+// Single pages whose sections are otherwise out of scope (the library's own news pages aren't wanted;
+// the rest of Facilities and Business Services is for staff and visitors).
 const SINGLE_PAGES = [
   "library", "library/collection-locations",
   "facilities-services/student-mail-center", "facilities-services/who-do-i-call", "business-services/laundry",
-  "college/arts/about/transportation-options", "college/box-office/directions-parking-and-transportation",
+  "facilities-services-office/service-request",
+  "college/summer-opportunities", "college/families", "college/international-students-counselor-assignments-country",
 ];
 // Old or archived material, even inside allowed sections.
 const EXCLUDE = /covid|archive|-old\b|\bold-|spring-?2021|midd2021|test-page|example|\/news\//i;
+// Parts of included middlebury.edu sections that are stories, podcasts or past calendars, not student answers.
+const SKIP = /\/community-engagement\/stories-field\/|\/rohatyn\/(new-frontiers-podcast|\d{4}-\d{4}-events-calendar)\//i;
 
-const trim = (url) => url.replace(/\/+$/, "");
+// Paths are compared lowercased: the Title IX office's pages live under both /title-ix/ and /title-IX/.
+const trim = (url) => url.replace(/\/+$/, "").toLowerCase();
 
 const SITES = [
   {
@@ -56,15 +68,16 @@ const SITES = [
       "https://www.middlebury.edu/library/sitemap.xml",
     ],
     include: (url) =>
-      SINGLE_PAGES.some((s) => trim(url) === `https://www.middlebury.edu/${s}`) ||
-      SECTIONS.some((s) => {
-        const base = `https://www.middlebury.edu/${s}`;
-        return trim(url) === base || url.startsWith(`${base}/`);
-      }),
+      !SKIP.test(url) &&
+      (SINGLE_PAGES.some((s) => trim(url) === `https://www.middlebury.edu/${s}`) ||
+        SECTIONS.some((s) => {
+          const base = `https://www.middlebury.edu/${s}`;
+          return trim(url) === base || trim(url).startsWith(`${base}/`);
+        })),
     // Sitemap dates here track real page edits.
     dated: true,
     section: (url) => {
-      const parts = url.replace("https://www.middlebury.edu/", "").split("/");
+      const parts = trim(url).replace("https://www.middlebury.edu/", "").split("/");
       return parts.slice(0, ["college", "library"].includes(parts[0]) ? 2 : 1).join("/");
     },
   },
