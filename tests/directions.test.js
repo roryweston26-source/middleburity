@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { directions, directionsTool, findPlace, mapsUrl } from "../src/tools/directions.js";
 import { PLACES } from "../src/data/places.js";
+import { isDisplayOnly } from "../src/tools/index.js";
+
+test("directions are display-only, so an answer written alongside the link is kept", () => {
+  assert.equal(isDisplayOnly("get_directions"), true);
+});
 
 test("every place has a name, a kind, and coordinates on campus", () => {
   for (const p of PLACES) {

@@ -97,7 +97,11 @@ export function directions({ to, from }) {
   };
 }
 
+// Display-only: the card shows the distance and any note itself. In testing (2026-09-28) DeepSeek
+// sometimes wrote the answer ("first home game is Nov 20 at Kenyon Arena") alongside a directions
+// call, then replaced it with a line about the link, and the game was lost.
 export const directionsTool = {
+  displayOnly: true,
   definition: {
     name: "get_directions",
     description:
