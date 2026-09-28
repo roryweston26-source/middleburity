@@ -36,9 +36,23 @@ export const SCHEMA = [
   "CREATE TABLE IF NOT EXISTS index_info (key TEXT PRIMARY KEY, value TEXT)",
 ];
 
-// The last few segments of a page's address, e.g. "center careers and internships advising".
+// Words for the outside sites in the index, searched like address words. The Snow Bowl's student
+// page is "Middlebury College 411" at /middlebury-college-411/ and writes "Snowbowl" as one word,
+// so without these, "student ski pass" found the general pass pages and never the $189 student
+// pass or the free pass for new students.
+const SITE_WORDS = {
+  "middleburysnowbowl.com": "snow bowl snowbowl ski",
+  "rikertoutdoor.com": "rikert nordic ski",
+  "trivalleytransit.org": "tri valley transit bus",
+};
+
+// The last few segments of a page's address, e.g. "center careers and internships advising",
+// after the site's own words for a page outside middlebury.edu.
 export function pathWords(url) {
-  return new URL(url).pathname.split("/").filter(Boolean).slice(-3).join(" ").replace(/-/g, " ");
+  const { hostname, pathname } = new URL(url);
+  const words = pathname.split("/").filter(Boolean).slice(-3).join(" ").replace(/-/g, " ");
+  const site = SITE_WORDS[hostname.replace(/^www\./, "")];
+  return site ? `${site} ${words}` : words;
 }
 
 // Statements that load a crawled index ({ builtOn, pages, chunks }) into the tables above.

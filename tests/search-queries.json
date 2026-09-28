@@ -262,6 +262,10 @@
       "expect": "middleburysnowbowl.com/(middlebury-college-411|season-passes)"
     },
     {
+      "q": "student ski pass price",
+      "expect": "middleburysnowbowl.com/middlebury-college-411"
+    },
+    {
       "q": "winter term pe skiing class",
       "expect": "rikertoutdoor.com/winter-term-pe|middleburysnowbowl.com/winter-term"
     },

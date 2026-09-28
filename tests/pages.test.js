@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { chunk, extract, scrub } from "../scripts/page-text.js";
 import { mergeCards } from "../src/chat.js";
 import { openLocalD1 } from "../src/db/node-d1.js";
-import { loadStatements, matchExpression, pagesTool, searchPages } from "../src/tools/pages.js";
+import { loadStatements, matchExpression, pagesTool, pathWords, searchPages } from "../src/tools/pages.js";
 
 // A tiny made-up index in the same shape scripts/build-pages.js writes.
 const data = {
@@ -101,4 +101,9 @@ test("several page searches merge into one card without repeats", () => {
   const merged = mergeCards([card(["a", "b"]), { type: "menu" }, card(["b", "c"])]);
   assert.deepEqual(merged.map((c) => c.type), ["menu", "pages"]);
   assert.deepEqual(merged[1].pages.map((p) => p.url), ["a", "b", "c"]);
+});
+
+test("outside pages are searchable by their site's name, Middlebury's by address only", () => {
+  assert.equal(pathWords("https://middleburysnowbowl.com/middlebury-college-411/"), "snow bowl snowbowl ski middlebury college 411");
+  assert.equal(pathWords("https://www.middlebury.edu/college/student-life/athletics"), "college student life athletics");
 });
