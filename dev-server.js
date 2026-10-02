@@ -42,7 +42,9 @@ async function loadEnv() {
 }
 
 async function serveStatic(pathname, res) {
-  const rel = pathname === "/" ? "index.html" : pathname.slice(1);
+  // Like Cloudflare's assets, "/offline" serves offline.html.
+  let rel = pathname === "/" ? "index.html" : pathname.slice(1);
+  if (!extname(rel)) rel += ".html";
   const file = normalize(join(publicDir, rel));
   if (!file.startsWith(publicDir + sep)) {
     res.writeHead(403).end();

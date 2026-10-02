@@ -17,6 +17,7 @@
     "eval:search": "node tests/eval-search.js",
     "feedback": "node scripts/feedback.js",
     "build:db": "node scripts/build-db.js",
+    "build:icons": "node scripts/build-icons.js",
     "dev:cf": "wrangler dev --port 8788",
     "db:local": "wrangler d1 execute middleburity --local --file=.cache/pages-d1.sql",
     "db:remote": "wrangler d1 execute middleburity --remote --file=.cache/pages-d1.sql",

@@ -66,6 +66,7 @@ After this phase: the friends test in January behind the access code, then the p
 ## How it's built
 
 - Plain JavaScript ES modules, no build step, Node 20+. The only dependency is `@anthropic-ai/sdk`.
+- **It installs as a home-screen app** (2026-10-02): `public/manifest.webmanifest`, PNG icons from `npm run build:icons` (drawn from the same shape as `icon.svg`, no image library; rerun after changing the icon), and `public/sw.js`, which only stands in when a page load fails (it shows `/offline`). It never answers from a cache while online, so deploys show up at once, and it never touches `/api/*`. App Store / Play Store wrapping waits until after the trademark talk with Communications.
 - `src/worker.js` has the Cloudflare Worker shape, so the same code runs locally (`dev-server.js`) and in production (Cloudflare Workers free plan).
 - **Adding a source:** add a tool file in `src/tools/`, register it in `src/tools/index.js`, add its questions to `tests/questions.json`, and add a live check to `tests/check-feeds.js`.
 - **Office names come from `src/tools/offices.js`, never from the model.** In testing, the model's remembered office names were stale: it offered the "Center for Campus Activities and Leadership", an office Middlebury has since renamed. `get_office` is `displayOnly`: when the model writes its answer and only asks for office links, chat.js returns that answer without a second model call.

@@ -703,3 +703,8 @@ async function loadToday() {
 }
 
 loadToday();
+
+// Installed as an app, this shows a saved "you're offline" page instead of the browser's error.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch(() => {});
+}
