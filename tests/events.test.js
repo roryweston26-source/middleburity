@@ -65,6 +65,7 @@ test("a few events get their whole description; a long list gets 280 characters 
     startDateTimeUtc: "2026-10-03T13:00:00Z", endDateTimeUtc: "2026-10-03T20:00:00Z", description: `<p>${long}</p>`, tags: [],
   }));
   t.mock.method(globalThis, "fetch", async () => new Response(JSON.stringify(events)));
+  t.mock.timers.enable({ apis: ["Date"], now: new Date("2026-10-03T12:00:00Z") }); // 8 AM in Vermont, before the trips
   clearEventsCache();
   const one = JSON.parse((await eventsTool.run({ from: "2026-10-03", keyword: "trip 2" })).content);
   assert.equal(one.events.length, 1);
