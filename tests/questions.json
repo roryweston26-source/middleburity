@@ -911,6 +911,131 @@
         "grounding",
         "tools"
       ]
+    },
+    {
+      "id": "n-winter-reg",
+      "question": "When do I register for winter term?",
+      "needs": "Winter 2027 Registration page",
+      "when": "now",
+      "good_answer": "Banner 9, from 7 a.m. Vermont time: Nov 2 (7-15.99 credits), Nov 3 (3-6.99), Nov 4 (16+). Credits through Fall 2026. Winter 2027 Registration page.",
+      "capabilities": [
+        "grounding",
+        "time"
+      ]
+    },
+    {
+      "id": "n-jterm-reg",
+      "question": "When is J-term registration?",
+      "needs": "Winter 2027 Registration page",
+      "when": "now",
+      "good_answer": "Same windows as above (Nov 2-4, 7 a.m.); may say J-term = Winter Term.",
+      "capabilities": [
+        "grounding",
+        "time"
+      ]
+    },
+    {
+      "id": "n-winter-adddrop",
+      "question": "When does add/drop open for winter term 2027?",
+      "needs": "Winter 2027 Registration page",
+      "when": "now",
+      "good_answer": "Online add/drop opens Thu Nov 5 and runs through Jan 6 (third day of classes); adding needs instructor approval. The page's FAQ also says Jan 7; mentioning the conflict is good.",
+      "capabilities": [
+        "grounding",
+        "time"
+      ]
+    },
+    {
+      "id": "n-admin-committee",
+      "question": "Who is on the Administration Committee?",
+      "needs": "Administration Committee page",
+      "when": "now",
+      "good_answer": "2026-27: chaired by Assistant Dean for Student Success Jennifer Sellers; Ilaria Brancoli Busdraghi, Sam Liebhaber, David West. No invented members.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "n-late-add",
+      "question": "Can I add a course after the deadline?",
+      "needs": "Fall 2026 Registration page + Handbook B.1.f",
+      "when": "now",
+      "good_answer": "Yes, by request: through Sept 25 as usual; second-half half-credit courses through Nov 6 by emailing the Registrar; after the deadline, petition the Registrar (Handbook B.1.f), which charges $50 per add if approved and may forward it to the Administration Committee. Late adds are at the student's own risk. Shouldn't open with a flat no.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "n-ap-late",
+      "question": "I missed the deadline to apply AP credit. What can I do?",
+      "needs": "Administration Committee page",
+      "when": "now",
+      "good_answer": "Administration Committee petition to the Registrar with an official score report.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "n-graduate-early",
+      "question": "How do I petition to graduate early?",
+      "needs": "Administration Committee page + Handbook degree requirements",
+      "when": "now",
+      "good_answer": "Administration Committee petition: signed degree audit; F-1/J-1 students also need ISSS approval. Petition format: request, reason, documents; cover form.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "n-opt-fee",
+      "question": "Is there a new fee for OPT?",
+      "needs": "ISSS update on the proposed OPT fee",
+      "when": "now",
+      "good_answer": "DHS proposed an OPT fee on Oct 8, 2026; proposal only, not in effect; no change to eligibility or procedures; comment period ends Nov 9, 2026; comments in personal capacity.",
+      "capabilities": [
+        "grounding",
+        "time"
+      ]
+    },
+    {
+      "id": "n-join-club",
+      "question": "How do I join a club?",
+      "needs": "Student Engagement page + club directory",
+      "when": "now",
+      "good_answer": "MiddPresence: membership open to all; learn about orgs, meeting times, contact leaders. May use get_clubs.",
+      "capabilities": [
+        "grounding",
+        "tools"
+      ]
+    },
+    {
+      "id": "n-exploration-fund",
+      "question": "What is the Exploration Fund?",
+      "needs": "Student Engagement page",
+      "when": "now",
+      "good_answer": "Student Engagement fund connecting students to resources for ideas/initiatives without needing registered student organization status.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "n-rohatyn-fellows",
+      "question": "Who are the Rohatyn Global Fellows this year?",
+      "needs": "Rohatyn Fellows 2026-2027 page",
+      "when": "now",
+      "good_answer": "2026-27 cohort from The Fellows 2026-2027 page (17 names, some fall/spring only). Or says it can't find the list; no invented names.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "n-phl",
+      "question": "What are the public humanities labs?",
+      "needs": "Axinn Public Humanities pages",
+      "when": "now",
+      "good_answer": "Axinn Center labs, est. 2021, experiential humanities courses; Mellon grant funds thirty new labs; NHA recognition 2023.",
+      "capabilities": [
+        "grounding"
+      ]
     }
   ]
 }
