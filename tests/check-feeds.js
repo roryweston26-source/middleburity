@@ -193,6 +193,10 @@ for (const [id, office] of Object.entries(OFFICES)) {
     } else if (!res.ok) {
       problems++;
       console.log(`  FAIL  ${id}: ${res.status} ${office.url}`);
+    } else if (moved && /\/splash\.aspx\b/.test(res.url)) {
+      // The athletics site (Sidearm) sometimes puts a promo page with a skip link in front of
+      // its homepage. The link still works for a person, so this is a note, not a problem.
+      console.log(`  ok    ${id} (a promo page with a skip link shows first: ${res.url})`);
     } else if (moved) {
       problems++;
       console.log(`  MOVED ${id}: now redirects to ${res.url}`);
