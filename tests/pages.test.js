@@ -35,6 +35,15 @@ test("questions become quoted OR searches, without stopwords, plus synonyms", ()
   assert.equal(matchExpression("the a of"), "");
 });
 
+test("J-term searches as winter term, and 'this year' adds the academic year's numbers", () => {
+  assert.equal(matchExpression("when is J-term registration"), '"winter" OR "term" OR "registration"');
+  assert.equal(matchExpression("rohatyn fellows this year", { now }), '"rohatyn" OR "fellows" OR "year" OR "2026" OR "2027"');
+  // Before July, the academic year started the fall before.
+  assert.equal(matchExpression("current fellows", { now: new Date("2027-03-01T12:00:00Z") }), '"current" OR "fellows" OR "2026" OR "2027"');
+  assert.equal(matchExpression("fellows next year", { now }), '"fellows" OR "next" OR "year" OR "2027" OR "2028"');
+  assert.equal(matchExpression("rohatyn fellows"), '"rohatyn" OR "fellows"');
+});
+
 test("the best-matching page comes first, with its passages and date", async () => {
   const [top] = await searchPages(db, "how does the meal plan work", { now });
   assert.equal(top.title, "General Information");

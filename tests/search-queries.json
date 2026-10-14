@@ -272,6 +272,30 @@
     {
       "q": "rikert day ticket",
       "expect": "rikertoutdoor.com/day-tickets"
+    },
+    {
+      "q": "when is J-term registration",
+      "expect": "registrar/registration/winter-[0-9]{4}-registration"
+    },
+    {
+      "q": "when do I register for winter term",
+      "expect": "registrar/registration/winter-[0-9]{4}-registration"
+    },
+    {
+      "q": "can I add a course after the deadline",
+      "expect": "course-reg-course-conduct|administration-committee"
+    },
+    {
+      "q": "who are the rohatyn global fellows this year",
+      "expect": "rohatyn/student-programs/overview/fellows-[0-9]{4}-[0-9]{4}$"
+    },
+    {
+      "q": "how do I petition to graduate early",
+      "expect": "administration-committee|degree-requires"
+    },
+    {
+      "q": "is there a new fee for OPT",
+      "expect": "international-student-and-scholar-services/travel-regulatory-and-information-updates"
     }
   ]
 }

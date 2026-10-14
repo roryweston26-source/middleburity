@@ -73,11 +73,13 @@ export function loadStatements(db, data) {
 
 // Turns a question into an FTS5 query: each meaningful word, plus synonyms, OR'd together
 // and quoted so nothing a person types is read as search syntax.
-export function matchExpression(query, { synonyms = true } = {}) {
+export function matchExpression(query, { synonyms = true, now = new Date() } = {}) {
+  const lower = query.toLowerCase();
   const words = [
     ...new Set(
-      query
-        .toLowerCase()
+      lower
+        // "J-term" would lose its "j" (one letter); Middlebury's pages say "winter term".
+        .replace(/\bj[- ]?term\b/g, "winter term")
         .normalize("NFKD")
         .replace(/[̀-ͯ]/g, "")
         .replace(/['’]/g, "")
@@ -87,6 +89,13 @@ export function matchExpression(query, { synonyms = true } = {}) {
   ];
   const terms = new Set(words);
   if (synonyms) for (const w of words) for (const s of SYNONYMS[w] ?? []) terms.add(s);
+  // "This year" means the current academic year, which pages write as "2026-2027" or "2026-27":
+  // without it, "rohatyn fellows this year" found every year's fellows page but this one.
+  if (synonyms && /\b(this|current|next) (academic )?year\b|\bcurrent\b/.test(lower)) {
+    const fall = now.getUTCMonth() >= 6 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
+    const start = /\bnext (academic )?year\b/.test(lower) ? fall + 1 : fall;
+    terms.add(String(start)).add(String(start + 1));
+  }
   return [...terms].map((t) => `"${t}"`).join(" OR ");
 }
 
@@ -110,7 +119,7 @@ const siteNote = (url) => {
 };
 
 export async function searchPages(db, query, { limit = 5, perPage = 2, scope = "all", now = new Date(), weights = WEIGHTS, synonyms = true } = {}) {
-  const match = matchExpression(query, { synonyms });
+  const match = matchExpression(query, { synonyms, now });
   if (!match) return [];
   // Faculty profiles are under college/people, librarians' under library/people.
   const people = "p.section IN ('college/people', 'library/people')";
