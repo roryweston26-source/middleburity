@@ -22,7 +22,26 @@ export const PLACES = {
   "fitness-center": { name: "Fitness Center", gcal: "t0e014c4u6vpndfjcgqqe25ct8" },
   pool: { name: "Natatorium (pool)", gcal: "0b3h20dfo8ep5ojt765one44qo" },
   "snow-bowl": { name: "Middlebury Snow Bowl", snowbowl: true },
+  // These three have no open-hours calendar. Their facility pages embed 25Live Publisher
+  // calendars of what's booked in the space (practices, games, PE classes, open skate, open gym).
+  "kenyon-arena": { name: "Kenyon Arena (rink)", space: "kenyon-space-schedule", page: "kenyon" },
+  "pepin-gym": { name: "Pepin Gymnasium", space: "pepin-space-schedule", page: "pepin" },
+  "nelson-rec": { name: "Nelson Recreation Center", space: "nelson-spaces-schedule", page: "nelson" },
 };
+
+// 25Live Publisher's iCal feed for a calendar, cut to the days asked for (a week is about 40 KB;
+// the whole feed runs months ahead and is 350 KB). 25livepub's robots.txt allows everything.
+const SPACE = (name, from, days) => `https://25livepub.collegenet.com/calendars/${name}.ics?startdate=${from.replace(/-/g, "")}&days=${days}`;
+const SPACE_PAGE = (page) => `https://athletics.middlebury.edu/sports/2020/6/4/facilities-${page}.aspx`;
+
+// A booking as one line: "4:30pm-6pm Volleyball Practice (Nelson Court 1)". PE classes are
+// shown without their course codes: class schedules wait on the Registrar's permission.
+export function describeBooking(entry) {
+  const title = /^PHED\s+\d/i.test(entry.summary) ? "PE class" : toPlainText(entry.summary, 120) || "Booked";
+  const time = entry.start === null ? "All day" : `${clock(entry.start)}-${entry.end ? clock(entry.end) : "?"}`;
+  const room = toPlainText(entry.location ?? "", 120).replace(/Memorial Field House /g, "");
+  return `${time} ${title}${room ? ` (${room})` : ""}`;
+}
 
 // The Snow Bowl's own hours calendar: the month table its hours page loads (robots.txt allows
 // admin-ajax.php). Days are "Open from 9 a.m. to 9 p.m." or "Closed", and next season's months
@@ -99,6 +118,10 @@ function stillMatters(body, since) {
   return addDays(`${start.slice(0, 4)}-${start.slice(4, 6)}-${start.slice(6, 8)}`, weeks * 7).replace(/-/g, "") >= since;
 }
 
+const unescape = (value) => (value ?? "").replace(/\\([,;\\])/g, "$1").replace(/\\n/gi, " ").trim();
+
+// Only the fields named here are ever read from an entry. The 25Live calendars also carry the
+// name, email and phone of whoever booked the space; those are never parsed.
 export function parseCalendar(text, since = "00000000") {
   const unfolded = text.replace(/\r?\n[ \t]/g, "");
   const masters = [];
@@ -119,7 +142,8 @@ export function parseCalendar(text, since = "00000000") {
       uid: one("UID")?.value,
       start,
       end,
-      summary: (one("SUMMARY")?.value ?? "").replace(/\\([,;\\])/g, "$1").replace(/\\n/gi, " ").trim(),
+      summary: unescape(one("SUMMARY")?.value),
+      location: unescape(one("LOCATION")?.value),
       cancelled: one("STATUS")?.value === "CANCELLED",
     };
     const rid = one("RECURRENCE-ID");
@@ -169,7 +193,7 @@ function weekly(event, from, to) {
 
 const shift = (event, t) => {
   const length = event.end ? daysBetween(event.start.date, event.end.date) : 0;
-  return { date: t.date, start: t.time, end: event.end?.time ?? null, lastDate: addDays(t.date, length), summary: event.summary };
+  return { date: t.date, start: t.time, end: event.end?.time ?? null, lastDate: addDays(t.date, length), summary: event.summary, location: event.location };
 };
 
 // Every entry in the calendar that falls on each date from `from` to `to`.
@@ -272,6 +296,18 @@ export async function getHours(placeId, from, to, now = new Date()) {
     }
     return { checkedAt: new Date(Math.min(...parsed.map((p) => p.at))).toISOString(), url: SNOWBOWL_PAGE, label: "Middlebury Snow Bowl hours calendar", days: out, notes };
   }
+  if (place.space) {
+    const url = SPACE(place.space, from, daysBetween(from, to) + 1);
+    const { at, data } = await cached(url, (text) => parseCalendar(text), now);
+    const byDate = entriesBetween(data, from, to);
+    return {
+      checkedAt: new Date(at).toISOString(),
+      url: SPACE_PAGE(place.page),
+      label: `${place.name} space schedule (25Live)`,
+      bookings: true,
+      days: [...byDate].map(([date, entries]) => ({ date, hours: entries.map(describeBooking) })),
+    };
+  }
   // Entries that ended over a week ago are skipped at parse time (see stillMatters).
   const since = addDays(campusDate(now), -7).replace(/-/g, "");
   const { at, data } = await cached(GCAL(place.gcal), (text) => parseCalendar(text, since), now);
@@ -292,7 +328,8 @@ export const hoursTool = {
     description:
       "Posted opening hours, day by day: the library, Crossroads Café and research help (about two weeks ahead), the athletic complex, fitness center and pool, and the Snow Bowl's lift hours (ski conditions and trail status aren't online, only in its app). " +
       "A day with no entry means nothing is posted, not that it's closed. " +
-      "Other hours (dining halls, retail spots, the Mail Center, offices, Kenyon Arena, Pepin Gym, Nelson Rec, the climbing wall) aren't here: search_pages, or say you couldn't find them.",
+      "Kenyon Arena, Pepin Gym and Nelson Rec give what's booked there instead (practices, games, open skate, open gym), not opening hours. " +
+      "Other hours (dining halls, retail spots, the Mail Center, offices, the climbing wall) aren't here: search_pages, or say you couldn't find them.",
     input_schema: {
       type: "object",
       properties: {
@@ -316,16 +353,20 @@ export const hoursTool = {
       content: JSON.stringify({
         source: result.label,
         place: name,
-        note: "Hours as posted. A day marked 'nothing posted' has no entry in the calendar; don't guess it.",
+        note: result.bookings
+          ? "What's booked in the space, from its reservation calendar: not opening hours. Entries titled open skate or open gym are the open times as named; others are teams, clubs or classes. An unbooked time doesn't mean the space is open: the building follows athletic-complex hours, and nothing here says who may use it then."
+          : "Hours as posted. A day marked 'nothing posted' has no entry in the calendar; don't guess it.",
         ...(result.notes?.length && { also: result.notes }),
         days: result.days.map((d) => ({
           date: `${dayLabel(d.date)} (${d.date})`,
-          hours: d.hours === null ? "nothing posted (beyond what the calendar covers)" : d.hours.length ? d.hours : "nothing posted",
+          [result.bookings ? "booked" : "hours"]:
+            d.hours === null ? "nothing posted (beyond what the calendar covers)" : d.hours.length ? d.hours : result.bookings ? "nothing booked" : "nothing posted",
         })),
       }),
       card: {
         type: "hours",
         place: name,
+        ...(result.bookings && { bookings: true }),
         days: result.days.map((d) => ({ date: d.date, hours: d.hours ?? [] })),
         source: { label: result.label, url: result.url, checkedAt: result.checkedAt },
       },

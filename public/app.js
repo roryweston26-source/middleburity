@@ -363,10 +363,11 @@ function hoursCard(card) {
       "li",
       { class: "row" },
       el("div", { class: "row-main", text: shortDate(d.date) }),
-      el("div", { class: "row-meta", text: d.hours.length ? d.hours.join(" · ") : "Nothing posted" }),
+      el("div", { class: "row-meta", text: d.hours.length ? d.hours.join(" · ") : card.bookings ? "Nothing booked" : "Nothing posted" }),
     ),
   );
-  return el("article", { class: "card" }, cardHead(card.place), el("ul", { class: "rows" }, rows), sourceLine(card.source, " Hours as the calendar lists them."));
+  const note = card.bookings ? " Bookings as the calendar lists them, not opening hours." : " Hours as the calendar lists them.";
+  return el("article", { class: "card" }, cardHead(card.place), el("ul", { class: "rows" }, rows), sourceLine(card.source, note));
 }
 
 // Timetable times are "HH:MM", and can run past 24:00 for trips after midnight.

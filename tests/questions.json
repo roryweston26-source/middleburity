@@ -1036,6 +1036,30 @@
       "capabilities": [
         "grounding"
       ]
+    },
+    {
+      "id": "open-skate",
+      "question": "When is open skate at Kenyon this week?",
+      "needs": "Kenyon space schedule (get_hours kenyon-arena)",
+      "when": "now",
+      "good_answer": "Lists the Open Skate times from the booking calendar for the coming days, as listed; says the calendar shows bookings, not opening hours. No guessed times; if none are booked, says so.",
+      "capabilities": [
+        "grounding",
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "pepin-free",
+      "question": "Can I shoot hoops in Pepin tonight?",
+      "needs": "Pepin space schedule + athletic-complex hours",
+      "when": "now",
+      "good_answer": "Says what is booked in Pepin tonight (practices, games, open gym) and the athletic complex hours; does not promise the gym is open to students when nothing is booked, since the calendar shows bookings only.",
+      "capabilities": [
+        "grounding",
+        "tools",
+        "time"
+      ]
     }
   ]
 }

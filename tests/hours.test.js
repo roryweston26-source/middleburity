@@ -75,6 +75,41 @@ test("the gym's hours come from the athletics calendar", async (t) => {
   assert.deepEqual(JSON.parse(out.content).days[0].hours, ["6am-5pm"]);
 });
 
+// Shaped like the 25Live feeds for Kenyon, Pepin and Nelson, including the booker's contact
+// fields, which must never come through.
+const spaceIcs = [
+  "BEGIN:VCALENDAR",
+  "BEGIN:VEVENT", "UID:skate", "DTSTART;TZID=America/New_York:20261018T130000", "DTEND;TZID=America/New_York:20261018T150000",
+  "SUMMARY:Open Skate", "LOCATION:Chip Kenyon Arena",
+  'X-TRUMBA-CUSTOMFIELD;NAME="Submitter Name";ID=884;TYPE=SingleLine:Pat Booker',
+  'X-TRUMBA-CUSTOMFIELD;NAME="Submitter Phone";ID=885;TYPE=SingleLine:(802) 555-0100',
+  'X-TRUMBA-CUSTOMFIELD;NAME="Submitter Email";ID=886;TYPE=Email:<a href="mailto:pat@example.edu">pat@example.edu</a>',
+  "END:VEVENT",
+  "BEGIN:VEVENT", "UID:class", "DTSTART;TZID=America/New_York:20261018T091500", "DTEND;TZID=America/New_York:20261018T103000",
+  "SUMMARY:PHED 0152 A 90020 202690", "LOCATION:Memorial Field House Pepin Gymnasium", "END:VEVENT",
+  "BEGIN:VEVENT", "UID:hockey", "DTSTART;TZID=America/New_York:20261018T160000", "DTEND;TZID=America/New_York:20261018T180000",
+  "SUMMARY:Women&#39\\;s Ice Hockey Practice", "LOCATION:Kenyon Skate Room\\, Chip Kenyon Arena", "END:VEVENT",
+  "END:VCALENDAR",
+].join("\r\n");
+
+test("Kenyon, Pepin and Nelson give what's booked, never who booked it or a class's code", async (t) => {
+  clearHoursCache();
+  const requested = stubFetch(t, { "25livepub.collegenet.com": { body: spaceIcs } });
+  const out = await hoursTool.run({ place: "kenyon-arena", date: "2026-10-17", days: 2 }, {}, new Date("2026-10-14T16:00:00Z"));
+  assert.match(requested[0], /calendars\/kenyon-space-schedule\.ics\?startdate=20261017&days=2$/);
+  const result = JSON.parse(out.content);
+  assert.match(result.note, /not opening hours/);
+  assert.equal(result.days[0].booked, "nothing booked");
+  assert.deepEqual(result.days[1].booked, [
+    "9:15am-10:30am PE class (Pepin Gymnasium)",
+    "1pm-3pm Open Skate (Chip Kenyon Arena)",
+    "4pm-6pm Women's Ice Hockey Practice (Kenyon Skate Room, Chip Kenyon Arena)",
+  ]);
+  const everything = out.content + JSON.stringify(out.card);
+  assert.doesNotMatch(everything, /Pat Booker|555-0100|example\.edu|PHED|90020/);
+  assert.match(out.card.source.url, /facilities-kenyon\.aspx$/);
+});
+
 test("unknown places and past dates are errors the model can read", async () => {
   await assert.rejects(hoursTool.run({ place: "climbing-wall" }), /place must be one of/);
   await assert.rejects(hoursTool.run({ place: "library", date: "2026-01-01" }, {}, new Date("2026-09-22T16:00:00Z")), /current and upcoming/);

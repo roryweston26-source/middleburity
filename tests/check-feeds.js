@@ -87,6 +87,13 @@ try {
   const { PLACES, hoursTool } = await import("../src/tools/hours.js");
   console.log("\nHours:");
   for (const place of Object.keys(PLACES)) {
+    if (PLACES[place].space) {
+      // Booking calendars: a week with nothing booked at all during term means the feed changed.
+      const week = JSON.parse((await hoursTool.run({ place, days: 7 })).content).days;
+      const count = week.filter((d) => Array.isArray(d.booked)).reduce((n, d) => n + d.booked.length, 0);
+      console.log(`  ${count ? "ok  " : "--  "}  ${place}: ${count} bookings in the next 7 days${count ? "" : " (fine in summer; otherwise check the 25Live feed)"}`);
+      continue;
+    }
     const days = JSON.parse((await hoursTool.run({ place })).content).days;
     const today = days[0].hours;
     console.log(`  ${Array.isArray(today) ? "ok  " : "--  "}  ${place}: ${JSON.stringify(today)}`);
