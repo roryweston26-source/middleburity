@@ -183,11 +183,11 @@
     },
     {
       "q": "how do I join a club",
-      "expect": "student-engagement-belonging/student-engagment$"
+      "expect": "student-engagement-belonging/student-engagement$"
     },
     {
       "q": "how to start a new club",
-      "expect": "student-engagement-belonging/student-engagment$"
+      "expect": "student-engagement-belonging/student-engagement$"
     },
     {
       "q": "club sports teams",

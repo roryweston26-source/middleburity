@@ -42,6 +42,8 @@ const SECTIONS = [
   "event-management", "college/arts", "college/box-office", "college/commencement",
   "about", "college-lands",
   "library/people", "axinn-center-humanities", "conflict-transformation", "alumni-and-families",
+  // Added 2026-10-14: the committee that hears student petitions for exceptions to academic rules.
+  "student-affairs/administration-committee",
 ];
 // Single pages whose sections are otherwise out of scope (the library's own news pages aren't wanted;
 // the rest of Facilities and Business Services is for staff and visitors).
