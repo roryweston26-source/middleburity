@@ -69,7 +69,9 @@ export async function getWeather(placeId, { hourly = false } = {}) {
     place: place.name,
     checkedAt: new Date(Math.min(forecast.at, alerts.at)).toISOString(),
     updated: f.updateTime ?? f.generatedAt ?? null,
-    periods: (f.periods ?? []).slice(0, hourly ? 12 : 8).map(summarizePeriod),
+    // The whole week (14 day/night periods): 8 stopped at Saturday night when asked on a Wednesday,
+    // so "this weekend" lost Sunday.
+    periods: (f.periods ?? []).slice(0, hourly ? 12 : 14).map(summarizePeriod),
     alerts: (alerts.data.features ?? []).map((x) => summarizeAlert(x.properties)),
     url: `https://forecast.weather.gov/MapClick.php?lat=${place.lat}&lon=${place.lon}`,
   };

@@ -34,10 +34,17 @@ export const PLACES = {
 const SPACE = (name, from, days) => `https://25livepub.collegenet.com/calendars/${name}.ics?startdate=${from.replace(/-/g, "")}&days=${days}`;
 const SPACE_PAGE = (page) => `https://athletics.middlebury.edu/sports/2020/6/4/facilities-${page}.aspx`;
 
+// Words that make a booking's title an activity rather than a person. Nelson's courts are also
+// booked by individuals, and those bookings are titled with the person's name ("Alex Draper"),
+// so a title without one of these words is shown only as "Booked".
+const ACTIVITY =
+  /\b(practices?|open|skate|skating|hockey|club|class(es)?|games?|vs\.?|tennis|volleyball|basketball|badminton|pickleball|squash|swim\w*|soccer|lacrosse|football|track|rugby|ultimate|camp|clinics?|workouts?|crossfit|meetings?|IM|intramural|tournament|lessons?|tours?|photoshoot|fitness|yoga|dance|rehearsal|events?|team|hold|league|sessions?|training|skills|tryouts?|scrimmage|classic|championships?|ceremony|fair|reception|preview|party|carnival|ball|keynote|speaker|remarks|coalition|set-?up|breakdown)\b/i;
+
 // A booking as one line: "4:30pm-6pm Volleyball Practice (Nelson Court 1)". PE classes are
 // shown without their course codes: class schedules wait on the Registrar's permission.
 export function describeBooking(entry) {
-  const title = /^PHED\s+\d/i.test(entry.summary) ? "PE class" : toPlainText(entry.summary, 120) || "Booked";
+  const text = toPlainText(entry.summary, 120);
+  const title = /^PHED\s+\d/i.test(entry.summary) ? "PE class" : ACTIVITY.test(text) ? text : "Booked";
   const time = entry.start === null ? "All day" : `${clock(entry.start)}-${entry.end ? clock(entry.end) : "?"}`;
   const room = toPlainText(entry.location ?? "", 120).replace(/Memorial Field House /g, "");
   return `${time} ${title}${room ? ` (${room})` : ""}`;

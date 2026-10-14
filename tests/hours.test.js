@@ -89,6 +89,9 @@ const spaceIcs = [
   "SUMMARY:PHED 0152 A 90020 202690", "LOCATION:Memorial Field House Pepin Gymnasium", "END:VEVENT",
   "BEGIN:VEVENT", "UID:hockey", "DTSTART;TZID=America/New_York:20261018T160000", "DTEND;TZID=America/New_York:20261018T180000",
   "SUMMARY:Women&#39\\;s Ice Hockey Practice", "LOCATION:Kenyon Skate Room\\, Chip Kenyon Arena", "END:VEVENT",
+  // Courts booked by a person are titled with their name.
+  "BEGIN:VEVENT", "UID:person", "DTSTART;TZID=America/New_York:20261018T190000", "DTEND;TZID=America/New_York:20261018T200000",
+  "SUMMARY:Jordan Sample", "LOCATION:Nelson Court 1", "END:VEVENT",
   "END:VCALENDAR",
 ].join("\r\n");
 
@@ -104,9 +107,10 @@ test("Kenyon, Pepin and Nelson give what's booked, never who booked it or a clas
     "9:15am-10:30am PE class (Pepin Gymnasium)",
     "1pm-3pm Open Skate (Chip Kenyon Arena)",
     "4pm-6pm Women's Ice Hockey Practice (Kenyon Skate Room, Chip Kenyon Arena)",
+    "7pm-8pm Booked (Nelson Court 1)",
   ]);
   const everything = out.content + JSON.stringify(out.card);
-  assert.doesNotMatch(everything, /Pat Booker|555-0100|example\.edu|PHED|90020/);
+  assert.doesNotMatch(everything, /Pat Booker|555-0100|example\.edu|PHED|90020|Jordan Sample/);
   assert.match(out.card.source.url, /facilities-kenyon\.aspx$/);
 });
 
