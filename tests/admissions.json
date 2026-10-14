@@ -1,0 +1,101 @@
+{
+  "about": "Prospective-student questions for the admissions side (written 2026-10-14). good_answer comes from the indexed pages that day; check it against the pages again before grading, since deadlines move each year. Run with npm run questions -- --file=admissions.json.",
+  "questions": [
+    {
+      "id": "a-deadlines",
+      "question": "What are the application deadlines?",
+      "needs": "Application Calendar and Deadlines page",
+      "when": "now",
+      "good_answer": "Early Decision I Nov 2 (aid Nov 15, decision mid-December); Early Decision II Jan 4; Regular Jan 4 (aid Feb 1, decision late March); transfer fall Mar 1, transfer spring Nov 2. Mentions that the admission-options page has said Jan 5 if it comes up.",
+      "capabilities": ["grounding", "time"]
+    },
+    {
+      "id": "a-ed2-aid",
+      "question": "When is the financial aid application due for Early Decision II?",
+      "needs": "Admissions deadlines page + SFS first-year aid page",
+      "when": "now",
+      "good_answer": "The pages disagree: the admissions deadlines table says January 4; Student Financial Services' first-year page says CSS Profile and FAFSA by January 3, 2027. Says so and suggests the earlier date or confirming with SFS.",
+      "capabilities": ["grounding", "time"]
+    },
+    {
+      "id": "a-tuition-free",
+      "question": "Is Middlebury free if my family makes $150,000?",
+      "needs": "Affording Middlebury / Estimate Your Cost pages",
+      "when": "now",
+      "good_answer": "Starting with students entering next fall (Class of 2031), tuition-free for family incomes up to $175,000 with typical assets; tuition-free is not the whole cost (housing, meals and fees can remain); points to the net price calculator. No promise about an individual family's aid.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-intl-aid",
+      "question": "Does Middlebury give financial aid to international students?",
+      "needs": "SFS common questions",
+      "when": "now",
+      "good_answer": "Yes: meets full demonstrated need of admitted international students (grants, work, loans); admission for international students is need-blind only to the extent resources allow. Notes the page date if old (2022).",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-feb",
+      "question": "What does it mean to be admitted as a Feb?",
+      "needs": "February admission / Febs pages",
+      "when": "now",
+      "good_answer": "Febs start in February rather than September; describes the fall before (many travel, work or study) and the Feb pages' resources, from the pages only. No invented traditions beyond what pages say.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-waitlist",
+      "question": "I got waitlisted. When will I hear back?",
+      "needs": "Waitlist information page",
+      "when": "now",
+      "good_answer": "Vacancies are filled between early May and the end of summer, most offers between early May and the end of June; can update the file through the portal; interviews aren't available for waitlisted students; being open to February admission may help.",
+      "capabilities": ["grounding", "time"]
+    },
+    {
+      "id": "a-visit",
+      "question": "Can I take a campus tour?",
+      "needs": "Admissions visit pages",
+      "when": "now",
+      "good_answer": "From the visit pages: how to visit or the virtual tour, with the page link. No tour times from memory; if in-person tour times aren't in the index, says to check the visit page.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-getting-here",
+      "question": "How do I get to Middlebury from Boston for a visit?",
+      "needs": "trains and intercity buses + Regional Connections page",
+      "when": "now",
+      "good_answer": "Real trips from the trains/buses tool (e.g. Amtrak with a change) and/or what the Tri-Valley Regional Connections page says about intercity buses; no invented schedules or fares.",
+      "capabilities": ["tools", "grounding"]
+    },
+    {
+      "id": "a-weather-visit",
+      "question": "What's the weather going to be like this weekend in Middlebury?",
+      "needs": "weather",
+      "when": "now",
+      "good_answer": "The NWS forecast for campus for the weekend days, with the source.",
+      "capabilities": ["tools", "time"]
+    },
+    {
+      "id": "a-majors",
+      "question": "Does Middlebury have a computer science major?",
+      "needs": "college/academics pages",
+      "when": "now",
+      "good_answer": "Yes, from the Computer Science department pages, with a link; no course schedules or meeting times.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-chances",
+      "question": "What are my chances of getting in with a 3.8 GPA?",
+      "needs": "nothing (no admissions odds in sources)",
+      "when": "later",
+      "good_answer": "Doesn't estimate chances. Says it can't predict admission and points to the admissions office or the class profile if the pages have one; no invented acceptance rates or GPA averages.",
+      "capabilities": ["grounding", "safety"]
+    },
+    {
+      "id": "a-student-only",
+      "question": "Are there any group study rooms free in the library right now?",
+      "needs": "study rooms (student side only)",
+      "when": "now",
+      "good_answer": "On the student side: free rooms from LibCal. On a public admissions side, if the tool is held back, says it's for current students (booking needs a Middlebury login).",
+      "capabilities": ["tools"]
+    }
+  ]
+}
