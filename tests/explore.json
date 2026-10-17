@@ -600,7 +600,7 @@
     {
       "id": "x-culture-carnival",
       "question": "when is winter carnival?",
-      "good_answer": "Annual Campus Events page: traditionally three days in February, the oldest student-run carnival in the nation (since 1923), with NCAA ski races, bonfire, fireworks, snow sculptures, ice show and the Carnival Ball (MCAB). Gives a 2027 date only if the events feeds post one; doesn't guess one.",
+      "good_answer": "Academic Calendars page: Thursday–Saturday, February 18–20, 2027, classes meet as scheduled. Annual Campus Events page: oldest student-run carnival in the nation (since 1923), NCAA ski races, bonfire, fireworks, snow sculptures, ice show and the Carnival Ball. No date from memory.",
       "capabilities": [
         "grounding",
         "tools",
