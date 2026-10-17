@@ -540,6 +540,88 @@
         "grounding",
         "time"
       ]
+    },
+    {
+      "id": "x-culture-rival",
+      "question": "who is our sports rival?",
+      "good_answer": "No indexed page names a rival. Says so rather than naming one from memory; may say Middlebury plays in NESCAC and list the conference's members (athletics Quick Facts page).",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-book",
+      "question": "what book should every midd student read?",
+      "good_answer": "No source has a list like this. Says it doesn't know rather than recommending books from memory; may point to the library or First-Year Seminars, without inventing a common read.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-ski-down",
+      "question": "what's the feb ski down?",
+      "good_answer": "From the Feb Celebration pages: Febs graduate in February and, after the ceremony, ski down the Snow Bowl in their caps and gowns. Sourced to the Feb Celebration / Snowbowl Ski Down pages.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-mascot",
+      "question": "what's our mascot?",
+      "good_answer": "The Panthers; colors blue and white (athletics Quick Facts page).",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-butch",
+      "question": "what is picking up butch?",
+      "good_answer": "From the athletics Picking Up Butch page: for over 60 years, starting in 1960, student-athletes brought Butch Varno, who had cerebral palsy, to games and community events; covered by Sports Illustrated, ESPN and CBS.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-kohn",
+      "question": "why is it called Kohn Field?",
+      "good_answer": "From the athletics Keeper of the Kohn page: named for Peter Kohn, longtime lacrosse figure who worked in Middlebury's equipment room 1981-88 and managed the men's lacrosse team.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-twilight",
+      "question": "who was Alexander Twilight?",
+      "good_answer": "Graduated from Middlebury in 1823, the first African American to earn a bachelor's degree at an American college (History and Traditions page; library's Alexander Twilight page).",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-carnival",
+      "question": "when is winter carnival?",
+      "good_answer": "Annual Campus Events page: traditionally three days in February, the oldest student-run carnival in the nation (since 1923), with NCAA ski races, bonfire, fireworks, snow sculptures, ice show and the Carnival Ball (MCAB). Gives a 2027 date only if the events feeds post one; doesn't guess one.",
+      "capabilities": [
+        "grounding",
+        "tools",
+        "time"
+      ]
+    },
+    {
+      "id": "x-culture-president",
+      "question": "who's the president of middlebury?",
+      "good_answer": "Ian Baucom, the 18th president, since July 1, 2025 (About the President page); previously provost at UVA.",
+      "capabilities": [
+        "grounding"
+      ]
+    },
+    {
+      "id": "x-culture-feb",
+      "question": "what is a feb?",
+      "good_answer": "From the admitted Febs page: about 20% of first-years start in February instead of September, a 50-year tradition; the term before is the \"Febmester\"; Febs graduate in February at Feb Celebration with the ski down.",
+      "capabilities": [
+        "grounding"
+      ]
     }
   ]
 }

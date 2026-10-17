@@ -296,6 +296,38 @@
     {
       "q": "is there a new fee for OPT",
       "expect": "international-student-and-scholar-services/travel-regulatory-and-information-updates"
+    },
+    {
+      "q": "what is our mascot",
+      "expect": "information-quickfacts"
+    },
+    {
+      "q": "what is picking up butch",
+      "expect": "traditions-pickingupbutch"
+    },
+    {
+      "q": "why is it called kohn field",
+      "expect": "traditions-keeperofthekohn"
+    },
+    {
+      "q": "who is the president of middlebury",
+      "expect": "president/about-president$"
+    },
+    {
+      "q": "when is winter carnival",
+      "expect": "student-life/annual-campus-events"
+    },
+    {
+      "q": "what is a feb",
+      "expect": "admissions/admitted/febs$|feb-celebration"
+    },
+    {
+      "q": "how many national championships has middlebury won",
+      "expect": "history-traditions|information-quickfacts"
+    },
+    {
+      "q": "how many PE credits do I need to graduate",
+      "expect": "information-physed|academics/physical-education"
     }
   ]
 }

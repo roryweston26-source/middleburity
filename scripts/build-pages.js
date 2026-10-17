@@ -52,6 +52,8 @@ const SINGLE_PAGES = [
   "facilities-services/student-mail-center", "facilities-services/who-do-i-call", "business-services/laundry",
   "facilities-services-office/service-request",
   "college/summer-opportunities", "college/families", "college/international-students-counselor-assignments-country",
+  // Added 2026-10-17 for history questions ("who is the president?"); the 2014 announcement pages stay out.
+  "president/about-president", "president/past-middlebury-presidents", "students",
 ];
 // Old or archived material, even inside allowed sections.
 const EXCLUDE = /covid|archive|-old\b|\bold-|spring-?2021|midd2021|test-page|example|\/news\//i;
@@ -97,6 +99,23 @@ const SITES = [
     // so the index shows no date rather than a misleading one.
     dated: false,
     section: (url) => (url.includes("/ii-ug-college-policies/") ? "handbook/college-policies" : "handbook/policies-for-all"),
+  },
+  {
+    // The athletics site's history and traditions pages (added 2026-10-17 for culture questions:
+    // Keeper of the Kohn, Picking Up Butch, championships) and the PE requirement. It has no
+    // sitemap, so the pages are listed. Its robots.txt asks for 30 seconds between requests and
+    // keeps /documents/ off limits, so the Panther history PDF isn't read.
+    host: "https://athletics.middlebury.edu/",
+    pages: [
+      "sports/2020/6/26/history-traditions", "sports/2020/6/4/information-quickfacts.aspx",
+      "sports/2020/6/4/traditions-keeperofthekohn.aspx", "sports/2020/6/4/traditions-pickingupbutch.aspx",
+      "sports/2020/6/4/traditions-directorscup.aspx", "sports/2023/7/10/nescac-champion-teams.aspx",
+      "sports/2020/6/4/information-physed.aspx",
+    ],
+    dated: false,
+    delayMs: 30000,
+    container: "article",
+    section: () => "athletics",
   },
   {
     // Tri-Valley Transit's Regional Connections page: which trains, intercity buses and airport
@@ -195,10 +214,13 @@ async function main() {
   const wanted = [];
   for (const site of SITES) {
     const found = [];
-    for (const sitemap of site.sitemaps) await readSitemap(sitemap, found, site.delayMs ?? DELAY_MS);
+    for (const sitemap of site.sitemaps ?? []) await readSitemap(sitemap, found, site.delayMs ?? DELAY_MS);
+    // A site without a sitemap lists its pages. With no date to compare, the month stands in
+    // for one, so a rebuild in a new month fetches them again.
+    for (const path of site.pages ?? []) found.push({ url: site.host + path, lastmod: new Date().toISOString().slice(0, 7) });
     const seen = new Set();
     const keep = found.filter(
-      (u) => !seen.has(u.url) && seen.add(u.url) && site.include(u.url) && !EXCLUDE.test(u.url) && (!site.dated || u.lastmod >= OLDEST),
+      (u) => !seen.has(u.url) && seen.add(u.url) && (site.pages || site.include(u.url)) && !EXCLUDE.test(u.url) && (!site.dated || u.lastmod >= OLDEST),
     );
     console.log(`${site.host}: ${found.length} URLs in the sitemaps, ${keep.length} in scope.`);
     for (const u of keep) wanted.push({ ...u, site });

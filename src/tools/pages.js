@@ -21,6 +21,8 @@ const SYNONYMS = {
   prof: ["professor", "faculty"], premed: ["med", "health", "profession"],
   // Students say "free"; the Snow Bowl's page says the new-student pass is "complimentary".
   free: ["complimentary"],
+  // The athletics site says "Nickname: Panthers" and "Physical Education", never "mascot" or "PE".
+  mascot: ["nickname", "panthers"], pe: ["physical", "education"],
 };
 
 // Column weights for bm25(): title, heading, address words, body. Chosen 2026-09-22 on the
@@ -44,6 +46,8 @@ const SITE_WORDS = {
   "middleburysnowbowl.com": "snow bowl snowbowl ski",
   "rikertoutdoor.com": "rikert nordic ski",
   "trivalleytransit.org": "tri valley transit bus",
+  // Its addresses are dates and run-together slugs ("traditions-keeperofthekohn.aspx").
+  "athletics.middlebury.edu": "athletics sports panthers",
 };
 
 // The last few segments of a page's address, e.g. "center careers and internships advising",
