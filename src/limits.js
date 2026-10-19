@@ -78,3 +78,23 @@ export async function recordSpend(db, usd, now = new Date()) {
     .bind(periods(now).day, usd)
     .run();
 }
+
+// Wrong access codes: after this many in an hour, the visitor's attempts are refused (right
+// code or not) until the hour is out, so the code can't be guessed by brute force. Counted
+// as "h <hour> code", which the hourly cleanup in admit() also deletes.
+export const WRONG_CODES_PER_HOUR = 10;
+const codePeriod = (now) => `h ${periods(now).hour} code`;
+
+export async function codeLocked(db, visitor, now = new Date()) {
+  await ensureTables(db);
+  const n = await db.prepare("SELECT n FROM usage WHERE period = ? AND visitor = ?").bind(codePeriod(now), visitor).first("n");
+  return (n ?? 0) >= WRONG_CODES_PER_HOUR;
+}
+
+export async function noteWrongCode(db, visitor, now = new Date()) {
+  await ensureTables(db);
+  await db
+    .prepare("INSERT INTO usage (period, visitor, n) VALUES (?, ?, 1) ON CONFLICT (period, visitor) DO UPDATE SET n = n + 1")
+    .bind(codePeriod(now), visitor)
+    .run();
+}

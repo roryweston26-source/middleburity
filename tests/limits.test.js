@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { openLocalD1 } from "../src/db/node-d1.js";
-import { admit, limitsFrom, recordSpend, spentToday, visitorId } from "../src/limits.js";
+import { WRONG_CODES_PER_HOUR, admit, limitsFrom, recordSpend, spentToday, visitorId } from "../src/limits.js";
 import { estimateUsd } from "../src/pricing.js";
-import worker from "../src/worker.js";
+import worker, { MAX_BODY_BYTES } from "../src/worker.js";
 
 const now = new Date("2026-09-22T15:00:00Z");
 
@@ -89,4 +89,18 @@ test("the server applies the hourly limit before anything reaches the model", as
   assert.equal((await chat(env, { body: JSON.stringify({ messages: [] }) })).status, 400); // counted, then rejected as empty
   const second = await chat(env, { body: JSON.stringify({ messages: [] }) });
   assert.equal(second.status, 429);
+});
+
+test("too many wrong access codes lock the visitor out, even with the right code", async () => {
+  const env = { ANTHROPIC_API_KEY: "test", ACCESS_CODE: "maple", DB: openLocalD1() };
+  for (let i = 0; i < WRONG_CODES_PER_HOUR; i++) assert.equal((await chat(env, { code: `guess${i}` })).status, 401);
+  const locked = await chat(env, { code: "maple", body: "not json" });
+  assert.equal(locked.status, 429);
+  assert.match((await locked.json()).error, /wrong access codes/);
+});
+
+test("an oversized body is refused before it's parsed", async () => {
+  const env = { ANTHROPIC_API_KEY: "test" };
+  const big = JSON.stringify({ messages: [{ role: "user", content: "x".repeat(MAX_BODY_BYTES) }] });
+  assert.equal((await chat(env, { body: big })).status, 413);
 });
