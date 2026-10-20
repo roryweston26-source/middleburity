@@ -23,6 +23,8 @@ const SYNONYMS = {
   free: ["complimentary"],
   // The athletics site says "Nickname: Panthers" and "Physical Education", never "mascot" or "PE".
   mascot: ["nickname", "panthers"], pe: ["physical", "education"],
+  // The Handbook's AP rule is headed "Advanced Placement Credit".
+  ap: ["advanced", "placement"],
 };
 
 // Column weights for bm25(): title, heading, address words, body. Chosen 2026-09-22 on the

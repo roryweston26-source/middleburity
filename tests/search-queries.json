@@ -328,6 +328,34 @@
     {
       "q": "how many PE credits do I need to graduate",
       "expect": "information-physed|academics/physical-education"
+    },
+    {
+      "q": "distribution requirements",
+      "expect": "deg-prgms-proj"
+    },
+    {
+      "q": "cultures and civilizations requirement",
+      "expect": "deg-prgms-proj"
+    },
+    {
+      "q": "how many credits to graduate",
+      "expect": "degree-requires|graduation-requirement-changes"
+    },
+    {
+      "q": "does AP credit count",
+      "expect": "degree-requires|graduation-requirement-changes"
+    },
+    {
+      "q": "biology major requirements",
+      "expect": "academics/biology/requirements"
+    },
+    {
+      "q": "what math class after linear algebra",
+      "expect": "academics/mathematics/(requirements|courses)"
+    },
+    {
+      "q": "degree progress worksheet",
+      "expect": "degree-works|registrar/faq"
     }
   ]
 }

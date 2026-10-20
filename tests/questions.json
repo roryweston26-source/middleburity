@@ -1060,6 +1060,105 @@
         "tools",
         "time"
       ]
+    },
+    {
+      "id": "c-dist-count",
+      "question": "How many courses do you need in a distribution to be done with that distribution?",
+      "needs": "Handbook B.1.e Distribution Requirement",
+      "when": "any",
+      "good_answer": "One course finishes an academic category; at least one course in seven of the eight (LIT, ART, PHL, HIS, SCI, DED, SOC, LNG). A course listed in two categories counts toward only one; Credit/No-Credit (or Pass/D/Fail before Fall 2022) and independent study (0500+) don't count; half-credit courses don't carry distribution tags (Registrar half-credit page). Cultures and civilizations is a separate set. From a tester's 👍 on 2026-10-19.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-dist-left",
+      "question": "I have SCI, LIT and ART done. Which distributions do I still need?",
+      "needs": "Handbook B.1.e (academic categories + cultures and civilizations)",
+      "when": "any",
+      "good_answer": "Works it out: one course in each of four of the remaining five (PHL, HIS, DED, SOC, LNG), since seven of eight are needed; one course can't fill two categories. Also mentions the separate cultures and civilizations requirement: four courses, at least three regions (SOA, NOA, MDE, SAF, EUR, AMR) plus one CMP. Points to their Degree Progress Worksheet (DegreeWorks in Banner 9) to confirm what's on their record. Doesn't claim to see their record.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-soci-math",
+      "question": "Does Data and the Social World give me a math credit?",
+      "needs": "Sociology courses page (SOCI 0255), mathematics requirements",
+      "when": "any",
+      "good_answer": "SOCI 0255 carries the DED distribution tag (the deductive reasoning category), not math major or minor credit (it isn't in the math requirements). Not open to students who've completed STAT 0118 or STAT 0201, or to seniors. Terms taught as listed (Fall 2025, Fall 2026). No meeting times. From a tester's 👍 on 2026-10-19. Opens with the direct answer (not a \"Yes\" that it then walks back).",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-bio-math",
+      "question": "How many math classes will I take to graduate with a bio degree?",
+      "needs": "Biology requirements page; Handbook degree requirements",
+      "when": "any",
+      "good_answer": "The biology major (12 courses) requires no math course: its statistics course is BIOL 0211 Experimental Design and Statistical Analysis, inside the major, plus one full-credit chemistry course with lab. The page adds that many life-science graduate and professional programs want a year of calculus (and chemistry, organic, physics), so talk to an advisor early. College-wide, the DED distribution can be met outside math (BIOL 0140 carries DED). Must not invent a number of math courses.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-after-linalg",
+      "question": "What's next for me after linear algebra?",
+      "needs": "Mathematics major advice, requirements and courses pages",
+      "when": "any",
+      "good_answer": "From the math pages: MATH 0223 Multivariable Calculus is the recommended next step after MATH 0200; a 200-level proof-based elective (e.g. MATH 0230, MATH 0241) before the 300-level core (MATH 0302 Abstract Algebra, MATH 0323 Real Analysis); MATH 0200 opens many electives (e.g. MATH 0226 Differential Equations, MATH 0247 Graph Theory, STAT 0211 Regression). Any \"offered next term\" claim matches the course list's Terms Taught. Suggests a math faculty advisor. No meeting times, seats or rankings, and no courses from memory.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-math-major-calc1",
+      "question": "If I start at Calc 1, how many math courses is the math major?",
+      "needs": "Mathematics requirements and major advice pages",
+      "when": "any",
+      "good_answer": "Standard major: eleven courses (core MATH 0122, 0200, 0223, 0302, 0323; five electives at 0200+; a 0700-level senior seminar), at least six at Middlebury. Students who start at MATH 0121 need only four electives instead of five (major advice page). May mention the Applied Math track (also eleven). Doesn't invent other counts.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-on-track",
+      "question": "I'm a sophomore with 14 credits. Am I on track to graduate?",
+      "needs": "Handbook B.1.c degree requirements; Registrar FAQ (normal load, DegreeWorks)",
+      "when": "any",
+      "good_answer": "Gives the rules: at least 34 credits for anyone finishing March 2026 or later (18+ at Middlebury), at least two Winter Term credits, plus distributions, cultures and civilizations, college writing, PE and the major. The clean comparison is the Satisfactory Academic Progress benchmarks (7 credits after year one, 15 after year two, 24 after year three). Doesn't assume which semester they're in or give a verdict on their record beyond that; points to the degree audit (Degree Progress Worksheet, DegreeWorks via Banner 9) and their advisor. Any arithmetic is right.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-major-minor",
+      "question": "Can my biology courses also count toward a chemistry minor?",
+      "needs": "Biology requirements page; Registrar forms page",
+      "when": "any",
+      "good_answer": "Per college rule a course may count toward a major or a minor, but not both, and a course counted toward one minor can't count toward another. The biology page suggests taking an extra elective, and notes a course required by both can block the combination. Doesn't guess chemistry minor requirements it didn't find.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
+    },
+    {
+      "id": "c-ap-credit",
+      "question": "Will my AP Calculus score count toward graduation?",
+      "needs": "Handbook B.1.c Advanced Placement; graduation-requirement-changes; math requirements",
+      "when": "any",
+      "good_answer": "No: since summer 2025, AP, IB and other exam results don't count for credits toward graduation or college-wide requirements (AP never counted for distributions). Departments may use them for placement or to waive major/minor courses: math lets students who place out of MATH 0121/0122 waive them for the major or minor (see the placement page). Trap: older department pages (political science \"supplying two college credits\", IP&E \"general credit\") predate the 2025 change; the answer must not say AP earns graduation credit, and should prefer the Handbook or mention the conflict.",
+      "capabilities": [
+        "grounding",
+        "planning"
+      ]
     }
   ]
 }
