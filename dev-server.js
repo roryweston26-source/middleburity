@@ -61,8 +61,28 @@ async function serveStatic(pathname, res) {
   }
 }
 
+// This server holds the real keys from .dev.vars and usually runs with no access code, so it
+// answers this computer only: not other devices on the Wi-Fi, not a site whose name points at
+// 127.0.0.1 (DNS rebinding), and not a page on another site posting to the chat in the background.
+const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+const LOCAL_HOST = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i;
+
+function refusedOrigin(req, url) {
+  if (!LOOPBACK.has(req.socket.remoteAddress)) return "not from this computer";
+  if (!LOCAL_HOST.test(req.headers.host ?? "")) return `host ${req.headers.host}`;
+  const origin = req.headers.origin;
+  if (url.pathname.startsWith("/api/") && origin && origin !== `http://${req.headers.host}`) return `origin ${origin}`;
+  return null;
+}
+
 async function handle(req, res, env) {
   const url = new URL(req.url, `http://${req.headers.host}`);
+  const refused = refusedOrigin(req, url);
+  if (refused) {
+    console.warn(`refused ${req.method} ${url.pathname}: ${refused}`);
+    res.writeHead(403, { "content-type": "text/plain" }).end("Local development only.");
+    return 403;
+  }
   if (!url.pathname.startsWith("/api/")) return serveStatic(url.pathname, res);
 
   const chunks = [];
