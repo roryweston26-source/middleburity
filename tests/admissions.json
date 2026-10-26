@@ -14,7 +14,7 @@
       "question": "When is the financial aid application due for Early Decision II?",
       "needs": "Admissions deadlines page + SFS first-year aid page",
       "when": "now",
-      "good_answer": "The pages disagree: the admissions deadlines table says January 4; Student Financial Services' first-year page says CSS Profile and FAFSA by January 3, 2027. Says so and suggests the earlier date or confirming with SFS.",
+      "good_answer": "January 4, 2027 for both the CSS Profile and the FAFSA (admissions deadlines table and SFS's first-year page agree since SFS updated on 2026-10-22). If it cites the older Affordability page (2025), notes that it still says January 3.",
       "capabilities": ["grounding", "time"]
     },
     {
@@ -158,7 +158,7 @@
       "question": "How much does a year at Middlebury cost?",
       "needs": "Affording Middlebury (cost of attendance)",
       "when": "now",
-      "good_answer": "2026–27: tuition $72,924, activity fee $542, housing and meals $20,920 (direct costs $94,386), plus estimated books, travel and personal costs for a total cost of attendance of $97,386. Mentions that aid, the tuition-free program and the net price calculator change what a family pays. Doesn't use the 2024 aid-example figures ($88,450).",
+      "good_answer": "2026–27: tuition $72,924, activity fee $542, housing and meals $20,920 (direct costs $94,386), plus estimated books, travel and personal costs for a total cost of attendance of $97,386 (Affording Middlebury; the I-20 page's $96,386 leaves out the $1,000 for transportation, also fine if sourced). Mentions that aid, the tuition-free program and the net price calculator change what a family pays. Doesn't use the 2024 aid-example figures ($88,450).",
       "capabilities": ["grounding"]
     },
     {
