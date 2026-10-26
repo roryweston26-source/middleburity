@@ -101,6 +101,15 @@ test("short sections merge into the next but keep their own heading in the text"
   assert.match(first.text, /^Atwater: Lunch 11 to 2\. Meal Plans: word0/);
 });
 
+test("long sections split at 220 words, and a short tail joins the piece before it", () => {
+  const words = (n) => Array.from({ length: n }, (_, i) => `w${i}`).join(" ");
+  const sizes = (n) => chunk([{ heading: "H", lines: [words(n)] }]).map((c) => c.text.split(" ").length);
+  assert.deepEqual(sizes(241), [241]);
+  assert.deepEqual(sizes(220), [220]);
+  assert.deepEqual(sizes(300), [220, 80]);
+  assert.deepEqual(sizes(480), [220, 260]);
+});
+
 test("contact details are scrubbed from indexed text", () => {
   assert.equal(scrub("Email jdoe@middlebury.edu or call 802-443-5000.").replace(/\s+/g, " "), "Email or call .");
 });

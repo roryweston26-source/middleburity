@@ -108,8 +108,14 @@ export function chunk(sections, maxWords = 220) {
       carry = { words: [`${s.heading}:`, ...words] };
       continue;
     }
+    // A tail under 60 words joins the piece before it. As its own passage, a 21-word tail of
+    // Admissions' international requirements outranked the part saying admission is "need aware"
+    // (BM25 favors short passages) while saying nothing itself. Equal-size pieces were tried too
+    // (2026-10-26): 76/106 right-first but 95/106 top 3, against 74 and 96 for this.
     for (let i = 0; i < words.length; i += maxWords) {
-      chunks.push({ heading: s.heading, text: words.slice(i, i + maxWords).join(" ") });
+      const end = words.length - (i + maxWords) < 60 ? words.length : i + maxWords;
+      chunks.push({ heading: s.heading, text: words.slice(i, end).join(" ") });
+      if (end === words.length) break;
     }
   }
   if (carry && carry.words.length) chunks.push({ heading: sections.at(-1)?.heading ?? "", text: carry.words.join(" ") });

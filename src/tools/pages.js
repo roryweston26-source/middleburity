@@ -104,6 +104,13 @@ export function matchExpression(query, { synonyms = true, now = new Date() } = {
     const start = /\bnext (academic )?year\b/.test(lower) ? fall + 1 : fall;
     terms.add(String(start)).add(String(start + 1));
   }
+  // Aid for international students is an admissions question too: the application instructions
+  // say admission is "need aware" for them, the older SFS page says need-blind. Without admissions
+  // words, "international students financial aid" found ISSS's visa-funding forms and that page
+  // ranked 43rd.
+  if (synonyms && terms.has("international") && ["aid", "financial", "scholarship", "scholarships"].some((w) => terms.has(w))) {
+    terms.add("admission").add("applicants");
+  }
   return [...terms].map((t) => `"${t}"`).join(" OR ");
 }
 
