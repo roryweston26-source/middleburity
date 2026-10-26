@@ -54,6 +54,9 @@ const SINGLE_PAGES = [
   "college/summer-opportunities", "college/families", "college/international-students-counselor-assignments-country",
   // Added 2026-10-17 for history questions ("who is the president?"); the 2014 announcement pages stay out.
   "president/about-president", "president/past-middlebury-presidents", "students",
+  // Added 2026-10-26 for prospective students: the tuition-free announcement (Class of 2031, $175,000),
+  // with aid figures the admissions pages don't give. Its stories/archive copy stays out with the archive.
+  "strategic-plan/announcements/middlebury-will-become-tuition-free-students-family-income-175000",
 ];
 // Old or archived material, even inside allowed sections.
 const EXCLUDE = /covid|archive|-old\b|\bold-|spring-?2021|midd2021|test-page|example|\/news\//i;

@@ -356,6 +356,74 @@
     {
       "q": "degree progress worksheet",
       "expect": "degree-works|registrar/faq"
+    },
+    {
+      "q": "is middlebury test optional",
+      "expect": "admissions/application-instructions-and-deadlines$"
+    },
+    {
+      "q": "SAT score range admitted students",
+      "expect": "admissions/apply-midd"
+    },
+    {
+      "q": "admissions interview",
+      "expect": "admissions/application-instructions-and-deadlines$|connect-admissions/alumni-volunteers"
+    },
+    {
+      "q": "application fee waiver",
+      "expect": "admissions/counselor-information"
+    },
+    {
+      "q": "is early decision binding",
+      "expect": "student-admissions-options"
+    },
+    {
+      "q": "questbridge",
+      "expect": "apply/questbridge-applicants"
+    },
+    {
+      "q": "TOEFL requirement international applicants",
+      "expect": "admissions/application-instructions-and-deadlines$"
+    },
+    {
+      "q": "art portfolio supplement",
+      "expect": "admissions/application-instructions-and-deadlines$"
+    },
+    {
+      "q": "defer admission gap year",
+      "expect": "admitted/gap-year"
+    },
+    {
+      "q": "tuition free family income",
+      "expect": "tuition-free-students-family-income-175000|affording-middlebury|admissions/affordability"
+    },
+    {
+      "q": "total cost of attendance",
+      "expect": "student-financial-services/affording-middlebury"
+    },
+    {
+      "q": "merit scholarships",
+      "expect": "office-student-financial-services/common-questions"
+    },
+    {
+      "q": "first year dorms roommate",
+      "expect": "residential-life/(housing-overview|new-students)$|admitted/(febs|first-year-life-middlebury)"
+    },
+    {
+      "q": "waitlist",
+      "expect": "admissions/waitlistinformation"
+    },
+    {
+      "q": "hotels near campus for a visit",
+      "expect": "admissions/campus-and-virtual-visits"
+    },
+    {
+      "q": "percent of students on financial aid",
+      "expect": "tuition-free-students-family-income-175000|student-financial-services/estimate-your-cost$|college/admissions$"
+    },
+    {
+      "q": "law school acceptance rate",
+      "expect": "college/admissions$"
     }
   ]
 }

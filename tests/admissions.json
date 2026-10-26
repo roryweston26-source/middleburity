@@ -30,7 +30,7 @@
       "question": "Does Middlebury give financial aid to international students?",
       "needs": "SFS common questions",
       "when": "now",
-      "good_answer": "Yes: meets full demonstrated need of admitted international students (grants, work, loans); admission for international students is need-blind only to the extent resources allow. Notes the page date if old (2022).",
+      "good_answer": "Yes: meets full demonstrated need of admitted international students (grants, work, loans). Admission for international students is need aware (application instructions, 2026); the older SFS page (2022) says need-blind 'to the extent resources allow'. If both come up, prefers the newer page and mentions the difference. Aid has to be requested when applying.",
       "capabilities": ["grounding"]
     },
     {
@@ -96,6 +96,190 @@
       "when": "now",
       "good_answer": "On the student side: free rooms from LibCal. On a public admissions side, if the tool is held back, says it's for current students (booking needs a Middlebury login).",
       "capabilities": ["tools"]
+    },
+    {
+      "id": "a-test-optional",
+      "question": "Do I have to send SAT or ACT scores?",
+      "needs": "Application instructions page",
+      "when": "now",
+      "good_answer": "No: Middlebury is test optional; scores you choose to send are considered; self-reported scores accepted at application; the ACT science section isn't required.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-scores",
+      "question": "What SAT scores do people who get in have?",
+      "needs": "Apply to Middlebury page (class profile)",
+      "when": "now",
+      "good_answer": "For Class of 2027 students who submitted testing: SAT mid-50% 1440–1550, ACT 33–34; roughly half of applicants apply without scores. Doesn't call the range a cutoff or estimate anyone's chances.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-interview",
+      "question": "Can I get an admissions interview?",
+      "needs": "Application instructions page (alumni interviews)",
+      "when": "now",
+      "good_answer": "Optional alumni interview, requested in the applicant portal after applying; not guaranteed; Glimpse (90-second video or audio) is the alternative. Request by Nov 8 (ED I), Jan 9 (ED II), Jan 16 (RD). International applicants: InitialView or Vericant (they charge a fee).",
+      "capabilities": ["grounding", "time"]
+    },
+    {
+      "id": "a-app-fee",
+      "question": "How much is the application fee? Can I get a waiver?",
+      "needs": "Counselor information page",
+      "when": "now",
+      "good_answer": "From the 2026–27 cycle the application is free, so no fee waiver is needed.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-ed-binding",
+      "question": "If I apply Early Decision, can I still apply to other colleges?",
+      "needs": "Admissions options page",
+      "when": "now",
+      "good_answer": "ED is binding: no other ED application, and you sign the ED Commitment Statement; Regular Decision or non-binding Early Action elsewhere is allowed but must be withdrawn if admitted ED to Middlebury.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-questbridge",
+      "question": "How does QuestBridge work with Middlebury?",
+      "needs": "QuestBridge applicants page",
+      "when": "now",
+      "good_answer": "Middlebury is a QuestBridge partner: finalists can rank it in the National College Match (Middlebury gets applications Oct 21, ranking deadline Nov 1, Match Day Dec 1; a match is binding); finalists who ranked it but didn't match move to Regular Decision; finalists who didn't rank it and non-finalists can apply RD with the QuestBridge application. Notes the dates are from a 2025 page if relevant.",
+      "capabilities": ["grounding", "time"]
+    },
+    {
+      "id": "a-merit",
+      "question": "Does Middlebury give merit scholarships?",
+      "needs": "SFS common questions (need-based aid)",
+      "when": "now",
+      "good_answer": "The pages describe the College's aid as need based (full demonstrated need met); no page describes merit scholarships for undergraduates, and it says so rather than guessing. Outside scholarships first replace the work and loan parts of an aid package. Merit aid mentioned for summer programs (Language Schools) isn't presented as College merit aid.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-cost",
+      "question": "How much does a year at Middlebury cost?",
+      "needs": "Affording Middlebury (cost of attendance)",
+      "when": "now",
+      "good_answer": "2026–27: tuition $72,924, activity fee $542, housing and meals $20,920 (direct costs $94,386), plus estimated books, travel and personal costs for a total cost of attendance of $97,386. Mentions that aid, the tuition-free program and the net price calculator change what a family pays. Doesn't use the 2024 aid-example figures ($88,450).",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-aid-share",
+      "question": "What percent of students get financial aid, and how big is the average grant?",
+      "needs": "Tuition-free announcement, Estimate Your Cost, admissions pages",
+      "when": "now",
+      "good_answer": "About 50% get need-based aid; the 2026 announcement gives an average grant of $66,000 (nearly $80 million in institutional aid). If it cites other pages, notes that they give different figures (over 45% of the Class of 2029 with grants, average grant over $62,860; $60,000 average aid on the Apply page) rather than blending them.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-tuition-free-covers",
+      "question": "What exactly does the tuition-free program cover?",
+      "needs": "Tuition-free announcement + Affording Middlebury",
+      "when": "now",
+      "good_answer": "Tuition, for admitted students from the Class of 2031 with family income up to $175,000 and typical assets; housing, meals and fees can remain. From the announcement: Middlebury also buys books and supplies for aid recipients and gives higher-need students health insurance and laptops. Points to the net price calculator.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-english",
+      "question": "I'm an international applicant. Do I need the TOEFL?",
+      "needs": "Application instructions (international requirements)",
+      "when": "now",
+      "good_answer": "Not if English is your native language or your high school classes were taught entirely in English; otherwise TOEFL iBT, Duolingo, IELTS or Cambridge. Recommended minimums: TOEFL iBT 5.5 (105 before Jan 21, 2026), DET 130, IELTS 7.0, Cambridge C1 Advanced. If aid comes up: the application page says admission is need aware for international students.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-arts",
+      "question": "Can I send in my art portfolio or music recordings?",
+      "needs": "Application instructions (arts supplements)",
+      "when": "now",
+      "good_answer": "Yes, optional arts supplements through SlideRoom: studio art 10 works (title, date, medium, dimensions); music 10–15 minutes, solo preferred; theater two contrasting monologues; and whatever else the page lists. No invented deadlines.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-gap-year",
+      "question": "Can I defer my admission and take a gap year?",
+      "needs": "Admitted students gap-year page",
+      "when": "now",
+      "good_answer": "Yes: accept and pay the nonrefundable deposit by the date in the letter, tell the Dean of Admissions in writing by June 1, don't enroll in a degree program or apply elsewhere during the year, and refile for aid. Students admitted from the waitlist can't defer.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-ap",
+      "question": "Will my AP scores count for college credit?",
+      "needs": "Handbook B.1.c (AP since summer 2025)",
+      "when": "now",
+      "good_answer": "No: since summer 2025 AP and IB results don't count for credit toward graduation or college-wide requirements; departments may use them for placement or to waive major/minor requirements. Doesn't repeat the older department pages that still describe AP credit.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-housing",
+      "question": "Where do first-years live? Will I have a roommate?",
+      "needs": "Residential Life housing overview + new students",
+      "when": "now",
+      "good_answer": "First-years live in first-year communities, generally in doubles with community bathrooms (Allen, Battell, Hepburn, Stewart); roommates are assigned after a housing questionnaire; Febs go into first-year communities where possible. No invented dorm rankings.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-dining",
+      "question": "How does the meal plan work?",
+      "needs": "Dining Services + first-year life page",
+      "when": "now",
+      "good_answer": "Students in campus housing are on the unlimited meal plan: Proctor, Atwater and Ross as often as you like, plus $25 declining balance a semester for retail spots. May mention today's menu if it looks one up, but the plan comes from the pages.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-feb-choice",
+      "question": "Can I choose whether I start in September or February?",
+      "needs": "Application instructions (semester of entry) + Feb FAQ",
+      "when": "now",
+      "good_answer": "You state a preference (September only, February only, or either); same pool, same deadlines, same notification; the preference doesn't affect evaluation. ED applicants' preference is honored; a few Regular Decision applicants may be offered the other term.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-outcomes",
+      "question": "Do Middlebury grads get into law school and med school?",
+      "needs": "Admissions home page + health professions pages",
+      "when": "now",
+      "good_answer": "The admissions page gives 94% law school and 95% medical school acceptance rates and a 95% graduation rate; points to the Center for Careers and Internships or health professions advising. No invented salaries, employers or rankings.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-study-abroad",
+      "question": "How many students study abroad?",
+      "needs": "Admissions home page",
+      "when": "now",
+      "good_answer": "More than 60% study abroad at least once, most through Middlebury's 32 Schools Abroad.",
+      "capabilities": ["grounding"]
+    },
+    {
+      "id": "a-lodging",
+      "question": "Where can my family stay when we come visit?",
+      "needs": "Campus and Virtual Visits page (Where to Stay)",
+      "when": "now",
+      "good_answer": "The lodging the visit page lists (Middlebury Inn, Swift House Inn, Courtyard by Marriott, Waybury Inn and others, asterisks marking ADA-accessible), with the note that some book quickly, or a map search card. Doesn't rank them or add places or prices of its own.",
+      "capabilities": ["grounding", "tools"]
+    },
+    {
+      "id": "a-ski-pass-new",
+      "question": "Do incoming students get a free ski pass?",
+      "needs": "Snow Bowl College 411 page",
+      "when": "now",
+      "good_answer": "The page offers a free 2026–27 Snow Bowl and Rikert pass to February and fall 2026 first-years and 2026 transfers. It doesn't say whether students entering in 2027 will get one, and the answer says so instead of promising it. Student season pass $189.",
+      "capabilities": ["grounding", "time"]
+    },
+    {
+      "id": "a-safety",
+      "question": "Is Middlebury's campus safe?",
+      "needs": "Reports and Policies (Clery report) + Public Safety pages",
+      "when": "now",
+      "good_answer": "No verdict or crime numbers from memory. Points to the Annual Security and Fire Safety Reports and what Public Safety offers (safety escorts after dark, the 24/7 office if the pages say so).",
+      "capabilities": ["grounding", "safety"]
+    },
+    {
+      "id": "a-recruiting",
+      "question": "How do I get recruited to play soccer at Middlebury?",
+      "needs": "nothing specific (no recruiting page indexed)",
+      "when": "later",
+      "good_answer": "Says the indexed pages don't describe athletic recruiting and points to the team's coaches on the athletics site. May say Middlebury plays in NESCAC (from the athletics Quick Facts). No invented NCAA rules or recruiting timelines.",
+      "capabilities": ["grounding"]
     }
   ]
 }

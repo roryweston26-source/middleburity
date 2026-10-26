@@ -25,6 +25,8 @@ const SYNONYMS = {
   mascot: ["nickname", "panthers"], pe: ["physical", "education"],
   // The Handbook's AP rule is headed "Advanced Placement Credit".
   ap: ["advanced", "placement"],
+  // Admissions calls portfolios "Arts Supplements", sent through SlideRoom.
+  portfolio: ["supplement", "slideroom"],
 };
 
 // Column weights for bm25(): title, heading, address words, body. Chosen 2026-09-22 on the
