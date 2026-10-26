@@ -246,7 +246,7 @@
       "question": "How many students study abroad?",
       "needs": "Admissions home page",
       "when": "now",
-      "good_answer": "More than 60% study abroad at least once, most through Middlebury's 32 Schools Abroad.",
+      "good_answer": "More than 60% study abroad at least once, most through Middlebury's 32 Schools Abroad (admissions page), or the Handbook's 'more than half of each class studies abroad in the junior year'. Either is sourced; doesn't claim no figure exists. Two or three searches, not seven.",
       "capabilities": ["grounding"]
     },
     {
