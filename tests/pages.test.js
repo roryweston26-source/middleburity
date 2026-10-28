@@ -13,6 +13,7 @@ const data = {
     { url: "https://www.middlebury.edu/public-safety/visitor-parking", title: "Visitor Parking Information", updated: "2026-08-01", section: "public-safety" },
     { url: "https://www.middlebury.edu/college/people/a-chemist", title: "Ada Chemist", updated: "2026-09-01", section: "college/people" },
     { url: "https://www.middlebury.edu/residential-life/old-guide", title: "Winter Guide", updated: "2023-01-10", section: "residential-life" },
+    { url: "https://www.middleburycampus.com/article/2026/10/ross-dining-hall-cuts-hours", title: "Ross Dining Hall cuts lunch hours", updated: "2026-10-01", section: "outside/campus" },
   ],
   chunks: [
     { p: 0, h: "Ross Dining Hall", t: "Monday through Friday lunch 11:00am to 2:00pm with limited options until 2:30pm." },
@@ -20,6 +21,7 @@ const data = {
     { p: 1, h: "Overnight guests", t: "Guests parking overnight must register the vehicle and park in the visitor section of the Mahaney Arts Center lot." },
     { p: 2, h: "Ada Chemist", t: "Professor of Chemistry. Research in medicinal chemistry; undergraduate research students welcome." },
     { p: 3, h: "Skiing", t: "Students can take ski lessons at the Snow Bowl." },
+    { p: 4, h: "Ross Dining Hall cuts lunch hours", t: "News: Ross Dining Hall lunch hours are shorter this fall as dining staff numbers fall." },
   ],
 };
 // The same SQLite search the app uses, on an in-memory database.
@@ -65,6 +67,16 @@ test("pages over a year old are flagged", async () => {
 test("scope limits results to faculty profiles, or excludes them", async () => {
   assert.deepEqual((await searchPages(db, "chemistry research", { scope: "faculty", now })).map((r) => r.title), ["Ada Chemist"]);
   assert.ok(!(await searchPages(db, "chemistry research", { scope: "not-faculty", now })).some((r) => r.title === "Ada Chemist"));
+});
+
+test("Campus articles rank after the official pages, or alone with scope news", async () => {
+  // An article packed with the query's words still doesn't push the dining page out.
+  assert.ok(!(await searchPages(db, "ross dining hall lunch hours", { now })).some((r) => r.url.includes("middleburycampus")));
+  const out = JSON.parse((await pagesTool.run({ query: "ross dining hall lunch hours" }, { DB: db })).content).results;
+  assert.equal(out[0].title, "General Information");
+  assert.equal(out.at(-1).title, "Ross Dining Hall cuts lunch hours");
+  assert.match(out.at(-1).site, /student newspaper/);
+  assert.deepEqual((await searchPages(db, "dining hours", { scope: "news", now })).map((r) => r.title), ["Ross Dining Hall cuts lunch hours"]);
 });
 
 test("a search with no matching words returns nothing rather than guessing", async () => {

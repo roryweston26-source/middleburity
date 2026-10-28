@@ -52,6 +52,7 @@ const SITE_WORDS = {
   "trivalleytransit.org": "tri valley transit bus",
   // Its addresses are dates and run-together slugs ("traditions-keeperofthekohn.aspx").
   "athletics.middlebury.edu": "athletics sports panthers",
+  "middleburycampus.com": "newspaper",
 };
 
 // The last few segments of a page's address, e.g. "center careers and internships advising",
@@ -127,6 +128,7 @@ const OUTSIDE = {
   "trivalleytransit.org": "Tri-Valley Transit's site, not Middlebury's",
   "middleburysnowbowl.com": "the Middlebury Snow Bowl's site",
   "rikertoutdoor.com": "the Rikert Outdoor Center's site",
+  "middleburycampus.com": "The Middlebury Campus, the student newspaper: student reporting and opinion, not an official page",
 };
 const siteNote = (url) => {
   const host = outsideSite(url);
@@ -138,7 +140,14 @@ export async function searchPages(db, query, { limit = 5, perPage = 2, scope = "
   if (!match) return [];
   // Faculty profiles are under college/people, librarians' under library/people.
   const people = "p.section IN ('college/people', 'library/people')";
-  const where = scope === "faculty" ? `AND ${people}` : scope === "not-faculty" ? `AND NOT ${people}` : "";
+  // The Campus's articles rank apart: with them in, articles about dining-hall staffing beat the
+  // dining halls' own hours page, and eval:search's top 3 fell from 96 to 91 of 106 (2026-10-28).
+  const news = "p.section = 'outside/campus'";
+  const where = {
+    faculty: `AND ${people}`,
+    "not-faculty": `AND NOT ${people} AND NOT ${news}`,
+    news: `AND ${news}`,
+  }[scope] ?? `AND NOT ${news}`;
   const { title, heading, path, body } = weights;
   const { results } = await db
     .prepare(
@@ -182,7 +191,7 @@ export const pagesTool = {
       type: "object",
       properties: {
         query: { type: "string", description: 'Keywords, e.g. "visitor parking overnight guest", "chemistry research students".' },
-        scope: { type: "string", enum: ["all", "faculty", "not-faculty"], description: "Default all. faculty searches only faculty and staff profiles." },
+        scope: { type: "string", enum: ["all", "faculty", "not-faculty", "news"], description: "Default all: official pages, plus one article from The Campus (student newspaper) after them. faculty searches only faculty and staff profiles; news only The Campus." },
       },
       required: ["query"],
       additionalProperties: false,
@@ -191,7 +200,7 @@ export const pagesTool = {
   async run(input, env = {}) {
     if (typeof input.query !== "string" || !input.query.trim()) throw new ToolInputError("query is required");
     const scope = input.scope ?? "all";
-    if (!["all", "faculty", "not-faculty"].includes(scope)) throw new ToolInputError("scope must be all, faculty or not-faculty");
+    if (!["all", "faculty", "not-faculty", "news"].includes(scope)) throw new ToolInputError("scope must be all, faculty, not-faculty or news");
     if (!env.DB) throw new ToolInputError("page search isn't set up here (run npm run build:pages)");
     let builtOn;
     try {
@@ -199,7 +208,11 @@ export const pagesTool = {
     } catch {
       throw new ToolInputError("page search isn't built yet (run npm run build:pages)");
     }
-    const results = await searchPages(env.DB, input.query, { scope });
+    // A plain search also brings the best newspaper article, after the official pages.
+    const results = [
+      ...(await searchPages(env.DB, input.query, { scope })),
+      ...(scope === "all" ? await searchPages(env.DB, input.query, { scope: "news", limit: 1 }) : []),
+    ];
     return {
       content: JSON.stringify({
         source: `middlebury.edu pages, indexed ${builtOn}`,

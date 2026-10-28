@@ -153,6 +153,22 @@ const SITES = [
     wordpress: true,
     section: () => "outside/rikert",
   },
+  {
+    // The Middlebury Campus, the student newspaper (added 2026-10-27, Rory's call): campus news,
+    // traditions and student opinion that no official page has. Its robots.txt (2026-10-19) allows
+    // everyone with a 10-second delay and bars AI training, but leaves AI answer engines that cite
+    // and link back unblocked on purpose. Its sitemap lists only a few special series, so each
+    // section's listing is read page by page; an article's date is the month in its address.
+    host: "https://www.middleburycampus.com/",
+    listings: ["news", "opinion", "sports", "local", "arts-culture"].map((s) => `https://www.middleburycampus.com/section/${s}`),
+    include: () => true,
+    dated: true,
+    delayMs: 10000,
+    container: "article",
+    // The writer's bio and the comments come after this rule; the byline and date stay.
+    cutAt: '<hr class="bg-gray"',
+    section: () => "outside/campus",
+  },
 ];
 
 // For sites listed page by page: the URL's last path segment is one of these.
@@ -212,12 +228,33 @@ async function readSitemap(url, out, delay = DELAY_MS) {
   }
 }
 
+// Reads a news section's listing (?page=1, 2, ...) for article links back to OLDEST. Each page
+// also shows a sidebar of recent and popular articles, so it stops at the first page that adds
+// no new article from OLDEST on, not at the first old link.
+async function readListing(base, out, delay = DELAY_MS) {
+  const seen = new Set(out.map((u) => u.url));
+  for (let page = 1; page <= 400; page++) {
+    const html = (await get(`${base}?page=${page}`)).text;
+    await sleep(delay);
+    let added = 0;
+    for (const m of html.matchAll(/https:\/\/www\.middleburycampus\.com\/article\/(\d{4})\/(\d{2})\/[a-z0-9-]+/g)) {
+      const lastmod = `${m[1]}-${m[2]}-01`;
+      if (seen.has(m[0]) || lastmod < OLDEST) continue;
+      seen.add(m[0]);
+      out.push({ url: m[0], lastmod });
+      added++;
+    }
+    if (!added) break;
+  }
+}
+
 async function main() {
   await mkdir(cacheDir, { recursive: true });
   const wanted = [];
   for (const site of SITES) {
     const found = [];
     for (const sitemap of site.sitemaps ?? []) await readSitemap(sitemap, found, site.delayMs ?? DELAY_MS);
+    for (const listing of site.listings ?? []) await readListing(listing, found, site.delayMs ?? DELAY_MS);
     // A site without a sitemap lists its pages. With no date to compare, the month stands in
     // for one, so a rebuild in a new month fetches them again.
     for (const path of site.pages ?? []) found.push({ url: site.host + path, lastmod: new Date().toISOString().slice(0, 7) });
@@ -281,7 +318,8 @@ async function main() {
       entry = { url, lastmod, status: res.status, main };
       await writeFile(cacheFile, JSON.stringify(entry));
     }
-    const page = entry.main ? extract(entry.main) : null;
+    const main = entry.main && site.cutAt ? entry.main.split(site.cutAt)[0] + "</main>" : entry.main;
+    const page = main ? extract(main) : null;
     if (page?.title && page.sections.length) pages.push({ ...entry, page, site });
     if ((i + 1) % 100 === 0) console.log(`${i + 1}/${wanted.length} (${fetched} fetched, rest from cache)`);
   }
