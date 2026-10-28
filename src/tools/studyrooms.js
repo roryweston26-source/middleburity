@@ -6,6 +6,7 @@
 // free and links to the booking page.
 import { addDays, campusDate, campusTime } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const BASE = "https://middlebury.libcal.com";
@@ -15,10 +16,10 @@ const ROOMS_MS = 24 * 60 * 60 * 1000;
 const SLOTS_MS = 10 * 60 * 1000;
 export const SOURCE_LABEL = "Davis Family Library room booking (LibCal)";
 
-let roomsCache = null;
-const slotsCache = new Map();
+const roomsCache = createCache("study-rooms");
+const slotsCache = createCache("study-room-slots");
 export function clearStudyRoomsCache() {
-  roomsCache = null;
+  roomsCache.clear();
   slotsCache.clear();
 }
 
@@ -65,25 +66,25 @@ async function get(url, init, fetchImpl) {
 }
 
 async function loadRooms(fetchImpl) {
-  if (roomsCache && Date.now() - roomsCache.at < ROOMS_MS) return roomsCache.rooms;
-  const rooms = parseRooms(await (await get(`${BOOKING}?lid=${LOCATION}`, {}, fetchImpl)).text());
-  if (!rooms.length) throw new Error("LibCal's booking page listed no rooms");
-  roomsCache = { at: Date.now(), rooms };
-  return rooms;
+  const { value } = await roomsCache.get("rooms", ROOMS_MS, async () => {
+    const rooms = parseRooms(await (await get(`${BOOKING}?lid=${LOCATION}`, {}, fetchImpl)).text());
+    if (!rooms.length) throw new Error("LibCal's booking page listed no rooms");
+    return rooms;
+  });
+  return value;
 }
 
 async function loadSlots(date, fetchImpl) {
-  const hit = slotsCache.get(date);
-  if (hit && Date.now() - hit.at < SLOTS_MS) return hit;
-  const body = new URLSearchParams({ lid: LOCATION, gid: 0, eid: -1, seat: 0, seatId: 0, zone: 0, start: date, end: addDays(date, 1), pageIndex: 0, pageSize: 50 });
-  const res = await get(`${BASE}/spaces/availability/grid`, {
-    method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded", "x-requested-with": "XMLHttpRequest", referer: BOOKING, accept: "application/json" },
-    body,
-  }, fetchImpl);
-  const entry = { at: Date.now(), slots: (await res.json()).slots ?? [] };
-  slotsCache.set(date, entry);
-  return entry;
+  const { at, value } = await slotsCache.get(date, SLOTS_MS, async () => {
+    const body = new URLSearchParams({ lid: LOCATION, gid: 0, eid: -1, seat: 0, seatId: 0, zone: 0, start: date, end: addDays(date, 1), pageIndex: 0, pageSize: 50 });
+    const res = await get(`${BASE}/spaces/availability/grid`, {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", "x-requested-with": "XMLHttpRequest", referer: BOOKING, accept: "application/json" },
+      body,
+    }, fetchImpl);
+    return (await res.json()).slots ?? [];
+  });
+  return { at, slots: value };
 }
 
 export async function getStudyRooms({ date, after, people, kind = "study", now = new Date() } = {}, fetchImpl = fetch) {

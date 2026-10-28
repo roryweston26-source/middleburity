@@ -4,6 +4,7 @@
 // search_pages.
 import { addDays, campusDate } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 import { toPlainText } from "./events.js";
 
@@ -68,20 +69,19 @@ export function parseSnowbowlMonth(html, year, month) {
   return { days, anyOpen };
 }
 
-const cache = new Map(); // source url -> { at, data }
+const cache = createCache("hours"); // source url and day -> parsed data
 export function clearHoursCache() {
   cache.clear();
 }
 
 async function cached(url, parse, now = new Date()) {
-  const hit = cache.get(url);
-  // Re-read at least daily too, since the calendar cutoff below moves with the date.
-  if (hit && Date.now() - hit.at < CACHE_MS && hit.day === campusDate(now)) return hit;
-  const res = await fetch(url, { headers: { "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`hours source returned ${res.status}`);
-  const entry = { at: Date.now(), day: campusDate(now), data: parse(await res.text()) };
-  cache.set(url, entry);
-  return entry;
+  // Keyed by day too, so it's re-read at least daily: the calendar cutoff below moves with the date.
+  const { at, value } = await cache.get(`${url}|${campusDate(now)}`, CACHE_MS, async () => {
+    const res = await fetch(url, { headers: { "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`hours source returned ${res.status}`);
+    return parse(await res.text());
+  });
+  return { at, data: value };
 }
 
 // ---------- Calendar files ----------

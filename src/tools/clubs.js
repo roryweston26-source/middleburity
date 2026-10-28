@@ -1,6 +1,7 @@
 // Student organizations from Presence, the same public platform the events come from.
 // Like event text, club descriptions are written by students, so they're handled as data.
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 import { toPlainText, upcomingEventsFor, when } from "./events.js";
 
@@ -14,10 +15,10 @@ const SOURCE_URL = "https://middlebury.presence.io/organizations";
 // When a search narrows to this many, it's about those clubs, so more of each is shown.
 const DETAIL_MAX = 3;
 
-let cache = null;
-const details = new Map(); // uri -> { at, join, contact }
+const cache = createCache("clubs");
+const details = createCache("club-details"); // uri -> { join, contact }
 export function clearClubsCache() {
-  cache = null;
+  cache.clear();
   details.clear();
 }
 
@@ -67,29 +68,29 @@ export function joinInfo(detail) {
 }
 
 async function loadClubs() {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`club feed returned ${res.status}`);
-  cache = { at: Date.now(), clubs: (await res.json()).map(normalizeClub).filter((c) => c.name) };
-  return cache;
+  const { at, value } = await cache.get("clubs", CACHE_MS, async () => {
+    const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`club feed returned ${res.status}`);
+    return (await res.json()).map(normalizeClub).filter((c) => c.name);
+  });
+  return { at, clubs: value };
 }
 
 // A club's own record. If it can't be read, the answer goes without these details rather
 // than failing. The contact is the student the club lists publicly on MiddPresence; only
 // the name is kept, never an email.
 async function loadDetail(uri) {
-  const hit = details.get(uri);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit;
   try {
-    const res = await fetch(`${FEED}/${encodeURIComponent(uri)}`, {
-      headers: { accept: "application/json", "user-agent": USER_AGENT },
-      signal: AbortSignal.timeout(8000),
+    const { at, value } = await details.get(uri, CACHE_MS, async () => {
+      const res = await fetch(`${FEED}/${encodeURIComponent(uri)}`, {
+        headers: { accept: "application/json", "user-agent": USER_AGENT },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error(`club record returned ${res.status}`);
+      const raw = await res.json();
+      return { join: joinInfo(raw), contact: (raw.contactName ?? "").trim() || null };
     });
-    if (!res.ok) return null;
-    const raw = await res.json();
-    const detail = { at: Date.now(), join: joinInfo(raw), contact: (raw.contactName ?? "").trim() || null };
-    details.set(uri, detail);
-    return detail;
+    return { at, ...value };
   } catch {
     return null;
   }

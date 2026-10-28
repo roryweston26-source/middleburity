@@ -3,6 +3,7 @@
 // the board's list comes from its public jobs API. The list pages 10 at a time, so the whole
 // board is read at most every 6 hours and searched here.
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const ACCOUNT = "middleburycollege";
@@ -12,9 +13,9 @@ const CACHE_MS = 6 * 60 * 60 * 1000;
 const MAX_PAGES = 30; // 300 jobs; the board had 143 on 2026-09-24
 export const SOURCE_LABEL = "Middlebury's job board (Workable)";
 
-let cache = null;
+const cache = createCache("jobs");
 export function clearJobsCache() {
-  cache = null;
+  cache.clear();
 }
 
 export function normalizeJob(raw) {
@@ -30,7 +31,11 @@ export function normalizeJob(raw) {
 }
 
 async function loadBoard(fetchImpl = fetch) {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache;
+  const { at, value } = await cache.get("board", CACHE_MS, () => readBoard(fetchImpl));
+  return { at, jobs: value };
+}
+
+async function readBoard(fetchImpl) {
   const jobs = [];
   let token;
   for (let page = 0; page < MAX_PAGES; page++) {
@@ -46,8 +51,7 @@ async function loadBoard(fetchImpl = fetch) {
     token = json.nextPage;
     if (!token || !json.results?.length) break;
   }
-  cache = { at: Date.now(), jobs };
-  return cache;
+  return jobs;
 }
 
 // Whole words, like club search: "art" shouldn't match "Department".

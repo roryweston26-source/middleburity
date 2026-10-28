@@ -10,6 +10,7 @@ import { ChatInputError, answerQuestion } from "./chat.js";
 import { ProviderError } from "./providers/openai-compatible.js";
 import { admit, codeLocked, limitsFrom, noteWrongCode, recordSpend, visitorId } from "./limits.js";
 import { estimateUsd } from "./pricing.js";
+import { useCacheStore } from "./shared-cache.js";
 import { FeedbackInputError, cleanFeedback, saveFeedback } from "./feedback.js";
 import { answerCounts, countUsage, questionCounts } from "./stats.js";
 import { nextHomeGames } from "./tools/athletics.js";
@@ -149,6 +150,9 @@ async function handleChat(request, env) {
 export default {
   async fetch(request, env = {}) {
     const { pathname } = new URL(request.url);
+    // Lookups keep what they fetch in D1 between requests (shared-cache.js). Not in test mode,
+    // whose planted events must never reach a database another server reads.
+    useCacheStore(env.TEST_PROBES === "1" ? null : env.DB);
 
     if (pathname === "/api/today") {
       if (request.method !== "GET") return json({ error: "Use GET." }, 405);

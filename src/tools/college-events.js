@@ -7,6 +7,7 @@
 import { addDays, campusDate } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
 import { toPlainText } from "./events.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const SITE = "https://www.middlebury.edu";
@@ -16,7 +17,7 @@ const MAX_PAGES = 6; // 120 events, about four days of the fall calendar
 const DELAY_MS = 1000;
 export const SOURCE_LABEL = "Middlebury events calendar (middlebury.edu)";
 
-const cache = new Map();
+const cache = createCache("college-events"); // start date -> { events, pages, done }
 export function clearCollegeEventsCache() {
   cache.clear();
 }
@@ -50,12 +51,11 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // start date and only extended as far as a question needs, so "today" and "this weekend"
 // share what's already fetched.
 async function loadRange(from, to, fetchImpl, wait) {
-  let entry = cache.get(from);
-  if (!entry || Date.now() - entry.at >= CACHE_MS) {
-    entry = { at: Date.now(), events: [], pages: 0, done: false };
-    cache.set(from, entry);
-  }
+  const cached = await cache.read(from, CACHE_MS);
+  const at = cached?.at ?? Date.now();
+  const entry = cached?.value ?? { events: [], pages: 0, done: false };
   const reaches = () => entry.done || (entry.events.length && campusDate(new Date(entry.events.at(-1).start)) > to);
+  const before = entry.pages;
   while (!reaches() && entry.pages < MAX_PAGES) {
     if (entry.pages) await wait(DELAY_MS);
     const res = await fetchImpl(`${LISTING}?start-date=${from}&page=${entry.pages}`, { headers: { "user-agent": USER_AGENT }, signal: AbortSignal.timeout(15000) });
@@ -65,7 +65,8 @@ async function loadRange(from, to, fetchImpl, wait) {
     entry.pages++;
     if (found.length < 20) entry.done = true;
   }
-  return entry;
+  if (entry.pages > before) await cache.write(from, { at, value: entry });
+  return { at, events: entry.events };
 }
 
 export async function getCollegeEvents({ from, to, keyword, publicOnly = false, limit = 8, now = new Date() } = {}, fetchImpl = fetch, wait = sleep) {

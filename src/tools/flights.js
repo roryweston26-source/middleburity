@@ -3,6 +3,7 @@
 // this answers "what's flying from BTV" and "is my flight on time", not "what can I book for
 // March": for that, and for fares and connections, the airline's site is the source.
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const FEED = "https://btv.aero/wp-json/btv/v1/flights";
@@ -10,9 +11,9 @@ const BOARD = "https://btv.aero/arrivals-departures/";
 const CACHE_MS = 10 * 60 * 1000; // times and gates change through the day
 export const SOURCE_LABEL = "Burlington International Airport flight board";
 
-let cache = null;
+const cache = createCache("flights");
 export function clearFlightsCache() {
-  cache = null;
+  cache.clear();
 }
 
 export function normalizeFlight(raw) {
@@ -30,12 +31,13 @@ export function normalizeFlight(raw) {
 }
 
 async function loadBoard() {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`flight board returned ${res.status}`);
-  const json = await res.json();
-  cache = { at: Date.now(), flights: (json.flights ?? []).map(normalizeFlight).filter((f) => f.city && f.date) };
-  return cache;
+  const { at, value } = await cache.get("board", CACHE_MS, async () => {
+    const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`flight board returned ${res.status}`);
+    const json = await res.json();
+    return (json.flights ?? []).map(normalizeFlight).filter((f) => f.city && f.date);
+  });
+  return { at, flights: value };
 }
 
 const matches = (text, keyword) => {

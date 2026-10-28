@@ -3,6 +3,7 @@
 // where it breaks, and tests/check-feeds.js is how you find out.
 import { addDays, campusDate, campusHour } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const API = "https://middlebury.api.nutrislice.com/menu/api/weeks/school";
@@ -20,7 +21,7 @@ export const MEALS = ["breakfast", "lunch", "dinner", "late-night"];
 export const SOURCE_LABEL = "Middlebury Dining Services menus";
 const TAG_NOTE = "Dietary tags are Dining Services' labels, not allergy guarantees. Anyone with an allergy should check with staff at the station.";
 
-const cache = new Map();
+const cache = createCache("dining");
 export function clearDiningCache() {
   cache.clear();
 }
@@ -29,28 +30,29 @@ export function menuWebUrl(hall, meal, date) {
   return `${WEB}/${HALLS[hall].slug}/${meal}/${date}`;
 }
 
-// The feed serves a Sunday-to-Saturday week, so one fetch covers seven days.
+// The feed serves a Sunday-to-Saturday week, so one fetch covers seven days. Only the parsed
+// stations are kept: the raw week runs 200-500 KB, too much to store and reread per question.
 function weekStart(date) {
   const dayOfWeek = new Date(`${date}T12:00:00Z`).getUTCDay();
   return addDays(date, -dayOfWeek);
 }
 
+// -> { at, days: { "2026-10-28": stations } }
 async function fetchWeek(slug, meal, date) {
   const start = weekStart(date);
   const key = `${slug}/${meal}/${start}`;
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.data;
-
-  const [y, m, d] = start.split("-");
-  const res = await fetch(`${API}/${slug}/menu-type/${meal}/${y}/${m}/${d}/?format=json`, {
-    headers: { accept: "application/json", "user-agent": USER_AGENT },
-    signal: AbortSignal.timeout(8000),
+  const { at, value } = await cache.get(key, CACHE_MS, async () => {
+    const [y, m, d] = start.split("-");
+    const res = await fetch(`${API}/${slug}/menu-type/${meal}/${y}/${m}/${d}/?format=json`, {
+      headers: { accept: "application/json", "user-agent": USER_AGENT },
+      signal: AbortSignal.timeout(8000),
+    });
+    // 404 means this hall has no menu of this type at all.
+    const data = res.status === 404 ? { days: [] } : res.ok ? await res.json() : null;
+    if (!data) throw new Error(`menu feed returned ${res.status}`);
+    return Object.fromEntries((data.days ?? []).map((d) => [d.date, parseDay(d)]));
   });
-  // 404 means this hall has no menu of this type at all.
-  const data = res.status === 404 ? { days: [] } : res.ok ? await res.json() : null;
-  if (!data) throw new Error(`menu feed returned ${res.status}`);
-  cache.set(key, { at: Date.now(), data });
-  return data;
+  return { at, days: value };
 }
 
 // One day of feed items -> [{ name: "Main Street", items: [{ name, tags }] }]
@@ -92,13 +94,15 @@ export async function getMenus({ date, meal, halls } = {}) {
     }
   }
 
+  let oldest = Infinity; // the card shows when the oldest menu in it was read
   const menus = await Promise.all(
     jobs.map(async ({ hall, meal: m }) => {
       const base = { hall, hallName: HALLS[hall].name, meal: m, url: menuWebUrl(hall, m, day) };
       if (!HALLS[hall].meals.includes(m)) return { ...base, status: `no ${m} menu in the feed` };
       try {
         const week = await fetchWeek(HALLS[hall].slug, m, day);
-        const stations = parseDay(week.days?.find((d) => d.date === day));
+        oldest = Math.min(oldest, week.at);
+        const stations = week.days[day] ?? [];
         if (!stations.length) return { ...base, status: "no menu posted for this day (the hall may be closed)" };
         return { ...base, stations };
       } catch {
@@ -107,7 +111,7 @@ export async function getMenus({ date, meal, halls } = {}) {
     }),
   );
 
-  return { date: day, checkedAt: new Date().toISOString(), menus };
+  return { date: day, checkedAt: new Date(Math.min(oldest, Date.now())).toISOString(), menus };
 }
 
 // "Maghmour (Roasted Eggplant Stew) [Vegan]" keeps the model's copy compact.

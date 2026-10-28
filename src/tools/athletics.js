@@ -2,6 +2,7 @@
 // The feed asks to be re-read every 2 hours (X-PUBLISHED-TTL) and the site asks crawlers to
 // wait 30 seconds between requests, so it's fetched at most once per 2 hours, never per question.
 import { campusDate } from "../campus-time.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 import { ToolInputError } from "./errors.js";
 
@@ -16,9 +17,9 @@ const SPORTS_HINT =
   "Men's/Women's Tennis, Men's/Women's Ice Hockey, Men's/Women's Basketball, Men's/Women's Squash, " +
   "Men's/Women's Swimming and Diving, Men's/Women's Track and Field, Alpine Skiing, Nordic Skiing";
 
-let cache = null;
+const cache = createCache("athletics");
 export function clearAthleticsCache() {
-  cache = null;
+  cache.clear();
 }
 
 function unescapeText(value) {
@@ -69,11 +70,12 @@ export function parseIcs(text) {
 }
 
 async function loadGames() {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "text/calendar", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`athletics feed returned ${res.status}`);
-  cache = { at: Date.now(), games: parseIcs(await res.text()) };
-  return cache;
+  const { at, value } = await cache.get("games", CACHE_MS, async () => {
+    const res = await fetch(FEED, { headers: { accept: "text/calendar", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`athletics feed returned ${res.status}`);
+    return parseIcs(await res.text());
+  });
+  return { at, games: value };
 }
 
 // The Vermont date a game falls on.

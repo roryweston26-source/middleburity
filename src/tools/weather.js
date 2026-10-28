@@ -2,6 +2,7 @@
 // data, free, no key. It asks every app to identify itself in the User-Agent, which we do.
 // Two places: campus, and the Snow Bowl, whose forecast differs up on the mountain.
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const API = "https://api.weather.gov";
@@ -15,19 +16,18 @@ export const PLACES = {
 const GRID_MS = 24 * 60 * 60 * 1000; // which forecast grid a point is in hardly ever changes
 const FORECAST_MS = 30 * 60 * 1000; // the forecast office updates a few times a day; alerts sooner
 
-const cache = new Map();
+const cache = createCache("weather");
 export function clearWeatherCache() {
   cache.clear();
 }
 
 async function getJson(url, maxAge) {
-  const hit = cache.get(url);
-  if (hit && Date.now() - hit.at < maxAge) return hit;
-  const res = await fetch(url, { headers: { accept: "application/geo+json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`weather.gov returned ${res.status}`);
-  const entry = { at: Date.now(), data: await res.json() };
-  cache.set(url, entry);
-  return entry;
+  const { at, value } = await cache.get(url, maxAge, async () => {
+    const res = await fetch(url, { headers: { accept: "application/geo+json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`weather.gov returned ${res.status}`);
+    return res.json();
+  });
+  return { at, data: value };
 }
 
 // Hourly periods have no name, so they get their time: "6 PM Wed".

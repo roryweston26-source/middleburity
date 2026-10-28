@@ -5,6 +5,7 @@
 // (some include passwords); the event's own page is linked instead.
 import { addDays, campusDate } from "../campus-time.js";
 import { ToolInputError } from "./errors.js";
+import { createCache } from "../shared-cache.js";
 import { USER_AGENT } from "../user-agent.js";
 
 const FEED = "https://api.presence.io/middlebury/v1/events";
@@ -14,9 +15,9 @@ export const SOURCE_LABEL = "Middlebury campus events (Presence)";
 const SOURCE_URL = "https://middlebury.presence.io/events";
 const LONG_EVENT_MS = 36 * 60 * 60 * 1000; // multi-day postings like "complete this training by…"
 
-let cache = null;
+const cache = createCache("events");
 export function clearEventsCache() {
-  cache = null;
+  cache.clear();
 }
 
 const ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", "#39": "'", "#34": '"' };
@@ -50,12 +51,12 @@ export function normalizeEvent(raw) {
 }
 
 async function loadEvents() {
-  if (cache && Date.now() - cache.at < CACHE_MS) return cache;
-  const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw new Error(`events feed returned ${res.status}`);
-  const raw = await res.json();
-  cache = { at: Date.now(), events: raw.map(normalizeEvent).filter((e) => e.name && e.start && e.end) };
-  return cache;
+  const { at, value } = await cache.get("events", CACHE_MS, async () => {
+    const res = await fetch(FEED, { headers: { accept: "application/json", "user-agent": USER_AGENT }, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`events feed returned ${res.status}`);
+    return (await res.json()).map(normalizeEvent).filter((e) => e.name && e.start && e.end);
+  });
+  return { at, events: value };
 }
 
 const lower = (s) => s.toLowerCase();
