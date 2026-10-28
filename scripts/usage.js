@@ -1,5 +1,5 @@
 // Prints the daily usage counts (src/stats.js): questions, people, how many came back, and
-// which lookups answered. Numbers only; the app keeps no questions here.
+// which lookups answered, and how many answers had no source to show. Numbers only; the app keeps no questions here.
 //   npm run usage              production (Cloudflare D1; needs `npx wrangler login`)
 //   npm run usage -- --local   the local dev server's database (.cache/pages.db)
 //   npm run usage -- --days=7  only the last few days (default 28)
@@ -55,9 +55,9 @@ if (!byDay.size) {
 }
 
 const pad = (v, w) => String(v).padStart(w);
-console.log(`${"day".padEnd(10)}  ${pad("questions", 9)}  ${pad("people", 6)}  ${pad("returning", 9)}  ${pad("follow-ups", 10)}  ${pad("answered", 8)}`);
+console.log(`${"day".padEnd(10)}  ${pad("questions", 9)}  ${pad("people", 6)}  ${pad("returning", 9)}  ${pad("follow-ups", 10)}  ${pad("answered", 8)}  ${pad("no source", 9)}`);
 for (const [day, d] of byDay) {
-  console.log(`${day}  ${pad(d.questions ?? 0, 9)}  ${pad(d.visitors ?? 0, 6)}  ${pad(d.returning ?? 0, 9)}  ${pad(d["follow-ups"] ?? 0, 10)}  ${pad(d.answered ?? 0, 8)}`);
+  console.log(`${day}  ${pad(d.questions ?? 0, 9)}  ${pad(d.visitors ?? 0, 6)}  ${pad(d.returning ?? 0, 9)}  ${pad(d["follow-ups"] ?? 0, 10)}  ${pad(d.answered ?? 0, 8)}  ${pad(d["no source"] ?? 0, 9)}`);
 }
 
 const questions = total("questions");
@@ -65,6 +65,7 @@ const people = total("visitors");
 console.log(`\nIn all: ${questions} questions on ${byDay.size} active days, ${people} person-days (one person asking on 3 days counts 3).`);
 console.log(`Returning: ${total("returning")} of ${people} person-days came from a device that had asked on an earlier day.`);
 console.log(`Questions per person-day: ${(questions / Math.max(people, 1)).toFixed(1)}; follow-ups: ${total("follow-ups")}; answered: ${total("answered")}.`);
+console.log(`No source: ${total("no source")} of ${total("answered")} answers showed no card (coverage gaps, plus greetings, off-topic questions and refusals).`);
 
 console.log("\nLookups (answers that used each; one answer can use several):");
 for (const [what, n] of [...tools].sort((a, b) => b[1] - a[1])) console.log(`${pad(n, 5)}  ${what.replace(/^tool /, "")}`);

@@ -121,7 +121,7 @@ async function handleChat(request, env) {
     const result = await answerQuestion(body?.messages, { env });
     if (env.DB) {
       await recordSpend(env.DB, estimateUsd(result.model, result.usage), now);
-      await countUsage(env.DB, answerCounts(result.tools), now);
+      await countUsage(env.DB, answerCounts(result.tools, result.cards), now);
     }
     return json({ ...result, ...(remainingToday !== null && { remainingToday }) });
   } catch (err) {

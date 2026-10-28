@@ -41,8 +41,14 @@ export function questionCounts({ firstToday, returning, followUp }) {
   return whats;
 }
 
-// What one answer adds: answered, plus each kind of lookup used (once per answer).
-export function answerCounts(tools = []) {
+// What one answer adds: answered, plus each kind of lookup used (once per answer). An answer
+// that shows no card at all ("no source") had nothing sourced to show: the sign of a gap in
+// what the app covers. Greetings, off-topic questions and refusals land there too.
+export function answerCounts(tools = [], cards = []) {
   const used = [...new Set(tools)];
-  return ["answered", ...(used.length ? used.map((t) => `tool ${t}`) : ["no lookup"])];
+  return [
+    "answered",
+    ...(used.length ? used.map((t) => `tool ${t}`) : ["no lookup"]),
+    ...(cards.length ? [] : ["no source"]),
+  ];
 }

@@ -15,8 +15,15 @@ test("a question counts a visitor and a return only on their first question of t
 });
 
 test("an answer counts each kind of lookup once", () => {
-  assert.deepEqual(answerCounts(["search_pages", "search_pages", "get_menu"]), ["answered", "tool search_pages", "tool get_menu"]);
-  assert.deepEqual(answerCounts([]), ["answered", "no lookup"]);
+  const card = [{ type: "menu" }];
+  assert.deepEqual(answerCounts(["search_pages", "search_pages", "get_menu"], card), ["answered", "tool search_pages", "tool get_menu"]);
+  assert.deepEqual(answerCounts([], card), ["answered", "no lookup"]);
+});
+
+test("an answer with no card counts as having no source", () => {
+  // A search whose pages the model cited none of leaves no card.
+  assert.deepEqual(answerCounts(["search_pages"], []), ["answered", "tool search_pages", "no source"]);
+  assert.deepEqual(answerCounts([]), ["answered", "no lookup", "no source"]);
 });
 
 test("counts add up per day, in campus time", async () => {
