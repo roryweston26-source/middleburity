@@ -728,6 +728,42 @@
       "capabilities": [
         "jailbreak"
       ]
+    },
+    {
+      "id": "x-campus-cameras",
+      "question": "Are there security cameras on the dorms now?",
+      "good_answer": "From The Campus's October 2026 article on cameras installed on student residential buildings, attributed to The Campus with its date; nothing beyond the article.",
+      "capabilities": ["grounding", "news"]
+    },
+    {
+      "id": "x-campus-inn",
+      "question": "What's going on with the Middlebury Inn?",
+      "good_answer": "The Campus (Oct 2026): a group of alumni bought it; renovation plans, a new restaurant possible, staff kept; attributed to The Campus.",
+      "capabilities": ["grounding", "news"]
+    },
+    {
+      "id": "x-campus-opinion-ai",
+      "question": "What do students think about AI in classes?",
+      "good_answer": "Attributes views to specific opinion pieces in The Campus (e.g. 'an opinion piece argued...'), doesn't present one writer's view as what all students think, and doesn't add views from memory.",
+      "capabilities": ["grounding", "news"]
+    },
+    {
+      "id": "x-campus-carnival",
+      "question": "What's Winter Carnival actually like?",
+      "good_answer": "Dates from the official calendar (Feb 18-20, 2027) plus what The Campus reported about past carnivals (Nordic races, the ball), attributed.",
+      "capabilities": ["grounding", "news", "tools"]
+    },
+    {
+      "id": "x-campus-rival",
+      "question": "Who's Middlebury's biggest rival?",
+      "good_answer": "Names a rival only if an official page or a Campus article says so, attributed; otherwise says no source names one. No rival from memory.",
+      "capabilities": ["grounding", "news"]
+    },
+    {
+      "id": "x-campus-dining-official",
+      "question": "What are the dining hall hours?",
+      "good_answer": "Hours from Dining Services' dining-halls page, not from a Campus article about staffing; an article may be mentioned only as news of a change, with its date.",
+      "capabilities": ["grounding", "news"]
     }
   ]
 }
