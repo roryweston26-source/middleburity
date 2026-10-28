@@ -67,7 +67,7 @@ export async function admit(db, { visitor, limits, now = new Date() }) {
     // Old hour counts are deleted as new ones come in; day counts go once their day is past.
     db.prepare("DELETE FROM usage WHERE (period LIKE 'h %' AND period < ?) OR (period LIKE 'd %' AND period < ?)").bind(cutoff, `d ${campusDate(new Date(now.getTime() - 2 * 864e5))}`),
   ]);
-  return { ok: true, remainingToday: limits.perDay - today - 1 };
+  return { ok: true, remainingToday: limits.perDay - today - 1, firstToday: today === 0 };
 }
 
 export async function recordSpend(db, usd, now = new Date()) {

@@ -1,8 +1,9 @@
 // The whole server. It's written as a Cloudflare Worker (web-standard Request/Response),
 // so the same file runs locally under dev-server.js and in production on Cloudflare.
 // Privacy: nothing here logs or stores what people ask. The only thing stored per visitor
-// is an anonymous daily count, for the limits in limits.js. The one exception is feedback
-// someone chooses to send on an answer (feedback.js), saved with nothing about who sent it.
+// is an anonymous daily count, for the limits in limits.js. Daily totals (stats.js) are
+// numbers only. The one exception is feedback someone chooses to send on an answer
+// (feedback.js), saved with nothing about who sent it.
 import Anthropic from "@anthropic-ai/sdk";
 import { campusDate } from "./campus-time.js";
 import { ChatInputError, answerQuestion } from "./chat.js";
@@ -10,6 +11,7 @@ import { ProviderError } from "./providers/openai-compatible.js";
 import { admit, codeLocked, limitsFrom, noteWrongCode, recordSpend, visitorId } from "./limits.js";
 import { estimateUsd } from "./pricing.js";
 import { FeedbackInputError, cleanFeedback, saveFeedback } from "./feedback.js";
+import { answerCounts, countUsage, questionCounts } from "./stats.js";
 import { nextHomeGames } from "./tools/athletics.js";
 import { todaysMenus } from "./tools/dining.js";
 import { todaysEvents } from "./tools/events.js";
@@ -109,13 +111,18 @@ async function handleChat(request, env) {
     const gate = await admit(env.DB, { visitor, limits: limitsFrom(env), now });
     if (!gate.ok) return json({ error: gate.error }, gate.status);
     remainingToday = gate.remainingToday;
+    const followUp = Array.isArray(body?.messages) && body.messages.length > 1;
+    await countUsage(env.DB, questionCounts({ firstToday: gate.firstToday, returning: body?.returning, followUp }), now);
   } else {
     console.warn("No database: usage limits and the spending cap are off.");
   }
 
   try {
     const result = await answerQuestion(body?.messages, { env });
-    if (env.DB) await recordSpend(env.DB, estimateUsd(result.model, result.usage), now);
+    if (env.DB) {
+      await recordSpend(env.DB, estimateUsd(result.model, result.usage), now);
+      await countUsage(env.DB, answerCounts(result.tools), now);
+    }
     return json({ ...result, ...(remainingToday !== null && { remainingToday }) });
   } catch (err) {
     if (err instanceof ChatInputError) return json({ error: err.message }, 400);

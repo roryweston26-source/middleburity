@@ -534,6 +534,26 @@ function saveCode(code) {
   }
 }
 
+// Whether this device asked something on an earlier day, for the server's count of returning
+// visitors (src/stats.js). Only yes/no is sent; the date stays on the device.
+const ASKED_KEY = "middleburity-last-asked";
+const localDay = () => new Date().toLocaleDateString("en-CA");
+function askedBefore() {
+  try {
+    const last = localStorage.getItem(ASKED_KEY);
+    return Boolean(last) && last < localDay();
+  } catch {
+    return false;
+  }
+}
+function noteAsked() {
+  try {
+    localStorage.setItem(ASKED_KEY, localDay());
+  } catch {
+    // Not counted as returning next time; nothing else depends on it.
+  }
+}
+
 // Shown in place of an answer when the server wants the access code; asks the question again once it's saved.
 function codePrompt(answer, question, message) {
   const input = el("input", { type: "password", class: "code-input", placeholder: "Access code", "aria-label": "Access code", autocomplete: "off" });
@@ -620,13 +640,14 @@ async function ask(question) {
   try {
     const headers = { "content-type": "application/json" };
     if (savedCode()) headers["x-access-code"] = savedCode();
-    const res = await fetch("/api/chat", { method: "POST", headers, body: JSON.stringify({ messages }) });
+    const res = await fetch("/api/chat", { method: "POST", headers, body: JSON.stringify({ messages, returning: askedBefore() }) });
     const data = await res.json().catch(() => ({}));
     if (res.status === 401 && data.needsCode) {
       codePrompt(answer, question, savedCode() ? "That code didn't work. Check it and try again." : data.error);
       return;
     }
     if (!res.ok) throw new Error(data.error || "Something went wrong. Try again.");
+    noteAsked();
 
     answer.replaceChildren(...answerNodes(data.answer));
     for (const card of data.cards ?? []) {

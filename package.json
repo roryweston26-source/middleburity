@@ -16,6 +16,7 @@
     "build:pages": "node scripts/build-pages.js && node scripts/build-db.js",
     "eval:search": "node tests/eval-search.js",
     "feedback": "node scripts/feedback.js",
+    "usage": "node scripts/usage.js",
     "build:db": "node scripts/build-db.js",
     "build:icons": "node scripts/build-icons.js",
     "dev:cf": "wrangler dev --port 8788",

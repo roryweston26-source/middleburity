@@ -74,6 +74,7 @@ Emails and phone numbers are removed from indexed page text. Pages over a year o
 - The conversation lives in the page's memory only. Reloading clears it.
 - No analytics, cookies or third-party scripts. Walking directions are a link to Google Maps; nothing goes to Google unless you tap it.
 - For the usage limits, the server counts questions per visitor. A visitor is an anonymous code: a hash of the date, a secret and their IP address. The IP address isn't stored, codes change daily so days can't be linked, and counts are deleted after two days.
+- The server keeps daily totals, numbers only: questions asked, people asking (first questions of the day), how many came from a device that had asked on an earlier day, follow-ups, and how many answers used each kind of lookup. To tell returning visitors apart, the page remembers on your device the date you last asked and sends only yes or no. Read with `npm run usage`.
 - If an access code is in use, your browser remembers it on your device.
 
 ## Run it locally
