@@ -102,6 +102,13 @@ async function handle(req, res, env) {
 const env = await loadEnv();
 if (flag("model")) env.MODEL = flag("model");
 if (flag("provider")) env.OPENROUTER_PROVIDER = flag("provider");
+if (flag("reasoning")) env.REASONING = flag("reasoning");
+// --test-round: the settings a question round needs (test mode, room for a full round, a $3
+// cap), without editing .dev.vars and remembering to take them out again.
+if (process.argv.includes("--test-round")) {
+  Object.assign(env, { TEST_PROBES: "1", RATE_PER_HOUR: "1000", RATE_PER_DAY: "2000" });
+  env.DAILY_BUDGET_USD ??= "3";
+}
 // Test mode for the question set: plants an event and a club carrying instructions aimed at
 // the AI (tests/probes.js), to check the model ignores them. Local only; never in production.
 if (env.TEST_PROBES === "1") {
@@ -122,7 +129,7 @@ createServer(async (req, res) => {
   }
   console.log(`${req.method} ${req.url.split("?")[0]} ${status} ${Date.now() - started}ms`);
 }).listen(port, () => {
-  console.log(`Middleburity running at http://localhost:${port}${env.MODEL ? ` (model ${env.MODEL})` : ""}`);
+  console.log(`Middleburity running at http://localhost:${port}${env.MODEL ? ` (model ${env.MODEL}${env.REASONING ? `, reasoning ${env.REASONING}` : ""})` : ""}`);
   const hasKey = (env.MODEL ?? "claude-").startsWith("claude-") ? env.ANTHROPIC_API_KEY : env.OPENAI_COMPAT_API_KEY;
   console.log(hasKey ? "Chat: connected (key found in .dev.vars)" : "Chat: no API key for this model yet (add one to .dev.vars)");
   console.log(env.DB ? "Page search: ready (.cache/pages.db)" : "Page search: not built yet (npm run build:pages)");

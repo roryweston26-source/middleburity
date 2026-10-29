@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { answerQuestion } from "../src/chat.js";
-import { answerWithOpenAICompatible, mapUsage, ProviderError, toFunctionTools } from "../src/providers/openai-compatible.js";
+import { answerWithOpenAICompatible, mapUsage, ProviderError, reasoningSetting, toFunctionTools } from "../src/providers/openai-compatible.js";
 import { estimateUsd } from "../src/pricing.js";
 import { installProbes, PROBE_CLUB, PROBE_EVENT } from "./probes.js";
 
@@ -116,4 +116,36 @@ test("the last round sends no tools and asks for an answer from what the model h
   assert.equal(last.tool_choice, undefined);
   assert.match(last.messages.at(-1).content, /no more lookups/);
   assert.equal(result.answer, "Sunny.");
+});
+
+test("thinking tokens and each round's time are reported, for the runner", async () => {
+  assert.equal(mapUsage({ completion_tokens: 500, completion_tokens_details: { reasoning_tokens: 380 } }).reasoning_tokens, 380);
+  assert.equal("reasoning_tokens" in mapUsage({ completion_tokens: 5 }), false);
+  const { fetchImpl } = fakeProvider([
+    { usage: { completion_tokens: 40, completion_tokens_details: { reasoning_tokens: 30 } },
+      choices: [{ message: { content: null, tool_calls: [{ id: "c1", type: "function", function: { name: "get_horoscope", arguments: "{}" } }] } }] },
+    { usage: { completion_tokens: 20 }, choices: [{ message: { content: "Nothing on that." } }] },
+  ]);
+  const out = await answerWithOpenAICompatible([{ role: "user", content: "Horoscope?" }], { env, model: "m", now, fetchImpl });
+  assert.equal(out.rounds.length, 2);
+  assert.equal(out.rounds[0].output, 40);
+  assert.equal(out.rounds[0].reasoning, 30);
+  assert.equal(typeof out.rounds[0].model_s, "number");
+  assert.equal(typeof out.rounds[0].lookups_s, "number");
+  assert.equal(out.rounds[1].lookups_s, undefined); // the answer round looks nothing up
+  assert.equal(out.usage.reasoning_tokens, 30);
+});
+
+test("REASONING sets how much the model thinks on OpenRouter; unset sends nothing", async () => {
+  assert.equal(reasoningSetting(undefined), null);
+  assert.deepEqual(reasoningSetting("none"), { enabled: false });
+  assert.deepEqual(reasoningSetting(" Low "), { effort: "low" });
+  assert.throws(() => reasoningSetting("fast"), ProviderError);
+  const reply = { choices: [{ message: { content: "Hi." } }], usage: {} };
+  const plain = fakeProvider([structuredClone(reply)]);
+  await answerWithOpenAICompatible([{ role: "user", content: "hi" }], { env, model: "m", now, fetchImpl: plain.fetchImpl });
+  assert.equal("reasoning" in plain.requests[0].body, false);
+  const low = fakeProvider([structuredClone(reply)]);
+  await answerWithOpenAICompatible([{ role: "user", content: "hi" }], { env: { ...env, REASONING: "low" }, model: "m", now, fetchImpl: low.fetchImpl });
+  assert.deepEqual(low.requests[0].body.reasoning, { effort: "low" });
 });

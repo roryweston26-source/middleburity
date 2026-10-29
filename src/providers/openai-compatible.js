@@ -34,8 +34,20 @@ export function mapUsage(u = {}) {
     cache_read_input_tokens: cached,
     cache_creation_input_tokens: 0,
     output_tokens: u.completion_tokens ?? 0,
+    // Hidden thinking, already counted in output_tokens.
+    ...(typeof u.completion_tokens_details?.reasoning_tokens === "number" && { reasoning_tokens: u.completion_tokens_details.reasoning_tokens }),
     ...(typeof u.cost === "number" && { cost_usd: u.cost }),
   };
+}
+
+// REASONING (wrangler.jsonc var, or --reasoning= locally) sets how much the model thinks on
+// OpenRouter: "low", "medium" or "high", or "none" to turn it off. Unset leaves the model's default.
+export function reasoningSetting(value) {
+  const v = (value ?? "").trim().toLowerCase();
+  if (!v) return null;
+  if (v === "none" || v === "off") return { enabled: false };
+  if (["minimal", "low", "medium", "high"].includes(v)) return { effort: v };
+  throw new ProviderError(503, `REASONING must be none, minimal, low, medium or high, not "${value}"`);
 }
 
 function addUsage(total, u) {
@@ -62,15 +74,20 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
   // It also skips hosts that train on or keep prompts, and OPENROUTER_PROVIDER (e.g. "DeepInfra")
   // pins one host with no fallback, so a round isn't spread across differently quantized copies.
   const pinned = (env.OPENROUTER_PROVIDER ?? "").split(",").map((p) => p.trim()).filter(Boolean);
+  const reasoning = reasoningSetting(env.REASONING);
   const extra = /openrouter\.ai/.test(env.OPENAI_COMPAT_BASE_URL ?? "")
     ? {
         usage: { include: true },
+        ...(reasoning && { reasoning }),
         provider: { data_collection: "deny", require_parameters: true, ...(pinned.length && { order: pinned, allow_fallbacks: false }) },
       }
     : {};
   const cards = [];
   const usage = {};
   const tools = [];
+  // Where each round's time went: waiting on the model, then on the lookups it asked for.
+  const rounds = [];
+  const since = (t) => Math.round((Date.now() - t) / 100) / 10;
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     // The last round sends no tools and says so, so the model answers from what it has. Neither
@@ -79,8 +96,12 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
     const last = round === MAX_ROUNDS - 1;
     if (last) messages.push({ role: "user", content: LAST_ROUND });
     const lookups = last ? {} : { tools: functions, tool_choice: "auto" };
+    const asked = Date.now();
     const data = await complete(env, { model, messages, ...lookups, max_tokens: 16000, ...extra }, fetchImpl);
-    addUsage(usage, mapUsage(data.usage));
+    const used = mapUsage(data.usage);
+    addUsage(usage, used);
+    const timing = { model_s: since(asked), output: used.output_tokens, ...(used.reasoning_tokens !== undefined && { reasoning: used.reasoning_tokens }) };
+    rounds.push(timing);
     const choice = data.choices?.[0];
     const message = choice?.message ?? {};
     const calls = message.tool_calls ?? [];
@@ -93,6 +114,7 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
         cards: final.cards,
         usage,
         tools,
+        rounds,
         model: data.model ?? model,
         // Thinking models spend output tokens on hidden reasoning, which can cut the answer off.
         ...(choice?.finish_reason === "length" && { truncated: true }),
@@ -101,6 +123,7 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
 
     messages.push({ role: "assistant", content: message.content ?? null, tool_calls: calls });
     tools.push(...calls.map((c) => c.function?.name));
+    const looked = Date.now();
     const results = await Promise.all(
       calls.map(async (call) => {
         let input;
@@ -113,10 +136,11 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
       }),
     );
     for (const { out } of results) if (out.card) cards.push(out.card);
+    timing.lookups_s = since(looked);
 
     // Same shortcut as chat.js: an answer written alongside office links only is the answer.
     if (text && calls.every((c) => isDisplayOnly(c.function?.name)) && !results.some(({ out }) => out.searchFirst)) {
-      return { ...applySources(text, cards), usage, tools, model: data.model ?? model };
+      return { ...applySources(text, cards), usage, tools, rounds, model: data.model ?? model };
     }
     for (const { call, out } of results) messages.push({ role: "tool", tool_call_id: call.id, content: out.content });
   }
@@ -126,6 +150,7 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
     cards: applySources("", cards).cards,
     usage,
     tools,
+    rounds,
     model,
   };
 }

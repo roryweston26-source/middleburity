@@ -37,9 +37,23 @@
         "dev-server.js",
         "--port=8792",
         "--model=deepseek/deepseek-v4.1-flash",
-        "--provider=DeepInfra"
+        "--provider=DeepInfra",
+        "--test-round"
       ],
       "port": 8792
+    },
+    {
+      "name": "compare-deepseek-low",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8796",
+        "--model=deepseek/deepseek-v4.1-flash",
+        "--provider=DeepInfra",
+        "--reasoning=low",
+        "--test-round"
+      ],
+      "port": 8796
     },
     {
       "name": "compare-qwen",
