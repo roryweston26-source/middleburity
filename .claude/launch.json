@@ -56,6 +56,18 @@
       "port": 8796
     },
     {
+      "name": "compare-wafer",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "dev-server.js",
+        "--port=8797",
+        "--model=deepseek/deepseek-v4.1-flash",
+        "--provider=wafer/us",
+        "--test-round"
+      ],
+      "port": 8797
+    },
+    {
       "name": "compare-qwen",
       "runtimeExecutable": "node",
       "runtimeArgs": [

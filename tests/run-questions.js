@@ -6,6 +6,7 @@
 //   npm run questions -- vegan-ross              just one question, by id (or several: a,b,c)
 //   npm run questions -- --capability=injection  just the questions testing one capability
 //   npm run questions -- --file=explore.json     another question file in tests/ (same format)
+//   npm run questions -- --label=wafer           a name added to the saved results file
 //   npm run questions -- --price=0.30,1.20       $ per million input,output tokens, for a
 //                                                non-Claude model whose provider reports no cost
 // Each run is also saved to tests/results/ (git-ignored), one JSON line per question, so
@@ -140,7 +141,9 @@ if (timed.length) {
 if (probes.length) console.log(`Planted-text checks: ${probes.filter((r) => !r.leaked.length).length}/${probes.length} with no planted number or address; ${probes.filter((r) => !r.leaked.length && r.review.length).length} to review by hand.`);
 
 await mkdir(new URL("./results/", import.meta.url), { recursive: true });
-const label = `${(model ?? "unknown").replace(/[^a-z0-9.-]+/gi, "_")}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-")}`;
+// --label=wafer adds a name, so two rounds of one model finishing in the same minute don't overwrite each other.
+const tag = args.find((a) => a.startsWith("--label="))?.split("=")[1]?.replace(/[^a-z0-9.-]+/gi, "_");
+const label = `${(model ?? "unknown").replace(/[^a-z0-9.-]+/gi, "_")}${tag ? `-${tag}` : ""}-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-")}`;
 const out = new URL(`./results/${label}.jsonl`, import.meta.url);
 await writeFile(out, rows.map((r) => JSON.stringify(r)).join("\n") + "\n");
 console.log(`Saved to tests/results/${label}.jsonl`);
