@@ -95,7 +95,9 @@ async function handle(req, res, env) {
   });
   const response = await worker.fetch(request, env);
   res.writeHead(response.status, Object.fromEntries(response.headers));
-  res.end(Buffer.from(await response.arrayBuffer()));
+  // Passed on piece by piece, so a streamed answer (/api/chat with stream: true) streams here too.
+  if (response.body) for await (const chunk of response.body) res.write(chunk);
+  res.end();
   return response.status;
 }
 

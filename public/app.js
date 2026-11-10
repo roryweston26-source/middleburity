@@ -625,6 +625,69 @@ function feedbackControl(feedback) {
   return wrap;
 }
 
+// Reads a streamed answer (one JSON object per line) and shows it as it comes: what's being
+// looked up, then the answer text. Returns the "done" message, which has the same fields as a
+// plain reply. Errors before the stream starts (access code, limits) are plain JSON instead.
+async function readAnswer(res, answer) {
+  if (!(res.headers.get("content-type") ?? "").includes("ndjson")) {
+    const data = await res.json().catch(() => ({}));
+    return { data, ok: res.ok, status: res.status };
+  }
+  const thinking = el("p", { class: "muted thinking", text: "Checking" });
+  let text = "";
+  let drawn = false;
+  const draw = () => {
+    drawn = false;
+    if (text.trim()) answer.replaceChildren(...answerNodes(text));
+  };
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let final = null;
+  const take = (line) => {
+    if (!line.trim()) return;
+    let event;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      return;
+    }
+    if (event.type === "status") {
+      text = "";
+      thinking.textContent = event.text;
+      answer.replaceChildren(thinking);
+    } else if (event.type === "reset") {
+      text = "";
+      answer.replaceChildren(thinking);
+    } else if (event.type === "text") {
+      text += event.text;
+      // At most one redraw every 50 ms, however fast the pieces arrive. A timer rather than
+      // requestAnimationFrame, which browsers pause or slow for tabs that aren't in front.
+      if (!drawn) {
+        drawn = true;
+        setTimeout(draw, 50);
+      }
+    } else if (event.type === "done" || event.type === "error") {
+      final = event;
+    }
+  };
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let end;
+    while ((end = buffer.indexOf("\n")) >= 0) {
+      take(buffer.slice(0, end));
+      buffer = buffer.slice(end + 1);
+    }
+  }
+  take(buffer);
+  text = ""; // a redraw still waiting for its frame must not paint over the finished answer
+  if (!final) return { data: { error: "The answer was cut off. Try again." }, ok: false, status: 502 };
+  if (final.type === "error") return { data: { error: final.error }, ok: false, status: final.status };
+  return { data: final, ok: true, status: 200 };
+}
+
 async function ask(question) {
   question = question.trim();
   if (!question) return;
@@ -640,13 +703,13 @@ async function ask(question) {
   try {
     const headers = { "content-type": "application/json" };
     if (savedCode()) headers["x-access-code"] = savedCode();
-    const res = await fetch("/api/chat", { method: "POST", headers, body: JSON.stringify({ messages, returning: askedBefore() }) });
-    const data = await res.json().catch(() => ({}));
-    if (res.status === 401 && data.needsCode) {
+    const res = await fetch("/api/chat", { method: "POST", headers, body: JSON.stringify({ messages, returning: askedBefore(), stream: true }) });
+    const { data, ok, status } = await readAnswer(res, answer);
+    if (status === 401 && data.needsCode) {
       codePrompt(answer, question, savedCode() ? "That code didn't work. Check it and try again." : data.error);
       return;
     }
-    if (!res.ok) throw new Error(data.error || "Something went wrong. Try again.");
+    if (!ok) throw new Error(data.error || "Something went wrong. Try again.");
     noteAsked();
 
     answer.replaceChildren(...answerNodes(data.answer));

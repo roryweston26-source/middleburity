@@ -6,7 +6,7 @@
 // (feedback.js), saved with nothing about who sent it.
 import Anthropic from "@anthropic-ai/sdk";
 import { campusDate } from "./campus-time.js";
-import { ChatInputError, answerQuestion } from "./chat.js";
+import { ChatInputError, answerQuestion, cleanHistory } from "./chat.js";
 import { ProviderError } from "./providers/openai-compatible.js";
 import { admit, codeLocked, limitsFrom, noteWrongCode, recordSpend, visitorId } from "./limits.js";
 import { estimateUsd } from "./pricing.js";
@@ -90,7 +90,7 @@ async function handleFeedback(request, env) {
   }
 }
 
-async function handleChat(request, env) {
+async function handleChat(request, env, ctx) {
   // A non-Claude model needs its own provider key instead (checked when it's called).
   if (!env.ANTHROPIC_API_KEY && (env.MODEL ?? "claude-").startsWith("claude-")) {
     return json({ error: "The chat isn't connected yet: the server has no Anthropic API key." }, 503);
@@ -118,37 +118,78 @@ async function handleChat(request, env) {
     console.warn("No database: usage limits and the spending cap are off.");
   }
 
-  try {
-    const result = await answerQuestion(body?.messages, { env });
+  // Spending and daily totals are recorded once the answer is done, streamed or not.
+  const answer = async (onEvent) => {
+    const result = await answerQuestion(body?.messages, { env, onEvent });
     if (env.DB) {
       await recordSpend(env.DB, estimateUsd(result.model, result.usage), now);
       await countUsage(env.DB, answerCounts(result.tools, result.cards), now);
     }
-    return json({ ...result, ...(remainingToday !== null && { remainingToday }) });
+    return { ...result, ...(remainingToday !== null && { remainingToday }) };
+  };
+
+  // The page asks for a stream (2026-11-10): one JSON object per line, "status" and "text"
+  // while the answer is written, then "done" with the same fields as the plain reply, or "error".
+  if (body?.stream === true) {
+    try {
+      cleanHistory(body?.messages); // a bad request still gets a plain 400, before the stream starts
+    } catch (err) {
+      if (err instanceof ChatInputError) return json({ error: err.message }, 400);
+      throw err;
+    }
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    const encoder = new TextEncoder();
+    // A closed page makes writes fail; the answer still finishes so its spending is recorded.
+    const send = (event) => writer.write(encoder.encode(`${JSON.stringify(event)}\n`)).catch(() => {});
+    const work = (async () => {
+      try {
+        send({ type: "done", ...(await answer(send)) });
+      } catch (err) {
+        const { status, error } = chatError(err);
+        send({ type: "error", status, error });
+      } finally {
+        await writer.close().catch(() => {});
+      }
+    })();
+    ctx?.waitUntil?.(work);
+    return new Response(readable, {
+      headers: { "content-type": "application/x-ndjson; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" },
+    });
+  }
+
+  try {
+    return json(await answer());
   } catch (err) {
-    if (err instanceof ChatInputError) return json({ error: err.message }, 400);
-    if (err instanceof Anthropic.AuthenticationError) return json({ error: "The server's API key was rejected." }, 503);
-    if (err instanceof Anthropic.RateLimitError) return json({ error: "Too many questions at once. Try again in a minute." }, 429);
-    if (err instanceof Anthropic.APIError) {
-      console.error(`AI service error ${err.status}: ${err.message}`);
-      return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
-    }
-    // A non-Claude model, like production's DeepSeek (src/providers/openai-compatible.js).
-    if (err instanceof ProviderError) {
-      console.error(`model provider error ${err.status}: ${err.message}`);
-      if (err.status === 401 || err.status === 403) return json({ error: "The model provider rejected the server's key." }, 503);
-      if (err.status === 429) return json({ error: "Too many questions at once. Try again in a minute." }, 429);
-      return json({ error: "The AI service had a problem. Try again in a moment." }, 502);
-    }
-    // The provider call's own timeout (openai-compatible.js) rather than a crash.
-    if (err?.name === "TimeoutError") return json({ error: "The AI service took too long. Try again in a moment." }, 504);
-    console.error(`chat failed: ${err?.name}: ${err?.message}`);
-    return json({ error: "Something broke on our end." }, 500);
+    const { status, error } = chatError(err);
+    return json({ error }, status);
   }
 }
 
+// What the page is told when an answer fails, and with what status.
+function chatError(err) {
+  if (err instanceof ChatInputError) return { status: 400, error: err.message };
+  if (err instanceof Anthropic.AuthenticationError) return { status: 503, error: "The server's API key was rejected." };
+  if (err instanceof Anthropic.RateLimitError) return { status: 429, error: "Too many questions at once. Try again in a minute." };
+  if (err instanceof Anthropic.APIError) {
+    console.error(`AI service error ${err.status}: ${err.message}`);
+    return { status: 502, error: "The AI service had a problem. Try again in a moment." };
+  }
+  // A non-Claude model, like production's DeepSeek (src/providers/openai-compatible.js).
+  if (err instanceof ProviderError) {
+    console.error(`model provider error ${err.status}: ${err.message}`);
+    if (err.status === 401 || err.status === 403) return { status: 503, error: "The model provider rejected the server's key." };
+    if (err.status === 429) return { status: 429, error: "Too many questions at once. Try again in a minute." };
+    return { status: 502, error: "The AI service had a problem. Try again in a moment." };
+  }
+  // The provider call's own timeout (openai-compatible.js) rather than a crash.
+  if (err?.name === "TimeoutError") return { status: 504, error: "The AI service took too long. Try again in a moment." };
+  console.error(`chat failed: ${err?.name}: ${err?.message}`);
+  return { status: 500, error: "Something broke on our end." };
+}
+
 export default {
-  async fetch(request, env = {}) {
+  async fetch(request, env = {}, ctx) {
     const { pathname } = new URL(request.url);
     // Lookups keep what they fetch in D1 between requests (shared-cache.js). Not in test mode,
     // whose planted events must never reach a database another server reads.
@@ -164,7 +205,7 @@ export default {
 
     if (pathname === "/api/chat") {
       if (request.method !== "POST") return json({ error: "Use POST." }, 405);
-      return handleChat(request, env);
+      return handleChat(request, env, ctx);
     }
 
     if (pathname === "/api/feedback") {

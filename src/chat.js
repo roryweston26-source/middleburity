@@ -162,12 +162,14 @@ function addUsage(total, usage = {}) {
   }
 }
 
-export async function answerQuestion(history, { env = {}, client, now = new Date() } = {}) {
+// onEvent streams progress to the page (see openai-compatible.js). Only the OpenAI-style path
+// streams; on Claude the page just gets the finished answer.
+export async function answerQuestion(history, { env = {}, client, now = new Date(), onEvent } = {}) {
   const model = env.MODEL || DEFAULT_MODEL;
   const messages = cleanHistory(history);
   // Claude always goes through Anthropic's SDK. Other models (production runs DeepSeek through
   // OpenRouter) go through an OpenAI-style endpoint set in OPENAI_COMPAT_BASE_URL.
-  if (!model.startsWith("claude-")) return answerWithOpenAICompatible(messages, { env, model, now });
+  if (!model.startsWith("claude-")) return answerWithOpenAICompatible(messages, { env, model, now, onEvent });
   client ??= new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
   const options = modelOptions(model, env.EFFORT);
   const cards = [];

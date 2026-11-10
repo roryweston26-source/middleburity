@@ -7,6 +7,7 @@
 // Settings (wrangler.jsonc vars, or .dev.vars locally): MODEL (the provider's model name, e.g. "qwen/qwen3.7-flash"),
 // OPENAI_COMPAT_BASE_URL (e.g. "https://openrouter.ai/api/v1") and OPENAI_COMPAT_API_KEY.
 // Optional on OpenRouter: OPENROUTER_PROVIDER, the host (or comma-separated hosts) to use.
+import { AnswerStream, statusFor } from "../answer-stream.js";
 import { campusNowLabel } from "../campus-time.js";
 import { MAX_ROUNDS, applySources, runLookup } from "../chat.js";
 import { SYSTEM_PROMPT, timeContext } from "../prompt.js";
@@ -54,20 +55,87 @@ function addUsage(total, u) {
   for (const [k, v] of Object.entries(u)) total[k] = (total[k] ?? 0) + v;
 }
 
-async function complete(env, body, fetchImpl) {
+// With onText, the reply is streamed (server-sent events) and each piece of answer text is
+// passed on as it arrives; the return value has the same shape as a non-streamed reply.
+async function complete(env, body, fetchImpl, onText) {
   const base = (env.OPENAI_COMPAT_BASE_URL ?? "").replace(/\/+$/, "");
   if (!base || !env.OPENAI_COMPAT_API_KEY) throw new ProviderError(503, "OPENAI_COMPAT_BASE_URL and OPENAI_COMPAT_API_KEY aren't set");
   const res = await fetchImpl(`${base}/chat/completions`, {
     method: "POST",
     headers: { authorization: `Bearer ${env.OPENAI_COMPAT_API_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(onText ? { ...body, stream: true } : body),
     signal: AbortSignal.timeout(120000),
   });
   if (!res.ok) throw new ProviderError(res.status, `model provider returned ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  return res.json();
+  return onText ? readStream(res, onText) : res.json();
 }
 
-export async function answerWithOpenAICompatible(history, { env = {}, model, now = new Date(), fetchImpl = fetch } = {}) {
+// Rebuilds a streamed reply: text pieces, tool calls sent in fragments by index, and the usage
+// OpenRouter puts in the last chunk. Lines starting with ":" are keep-alive comments.
+export async function readStream(res, onText) {
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  const calls = [];
+  let buffer = "";
+  let content = "";
+  let model;
+  let usage;
+  let finish;
+  const take = (line) => {
+    if (!line.startsWith("data:")) return;
+    const payload = line.slice(5).trim();
+    if (!payload || payload === "[DONE]") return;
+    let chunk;
+    try {
+      chunk = JSON.parse(payload);
+    } catch {
+      return;
+    }
+    // A provider that fails partway sends an error chunk instead of closing cleanly.
+    if (chunk.error) {
+      const status = Number(chunk.error.code) || 502;
+      throw new ProviderError(status, `model provider stream error: ${String(chunk.error.message ?? "").slice(0, 200)}`);
+    }
+    model ??= chunk.model;
+    if (chunk.usage) usage = chunk.usage;
+    const choice = chunk.choices?.[0];
+    if (!choice) return;
+    if (choice.finish_reason) finish = choice.finish_reason;
+    const delta = choice.delta ?? {};
+    if (typeof delta.content === "string" && delta.content) {
+      content += delta.content;
+      onText(delta.content);
+    }
+    for (const part of delta.tool_calls ?? []) {
+      const call = (calls[part.index ?? calls.length] ??= { id: "", type: "function", function: { name: "", arguments: "" } });
+      if (part.id) call.id = part.id;
+      if (part.function?.name) call.function.name += part.function.name;
+      if (part.function?.arguments) call.function.arguments += part.function.arguments;
+    }
+  };
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let end;
+    while ((end = buffer.indexOf("\n")) >= 0) {
+      take(buffer.slice(0, end).trim());
+      buffer = buffer.slice(end + 1);
+    }
+  }
+  take(buffer.trim());
+  const toolCalls = calls.filter(Boolean);
+  return {
+    model,
+    usage,
+    choices: [{ message: { role: "assistant", content, ...(toolCalls.length && { tool_calls: toolCalls }) }, finish_reason: finish }],
+  };
+}
+
+// onEvent (optional) streams progress to the page: { type: "text", text } as the answer is
+// written, "reset" when text already shown turns out to come with lookups, and
+// { type: "status", text } while lookups run. Without it, replies aren't streamed.
+export async function answerWithOpenAICompatible(history, { env = {}, model, now = new Date(), fetchImpl = fetch, onEvent } = {}) {
   const messages = [{ role: "system", content: `${SYSTEM_PROMPT}\n\n${timeContext(campusNowLabel(now))}` }, ...history];
   const functions = toFunctionTools(TOOL_DEFINITIONS);
   // OpenRouter reports each request's cost when asked; other providers would reject the field.
@@ -97,7 +165,8 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
     if (last) messages.push({ role: "user", content: LAST_ROUND });
     const lookups = last ? {} : { tools: functions, tool_choice: "auto" };
     const asked = Date.now();
-    const data = await complete(env, { model, messages, ...lookups, max_tokens: 16000, ...extra }, fetchImpl);
+    const shown = onEvent ? new AnswerStream((text) => onEvent({ type: "text", text })) : null;
+    const data = await complete(env, { model, messages, ...lookups, max_tokens: 16000, ...extra }, fetchImpl, shown && ((t) => shown.push(t)));
     const used = mapUsage(data.usage);
     addUsage(usage, used);
     const timing = { model_s: since(asked), output: used.output_tokens, ...(used.reasoning_tokens !== undefined && { reasoning: used.reasoning_tokens }) };
@@ -123,6 +192,12 @@ export async function answerWithOpenAICompatible(history, { env = {}, model, now
 
     messages.push({ role: "assistant", content: message.content ?? null, tool_calls: calls });
     tools.push(...calls.map((c) => c.function?.name));
+    if (onEvent) {
+      // Text written alongside lookups ("Let me check…") isn't the answer, unless it's the
+      // office-links shortcut below; the finished answer replaces it either way.
+      if (shown.started) onEvent({ type: "reset" });
+      onEvent({ type: "status", text: statusFor(calls.map((c) => c.function?.name)) });
+    }
     const looked = Date.now();
     const results = await Promise.all(
       calls.map(async (call) => {
