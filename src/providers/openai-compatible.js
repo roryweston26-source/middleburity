@@ -107,7 +107,10 @@ export async function readStream(res, onText) {
       onText(delta.content);
     }
     for (const part of delta.tool_calls ?? []) {
-      const call = (calls[part.index ?? calls.length] ??= { id: "", type: "function", function: { name: "", arguments: "" } });
+      // Fragments carry an index; a host that leaves it out on a continuation (no id either)
+      // is adding to the last call, not starting a new one.
+      const slot = part.index ?? (part.id || !calls.length ? calls.length : calls.length - 1);
+      const call = (calls[slot] ??= { id: "", type: "function", function: { name: "", arguments: "" } });
       if (part.id) call.id = part.id;
       if (part.function?.name) call.function.name += part.function.name;
       if (part.function?.arguments) call.function.arguments += part.function.arguments;

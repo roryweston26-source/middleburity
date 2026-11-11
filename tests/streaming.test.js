@@ -78,6 +78,31 @@ test("a streamed reply is rebuilt: tool calls in fragments, text, usage, and the
   assert.equal(answerText.trimEnd(), "I couldn't find that.");
 });
 
+test("two lookups in one streamed round arrive interleaved and both reach the tools whole", async () => {
+  const requests = [];
+  const call = (index, fn) => ({ model: "m", choices: [{ delta: { tool_calls: [{ index, ...fn }] } }] });
+  const replies = [
+    sse([
+      call(0, { id: "a", type: "function", function: { name: "get_horoscope", arguments: '{"sign"' } }),
+      call(1, { id: "b", type: "function", function: { name: "get_fortune", arguments: '{"day"' } }),
+      call(0, { function: { arguments: ':"leo"}' } }),
+      call(1, { function: { arguments: ':"mon"}' } }),
+      // A host that leaves out index on a continuation adds to the last call, not a new one.
+      { model: "m", choices: [{ delta: { tool_calls: [{ function: { arguments: "" } }] }, finish_reason: "tool_calls" }] },
+    ]),
+    sse([say("Nothing found.")]),
+  ];
+  const fetchImpl = async (url, init) => {
+    requests.push(JSON.parse(init.body));
+    return replies.shift();
+  };
+  const out = await answerWithOpenAICompatible([{ role: "user", content: "Q" }], { env, model: "m", now, fetchImpl, onEvent: () => {} });
+  assert.deepEqual(out.tools, ["get_horoscope", "get_fortune"]);
+  const sent = requests[1].messages.at(-3).tool_calls;
+  assert.deepEqual(sent.map((c) => [c.id, c.function.arguments]), [["a", '{"sign":"leo"}'], ["b", '{"day":"mon"}']]);
+  assert.deepEqual(requests[1].messages.slice(-2).map((m) => m.tool_call_id), ["a", "b"]);
+});
+
 test("without onEvent nothing is streamed, as before", async () => {
   const requests = [];
   const fetchImpl = async (url, init) => {
